@@ -42,14 +42,14 @@ export const Route = createFileRoute("/")({
 });
 
 const quickActions = [
-  { label: "Virtual\nNumber", icon: Phone, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/use/virtual-numbers" },
-  { label: "Boost\nAccount", icon: Rocket, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.75_0.2_300)]", to: "/use/boost" },
-  { label: "Buy\nLogs", icon: Store, tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]", to: "/use/logs" },
-  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-[oklch(0.4_0.18_60)]/25 text-[oklch(0.8_0.18_65)]", to: "/use/rent" },
-  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/use/affiliate" },
-  { label: "Number\nOrders", icon: BarChart3, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/history" },
-  { label: "Boost\nOrders", icon: Star, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]", to: "/history" },
-  { label: "Log\nHistory", icon: Clock, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/history" },
+  { label: "Virtual\nNumber", icon: Phone, tint: "bg-[#EEF0FF] text-[#3949AB]", to: "/use/virtual-numbers" },
+  { label: "Boost\nAccount", icon: Rocket, tint: "bg-[#F3E8FF] text-[#7C3AED]", to: "/use/boost" },
+  { label: "Buy\nLogs", icon: Store, tint: "bg-[#E6F7EE] text-[#0F9D58]", to: "/use/logs" },
+  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-[#FFF1E0] text-[#D97706]", to: "/use/rent" },
+  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-[#E7F0FF] text-[#1D4ED8]", to: "/use/affiliate" },
+  { label: "Number\nOrders", icon: BarChart3, tint: "bg-[#EEF0FF] text-[#3949AB]", to: "/history" },
+  { label: "Boost\nOrders", icon: Star, tint: "bg-[#F3E8FF] text-[#7C3AED]", to: "/history" },
+  { label: "Log\nHistory", icon: Clock, tint: "bg-[#F1F5F9] text-[#0F172A]", to: "/history" },
 ] as const;
 
 const activity = [
@@ -59,7 +59,7 @@ const activity = [
     subtitle: "5,000 followers • Just now",
     amount: -386.96,
     icon: Rocket,
-    tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]",
+    tint: "bg-[#F3E8FF] text-[#7C3AED]",
   },
   {
     id: 2,
@@ -67,7 +67,7 @@ const activity = [
     subtitle: "WhatsApp • USA S1",
     amount: 191.1,
     icon: ArrowDownLeft,
-    tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]",
+    tint: "bg-[#E6F7EE] text-[#0F9D58]",
   },
   {
     id: 3,
@@ -75,7 +75,7 @@ const activity = [
     subtitle: "Paga transfer • Success",
     amount: 5000,
     icon: ArrowUpRight,
-    tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]",
+    tint: "bg-[#EEF0FF] text-[#3949AB]",
   },
 ];
 
