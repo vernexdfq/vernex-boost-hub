@@ -177,18 +177,20 @@ function Dashboard() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev">
-          <div className="grid grid-cols-4 gap-1">
-            {quickActions.map((a) => {
+        <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-card-elev">
+          <div className="grid grid-cols-4">
+            {quickActions.map((a, i) => {
               const Icon = a.icon;
+              const rightEdge = (i + 1) % 4 === 0;
+              const bottomRow = i >= 4;
               return (
                 <Link
                   key={a.label}
                   to={a.to}
-                  className="group flex flex-col items-center gap-2 rounded-2xl p-2.5 transition hover:bg-accent/60 active:scale-[0.97]"
+                  className={`group flex flex-col items-center gap-2 p-3 transition hover:bg-accent/60 active:scale-[0.97] ${!rightEdge ? "border-r border-border" : ""} ${bottomRow ? "border-t border-border" : ""}`}
                 >
                   <span
-                    className={`grid h-12 w-12 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}
+                    className={`grid h-11 w-11 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}
                   >
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>
