@@ -9,38 +9,155 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RewardRouteImport } from './routes/reward'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as FundRouteImport } from './routes/fund'
+import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UseVirtualNumbersRouteImport } from './routes/use.virtual-numbers'
 
+const RewardRoute = RewardRouteImport.update({
+  id: '/reward',
+  path: '/reward',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundRoute = FundRouteImport.update({
+  id: '/fund',
+  path: '/fund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UseVirtualNumbersRoute = UseVirtualNumbersRouteImport.update({
+  id: '/use/virtual-numbers',
+  path: '/use/virtual-numbers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/fund': typeof FundRoute
+  '/history': typeof HistoryRoute
+  '/profile': typeof ProfileRoute
+  '/reward': typeof RewardRoute
+  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/fund': typeof FundRoute
+  '/history': typeof HistoryRoute
+  '/profile': typeof ProfileRoute
+  '/reward': typeof RewardRoute
+  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/fund': typeof FundRoute
+  '/history': typeof HistoryRoute
+  '/profile': typeof ProfileRoute
+  '/reward': typeof RewardRoute
+  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/fund'
+    | '/history'
+    | '/profile'
+    | '/reward'
+    | '/use/virtual-numbers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/alerts'
+    | '/fund'
+    | '/history'
+    | '/profile'
+    | '/reward'
+    | '/use/virtual-numbers'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/fund'
+    | '/history'
+    | '/profile'
+    | '/reward'
+    | '/use/virtual-numbers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertsRoute: typeof AlertsRoute
+  FundRoute: typeof FundRoute
+  HistoryRoute: typeof HistoryRoute
+  ProfileRoute: typeof ProfileRoute
+  RewardRoute: typeof RewardRoute
+  UseVirtualNumbersRoute: typeof UseVirtualNumbersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reward': {
+      id: '/reward'
+      path: '/reward'
+      fullPath: '/reward'
+      preLoaderRoute: typeof RewardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fund': {
+      id: '/fund'
+      path: '/fund'
+      fullPath: '/fund'
+      preLoaderRoute: typeof FundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +165,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/use/virtual-numbers': {
+      id: '/use/virtual-numbers'
+      path: '/use/virtual-numbers'
+      fullPath: '/use/virtual-numbers'
+      preLoaderRoute: typeof UseVirtualNumbersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertsRoute: AlertsRoute,
+  FundRoute: FundRoute,
+  HistoryRoute: HistoryRoute,
+  ProfileRoute: ProfileRoute,
+  RewardRoute: RewardRoute,
+  UseVirtualNumbersRoute: UseVirtualNumbersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,24 +1,249 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  Bell,
+  Eye,
+  EyeOff,
+  Plus,
+  History,
+  Phone,
+  Rocket,
+  Store,
+  PhoneCall,
+  Globe,
+  BarChart3,
+  Star,
+  Clock,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownLeft,
+} from "lucide-react";
+import { AppShell } from "@/components/app-shell";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Vernex — Virtual Numbers, SMM & Wallet" },
+      {
+        name: "description",
+        content:
+          "Vernex is a Nigerian fintech and virtual telecom platform for OTP numbers, social media boosting, and instant wallet funding.",
+      },
+      { property: "og:title", content: "Vernex Dashboard" },
+      {
+        property: "og:description",
+        content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const quickActions = [
+  { label: "Virtual\nNumber", icon: Phone, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/use/virtual-numbers" },
+  { label: "Boost\nAccount", icon: Rocket, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.75_0.2_300)]", to: "/use/boost" },
+  { label: "Buy\nLogs", icon: Store, tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]", to: "/use/logs" },
+  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-[oklch(0.4_0.18_60)]/25 text-[oklch(0.8_0.18_65)]", to: "/use/rent" },
+  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/use/affiliate" },
+  { label: "Number\nOrders", icon: BarChart3, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/history" },
+  { label: "Boost\nOrders", icon: Star, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]", to: "/history" },
+  { label: "Log\nHistory", icon: Clock, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/history" },
+] as const;
+
+const activity = [
+  {
+    id: 1,
+    label: "Boosting: Instagram",
+    subtitle: "5,000 followers • Just now",
+    amount: -386.96,
+    icon: Rocket,
+    tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]",
+  },
+  {
+    id: 2,
+    label: "Refund: Virtual Number",
+    subtitle: "WhatsApp • USA S1",
+    amount: 191.1,
+    icon: ArrowDownLeft,
+    tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]",
+  },
+  {
+    id: 3,
+    label: "Wallet Funding",
+    subtitle: "Paga transfer • Success",
+    amount: 5000,
+    icon: ArrowUpRight,
+    tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]",
+  },
+];
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return { text: "Good Night", emoji: "🌙" };
+  if (h < 12) return { text: "Good Morning", emoji: "☀️" };
+  if (h < 17) return { text: "Good Afternoon", emoji: "🌤️" };
+  if (h < 21) return { text: "Good Evening", emoji: "🌆" };
+  return { text: "Good Night", emoji: "🌙" };
+}
+
+function formatNaira(n: number) {
+  return `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function Dashboard() {
+  const [hidden, setHidden] = useState(false);
+  const balance = 0.27;
+  const g = greeting();
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <AppShell>
+      {/* Header */}
+      <header className="flex items-center gap-3 px-5 pt-6">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_oklch(0.6_0.22_262/0.6)]">
+          D
+        </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-[17px] font-bold leading-tight">
+            {g.text}, Denny <span className="ml-0.5">{g.emoji}</span>
+          </h1>
+          <p className="truncate text-xs text-muted-foreground">Your Vernex Dashboard</p>
+        </div>
+        <button
+          aria-label="Notifications"
+          className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border bg-surface text-foreground/90 hover:bg-surface-2 transition"
+        >
+          <Bell className="h-5 w-5" />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-surface" />
+        </button>
+      </header>
+
+      {/* Wallet Card */}
+      <section className="px-5 pt-5">
+        <div className="relative overflow-hidden rounded-3xl wallet-gradient p-5 shadow-wallet">
+          <div className="absolute inset-0 dotted-bg opacity-40" />
+          <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full border border-white/10" />
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-white/5" />
+
+          <div className="relative flex items-start justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
+              Available Balance
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Active
+            </span>
+          </div>
+
+          <div className="relative mt-3 flex items-center gap-3">
+            <span className="text-[38px] font-black tracking-tight text-white tabular-nums">
+              {hidden ? "₦••••" : formatNaira(balance)}
+            </span>
+            <button
+              onClick={() => setHidden((v) => !v)}
+              aria-label={hidden ? "Show balance" : "Hide balance"}
+              className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition"
+            >
+              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <div className="relative mt-5 grid grid-cols-2 gap-3">
+            <Link
+              to="/fund"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-[oklch(0.22_0.12_265)] shadow-[0_10px_25px_-10px_oklch(1_0_0/0.4)] hover:brightness-95 transition"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.6} />
+              Fund Wallet
+            </Link>
+            <Link
+              to="/history"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition"
+            >
+              <History className="h-4 w-4" />
+              History
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="px-5 pt-7">
+        <div className="mb-3 flex items-center gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Quick Actions
+          </h2>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev">
+          <div className="grid grid-cols-4 gap-1">
+            {quickActions.map((a) => {
+              const Icon = a.icon;
+              return (
+                <Link
+                  key={a.label}
+                  to={a.to}
+                  className="group flex flex-col items-center gap-2 rounded-2xl p-2.5 transition hover:bg-accent/60 active:scale-[0.97]"
+                >
+                  <span
+                    className={`grid h-12 w-12 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={2.2} />
+                  </span>
+                  <span className="whitespace-pre-line text-center text-[11px] font-semibold leading-tight text-foreground/90">
+                    {a.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Activity */}
+      <section className="px-5 pt-7">
+        <div className="mb-3 flex items-center gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Recent Activity
+          </h2>
+          <div className="h-px flex-1 bg-border" />
+          <Link
+            to="/history"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+          >
+            View all <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <ul className="space-y-2">
+          {activity.map((row) => {
+            const Icon = row.icon;
+            const positive = row.amount >= 0;
+            return (
+              <li
+                key={row.id}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev"
+              >
+                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${row.tint}`}>
+                  <Icon className="h-5 w-5" strokeWidth={2.2} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{row.label}</p>
+                  <p className="truncate text-xs text-muted-foreground">{row.subtitle}</p>
+                </div>
+                <span
+                  className={`shrink-0 text-sm font-bold tabular-nums ${positive ? "text-emerald-400" : "text-destructive"}`}
+                >
+                  {positive ? "+" : "-"}
+                  {formatNaira(Math.abs(row.amount))}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </AppShell>
   );
 }
