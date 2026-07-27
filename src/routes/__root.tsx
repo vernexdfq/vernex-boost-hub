@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0B1021" },
+      { name: "theme-color", content: "#F4F7FB" },
       { title: "Vernex — Virtual Numbers, SMM & Wallet" },
       { name: "description", content: "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding." },
       { name: "author", content: "Vernex" },
@@ -124,7 +124,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster theme="dark" position="top-center" richColors closeButton />
+      <Toaster theme="light" position="top-center" richColors closeButton />
     </QueryClientProvider>
   );
 }

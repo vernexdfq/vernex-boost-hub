@@ -42,14 +42,14 @@ export const Route = createFileRoute("/")({
 });
 
 const quickActions = [
-  { label: "Virtual\nNumber", icon: Phone, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/use/virtual-numbers" },
-  { label: "Boost\nAccount", icon: Rocket, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.75_0.2_300)]", to: "/use/boost" },
-  { label: "Buy\nLogs", icon: Store, tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]", to: "/use/logs" },
-  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-[oklch(0.4_0.18_60)]/25 text-[oklch(0.8_0.18_65)]", to: "/use/rent" },
-  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/use/affiliate" },
-  { label: "Number\nOrders", icon: BarChart3, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]", to: "/history" },
-  { label: "Boost\nOrders", icon: Star, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]", to: "/history" },
-  { label: "Log\nHistory", icon: Clock, tint: "bg-[oklch(0.35_0.02_260)]/40 text-foreground", to: "/history" },
+  { label: "Virtual\nNumber", icon: Phone, tint: "bg-[#EEF0FF] text-[#3949AB]", to: "/use/virtual-numbers" },
+  { label: "Boost\nAccount", icon: Rocket, tint: "bg-[#F3E8FF] text-[#7C3AED]", to: "/use/boost" },
+  { label: "Buy\nLogs", icon: Store, tint: "bg-[#E6F7EE] text-[#0F9D58]", to: "/use/logs" },
+  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-[#FFF1E0] text-[#D97706]", to: "/use/rent" },
+  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-[#E7F0FF] text-[#1D4ED8]", to: "/use/affiliate" },
+  { label: "Number\nOrders", icon: BarChart3, tint: "bg-[#EEF0FF] text-[#3949AB]", to: "/history" },
+  { label: "Boost\nOrders", icon: Star, tint: "bg-[#F3E8FF] text-[#7C3AED]", to: "/history" },
+  { label: "Log\nHistory", icon: Clock, tint: "bg-[#F1F5F9] text-[#0F172A]", to: "/history" },
 ] as const;
 
 const activity = [
@@ -59,7 +59,7 @@ const activity = [
     subtitle: "5,000 followers • Just now",
     amount: -386.96,
     icon: Rocket,
-    tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]",
+    tint: "bg-[#F3E8FF] text-[#7C3AED]",
   },
   {
     id: 2,
@@ -67,7 +67,7 @@ const activity = [
     subtitle: "WhatsApp • USA S1",
     amount: 191.1,
     icon: ArrowDownLeft,
-    tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]",
+    tint: "bg-[#E6F7EE] text-[#0F9D58]",
   },
   {
     id: 3,
@@ -75,7 +75,7 @@ const activity = [
     subtitle: "Paga transfer • Success",
     amount: 5000,
     icon: ArrowUpRight,
-    tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]",
+    tint: "bg-[#EEF0FF] text-[#3949AB]",
   },
 ];
 
@@ -177,18 +177,20 @@ function Dashboard() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev">
-          <div className="grid grid-cols-4 gap-1">
-            {quickActions.map((a) => {
+        <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-card-elev">
+          <div className="grid grid-cols-4">
+            {quickActions.map((a, i) => {
               const Icon = a.icon;
+              const rightEdge = (i + 1) % 4 === 0;
+              const bottomRow = i >= 4;
               return (
                 <Link
                   key={a.label}
                   to={a.to}
-                  className="group flex flex-col items-center gap-2 rounded-2xl p-2.5 transition hover:bg-accent/60 active:scale-[0.97]"
+                  className={`group flex flex-col items-center gap-2 p-3 transition hover:bg-accent/60 active:scale-[0.97] ${!rightEdge ? "border-r border-border" : ""} ${bottomRow ? "border-t border-border" : ""}`}
                 >
                   <span
-                    className={`grid h-12 w-12 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}
+                    className={`grid h-11 w-11 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}
                   >
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>

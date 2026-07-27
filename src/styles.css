@@ -45,48 +45,48 @@
 :root {
   --radius: 0.875rem;
 
-  /* Deep navy fintech palette */
-  --background: oklch(0.16 0.04 265);
-  --foreground: oklch(0.98 0.005 250);
+  /* Light fintech palette (Primex-inspired) */
+  --background: oklch(0.98 0.008 250);
+  --foreground: oklch(0.19 0.04 265);
 
-  --surface: oklch(0.21 0.045 265);
-  --surface-2: oklch(0.25 0.05 265);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.97 0.012 250);
 
-  --card: oklch(0.21 0.045 265);
-  --card-foreground: oklch(0.98 0.005 250);
-  --popover: oklch(0.21 0.045 265);
-  --popover-foreground: oklch(0.98 0.005 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.04 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.04 265);
 
-  --brand: oklch(0.6 0.22 262);
-  --brand-glow: oklch(0.72 0.19 262);
+  --brand: oklch(0.42 0.18 265);
+  --brand-glow: oklch(0.55 0.2 265);
 
-  --primary: oklch(0.6 0.22 262);
+  --primary: oklch(0.42 0.18 265);
   --primary-foreground: oklch(0.99 0.005 250);
-  --secondary: oklch(0.28 0.05 265);
-  --secondary-foreground: oklch(0.98 0.005 250);
-  --muted: oklch(0.26 0.045 265);
-  --muted-foreground: oklch(0.72 0.03 260);
-  --accent: oklch(0.3 0.06 265);
-  --accent-foreground: oklch(0.98 0.005 250);
+  --secondary: oklch(0.96 0.012 250);
+  --secondary-foreground: oklch(0.19 0.04 265);
+  --muted: oklch(0.96 0.012 250);
+  --muted-foreground: oklch(0.5 0.03 260);
+  --accent: oklch(0.95 0.02 260);
+  --accent-foreground: oklch(0.19 0.04 265);
 
-  --success: oklch(0.72 0.17 162);
-  --success-foreground: oklch(0.15 0.04 265);
-  --warning: oklch(0.82 0.16 78);
+  --success: oklch(0.62 0.16 162);
+  --success-foreground: oklch(0.99 0.005 250);
+  --warning: oklch(0.75 0.16 78);
   --warning-foreground: oklch(0.2 0.04 60);
-  --destructive: oklch(0.65 0.24 22);
+  --destructive: oklch(0.6 0.24 22);
   --destructive-foreground: oklch(0.99 0.005 250);
 
-  --border: oklch(0.3 0.045 265);
-  --input: oklch(0.28 0.05 265);
-  --ring: oklch(0.6 0.22 262);
+  --border: oklch(0.92 0.012 250);
+  --input: oklch(0.94 0.012 250);
+  --ring: oklch(0.42 0.18 265);
 
-  /* Gradients & effects */
-  --gradient-wallet: radial-gradient(circle at 85% 20%, oklch(0.45 0.2 262 / 0.5) 0%, transparent 55%),
-    linear-gradient(135deg, oklch(0.22 0.12 265) 0%, oklch(0.18 0.15 268) 55%, oklch(0.14 0.1 270) 100%);
+  /* Deep royal blue wallet banner (#04113E → #0B2578) */
+  --gradient-wallet: radial-gradient(circle at 85% 20%, oklch(0.4 0.18 265 / 0.55) 0%, transparent 55%),
+    linear-gradient(135deg, #04113E 0%, #081b58 55%, #0B2578 100%);
   --gradient-brand: linear-gradient(135deg, var(--brand) 0%, var(--brand-glow) 100%);
-  --shadow-card: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 10px 30px -18px oklch(0 0 0 / 0.6);
-  --shadow-wallet: 0 20px 50px -20px oklch(0.4 0.22 262 / 0.55);
-  --shadow-glow: 0 0 0 1px oklch(1 0 0 / 0.06), 0 20px 40px -20px oklch(0.4 0.22 262 / 0.5);
+  --shadow-card: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 8px 24px -16px oklch(0.2 0.08 265 / 0.18);
+  --shadow-wallet: 0 24px 50px -22px oklch(0.15 0.15 265 / 0.45);
+  --shadow-glow: 0 0 0 1px oklch(0.2 0.05 265 / 0.06), 0 20px 40px -20px oklch(0.4 0.18 265 / 0.3);
 }
 
 @layer base {
