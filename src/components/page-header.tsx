@@ -14,7 +14,7 @@ export function PageHeader({
   return (
     <header className="flex items-center gap-3 px-5 pt-6">
       <Link
-        to="/"
+        to="/dashboard"
         aria-label="Back"
         className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface hover:bg-surface-2 transition"
       >
