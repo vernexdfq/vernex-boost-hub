@@ -5,7 +5,7 @@ import { Search, Copy, Check, Timer } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/use/virtual-numbers")({
+export const Route = createFileRoute("/virtual-numbers")({
   head: () => ({
     meta: [
       { title: "Virtual Numbers — Vernex" },

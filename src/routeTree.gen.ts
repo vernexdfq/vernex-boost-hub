@@ -9,14 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VirtualNumbersRouteImport } from './routes/virtual-numbers'
 import { Route as RewardRouteImport } from './routes/reward'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as FundRouteImport } from './routes/fund'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UseVirtualNumbersRouteImport } from './routes/use.virtual-numbers'
 
+const VirtualNumbersRoute = VirtualNumbersRouteImport.update({
+  id: '/virtual-numbers',
+  path: '/virtual-numbers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RewardRoute = RewardRouteImport.update({
   id: '/reward',
   path: '/reward',
@@ -47,11 +52,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UseVirtualNumbersRoute = UseVirtualNumbersRouteImport.update({
-  id: '/use/virtual-numbers',
-  path: '/use/virtual-numbers',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,7 +60,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +69,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +79,7 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +90,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/profile'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/profile'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
   id:
     | '__root__'
     | '/'
@@ -108,7 +108,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/profile'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,11 +118,18 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   ProfileRoute: typeof ProfileRoute
   RewardRoute: typeof RewardRoute
-  UseVirtualNumbersRoute: typeof UseVirtualNumbersRoute
+  VirtualNumbersRoute: typeof VirtualNumbersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/virtual-numbers': {
+      id: '/virtual-numbers'
+      path: '/virtual-numbers'
+      fullPath: '/virtual-numbers'
+      preLoaderRoute: typeof VirtualNumbersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reward': {
       id: '/reward'
       path: '/reward'
@@ -165,13 +172,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/use/virtual-numbers': {
-      id: '/use/virtual-numbers'
-      path: '/use/virtual-numbers'
-      fullPath: '/use/virtual-numbers'
-      preLoaderRoute: typeof UseVirtualNumbersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -182,7 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   ProfileRoute: ProfileRoute,
   RewardRoute: RewardRoute,
-  UseVirtualNumbersRoute: UseVirtualNumbersRoute,
+  VirtualNumbersRoute: VirtualNumbersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
