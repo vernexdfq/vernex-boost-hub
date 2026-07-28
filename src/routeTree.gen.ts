@@ -24,6 +24,7 @@ import { Route as BoostRouteImport } from './routes/boost'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as AffiliateRouteImport } from './routes/affiliate'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 
 const VirtualNumbersRoute = VirtualNumbersRouteImport.update({
   id: '/virtual-numbers',
@@ -100,6 +101,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/admin/pricing',
+  path: '/admin/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
   '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
   '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
   '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/rent-number'
     | '/reward'
     | '/virtual-numbers'
+    | '/admin/pricing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/rent-number'
     | '/reward'
     | '/virtual-numbers'
+    | '/admin/pricing'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/rent-number'
     | '/reward'
     | '/virtual-numbers'
+    | '/admin/pricing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   RentNumberRoute: typeof RentNumberRoute
   RewardRoute: typeof RewardRoute
   VirtualNumbersRoute: typeof VirtualNumbersRoute
+  AdminPricingRoute: typeof AdminPricingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/admin/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   RentNumberRoute: RentNumberRoute,
   RewardRoute: RewardRoute,
   VirtualNumbersRoute: VirtualNumbersRoute,
+  AdminPricingRoute: AdminPricingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
