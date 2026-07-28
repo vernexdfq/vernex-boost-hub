@@ -9,22 +9,51 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VirtualNumbersRouteImport } from './routes/virtual-numbers'
 import { Route as RewardRouteImport } from './routes/reward'
+import { Route as RentNumberRouteImport } from './routes/rent-number'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NumberOrdersRouteImport } from './routes/number-orders'
+import { Route as LogHistoryRouteImport } from './routes/log-history'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as FundRouteImport } from './routes/fund'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BuyAccountsRouteImport } from './routes/buy-accounts'
+import { Route as BoostOrdersRouteImport } from './routes/boost-orders'
+import { Route as BoostRouteImport } from './routes/boost'
 import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as AffiliateRouteImport } from './routes/affiliate'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UseVirtualNumbersRouteImport } from './routes/use.virtual-numbers'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 
+const VirtualNumbersRoute = VirtualNumbersRouteImport.update({
+  id: '/virtual-numbers',
+  path: '/virtual-numbers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RewardRoute = RewardRouteImport.update({
   id: '/reward',
   path: '/reward',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RentNumberRoute = RentNumberRouteImport.update({
+  id: '/rent-number',
+  path: '/rent-number',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NumberOrdersRoute = NumberOrdersRouteImport.update({
+  id: '/number-orders',
+  path: '/number-orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogHistoryRoute = LogHistoryRouteImport.update({
+  id: '/log-history',
+  path: '/log-history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoryRoute = HistoryRouteImport.update({
@@ -37,9 +66,34 @@ const FundRoute = FundRouteImport.update({
   path: '/fund',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyAccountsRoute = BuyAccountsRouteImport.update({
+  id: '/buy-accounts',
+  path: '/buy-accounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoostOrdersRoute = BoostOrdersRouteImport.update({
+  id: '/boost-orders',
+  path: '/boost-orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoostRoute = BoostRouteImport.update({
+  id: '/boost',
+  path: '/boost',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlertsRoute = AlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AffiliateRoute = AffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -47,82 +101,152 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UseVirtualNumbersRoute = UseVirtualNumbersRouteImport.update({
-  id: '/use/virtual-numbers',
-  path: '/use/virtual-numbers',
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/admin/pricing',
+  path: '/admin/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/affiliate': typeof AffiliateRoute
   '/alerts': typeof AlertsRoute
+  '/boost': typeof BoostRoute
+  '/boost-orders': typeof BoostOrdersRoute
+  '/buy-accounts': typeof BuyAccountsRoute
+  '/dashboard': typeof DashboardRoute
   '/fund': typeof FundRoute
   '/history': typeof HistoryRoute
+  '/log-history': typeof LogHistoryRoute
+  '/number-orders': typeof NumberOrdersRoute
   '/profile': typeof ProfileRoute
+  '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/affiliate': typeof AffiliateRoute
   '/alerts': typeof AlertsRoute
+  '/boost': typeof BoostRoute
+  '/boost-orders': typeof BoostOrdersRoute
+  '/buy-accounts': typeof BuyAccountsRoute
+  '/dashboard': typeof DashboardRoute
   '/fund': typeof FundRoute
   '/history': typeof HistoryRoute
+  '/log-history': typeof LogHistoryRoute
+  '/number-orders': typeof NumberOrdersRoute
   '/profile': typeof ProfileRoute
+  '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/affiliate': typeof AffiliateRoute
   '/alerts': typeof AlertsRoute
+  '/boost': typeof BoostRoute
+  '/boost-orders': typeof BoostOrdersRoute
+  '/buy-accounts': typeof BuyAccountsRoute
+  '/dashboard': typeof DashboardRoute
   '/fund': typeof FundRoute
   '/history': typeof HistoryRoute
+  '/log-history': typeof LogHistoryRoute
+  '/number-orders': typeof NumberOrdersRoute
   '/profile': typeof ProfileRoute
+  '/rent-number': typeof RentNumberRoute
   '/reward': typeof RewardRoute
-  '/use/virtual-numbers': typeof UseVirtualNumbersRoute
+  '/virtual-numbers': typeof VirtualNumbersRoute
+  '/admin/pricing': typeof AdminPricingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/affiliate'
     | '/alerts'
+    | '/boost'
+    | '/boost-orders'
+    | '/buy-accounts'
+    | '/dashboard'
     | '/fund'
     | '/history'
+    | '/log-history'
+    | '/number-orders'
     | '/profile'
+    | '/rent-number'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
+    | '/admin/pricing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/affiliate'
     | '/alerts'
+    | '/boost'
+    | '/boost-orders'
+    | '/buy-accounts'
+    | '/dashboard'
     | '/fund'
     | '/history'
+    | '/log-history'
+    | '/number-orders'
     | '/profile'
+    | '/rent-number'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
+    | '/admin/pricing'
   id:
     | '__root__'
     | '/'
+    | '/affiliate'
     | '/alerts'
+    | '/boost'
+    | '/boost-orders'
+    | '/buy-accounts'
+    | '/dashboard'
     | '/fund'
     | '/history'
+    | '/log-history'
+    | '/number-orders'
     | '/profile'
+    | '/rent-number'
     | '/reward'
-    | '/use/virtual-numbers'
+    | '/virtual-numbers'
+    | '/admin/pricing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AffiliateRoute: typeof AffiliateRoute
   AlertsRoute: typeof AlertsRoute
+  BoostRoute: typeof BoostRoute
+  BoostOrdersRoute: typeof BoostOrdersRoute
+  BuyAccountsRoute: typeof BuyAccountsRoute
+  DashboardRoute: typeof DashboardRoute
   FundRoute: typeof FundRoute
   HistoryRoute: typeof HistoryRoute
+  LogHistoryRoute: typeof LogHistoryRoute
+  NumberOrdersRoute: typeof NumberOrdersRoute
   ProfileRoute: typeof ProfileRoute
+  RentNumberRoute: typeof RentNumberRoute
   RewardRoute: typeof RewardRoute
-  UseVirtualNumbersRoute: typeof UseVirtualNumbersRoute
+  VirtualNumbersRoute: typeof VirtualNumbersRoute
+  AdminPricingRoute: typeof AdminPricingRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/virtual-numbers': {
+      id: '/virtual-numbers'
+      path: '/virtual-numbers'
+      fullPath: '/virtual-numbers'
+      preLoaderRoute: typeof VirtualNumbersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reward': {
       id: '/reward'
       path: '/reward'
@@ -130,11 +254,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RewardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rent-number': {
+      id: '/rent-number'
+      path: '/rent-number'
+      fullPath: '/rent-number'
+      preLoaderRoute: typeof RentNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/number-orders': {
+      id: '/number-orders'
+      path: '/number-orders'
+      fullPath: '/number-orders'
+      preLoaderRoute: typeof NumberOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/log-history': {
+      id: '/log-history'
+      path: '/log-history'
+      fullPath: '/log-history'
+      preLoaderRoute: typeof LogHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/history': {
@@ -151,11 +296,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FundRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy-accounts': {
+      id: '/buy-accounts'
+      path: '/buy-accounts'
+      fullPath: '/buy-accounts'
+      preLoaderRoute: typeof BuyAccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boost-orders': {
+      id: '/boost-orders'
+      path: '/boost-orders'
+      fullPath: '/boost-orders'
+      preLoaderRoute: typeof BoostOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boost': {
+      id: '/boost'
+      path: '/boost'
+      fullPath: '/boost'
+      preLoaderRoute: typeof BoostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alerts': {
       id: '/alerts'
       path: '/alerts'
       fullPath: '/alerts'
       preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/affiliate': {
+      id: '/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AffiliateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -165,11 +345,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/use/virtual-numbers': {
-      id: '/use/virtual-numbers'
-      path: '/use/virtual-numbers'
-      fullPath: '/use/virtual-numbers'
-      preLoaderRoute: typeof UseVirtualNumbersRouteImport
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/admin/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -177,12 +357,21 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AffiliateRoute: AffiliateRoute,
   AlertsRoute: AlertsRoute,
+  BoostRoute: BoostRoute,
+  BoostOrdersRoute: BoostOrdersRoute,
+  BuyAccountsRoute: BuyAccountsRoute,
+  DashboardRoute: DashboardRoute,
   FundRoute: FundRoute,
   HistoryRoute: HistoryRoute,
+  LogHistoryRoute: LogHistoryRoute,
+  NumberOrdersRoute: NumberOrdersRoute,
   ProfileRoute: ProfileRoute,
+  RentNumberRoute: RentNumberRoute,
   RewardRoute: RewardRoute,
-  UseVirtualNumbersRoute: UseVirtualNumbersRoute,
+  VirtualNumbersRoute: VirtualNumbersRoute,
+  AdminPricingRoute: AdminPricingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

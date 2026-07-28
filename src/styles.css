@@ -57,36 +57,36 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.19 0.04 265);
 
-  --brand: oklch(0.42 0.18 265);
-  --brand-glow: oklch(0.55 0.2 265);
+  --brand: oklch(0.72 0.17 160);
+  --brand-glow: oklch(0.78 0.15 165);
 
-  --primary: oklch(0.42 0.18 265);
+  --primary: oklch(0.72 0.17 160);
   --primary-foreground: oklch(0.99 0.005 250);
   --secondary: oklch(0.96 0.012 250);
   --secondary-foreground: oklch(0.19 0.04 265);
   --muted: oklch(0.96 0.012 250);
-  --muted-foreground: oklch(0.5 0.03 260);
-  --accent: oklch(0.95 0.02 260);
+  --muted-foreground: oklch(0.5 0.02 240);
+  --accent: oklch(0.96 0.03 160);
   --accent-foreground: oklch(0.19 0.04 265);
 
-  --success: oklch(0.62 0.16 162);
+  --success: oklch(0.72 0.17 160);
   --success-foreground: oklch(0.99 0.005 250);
   --warning: oklch(0.75 0.16 78);
   --warning-foreground: oklch(0.2 0.04 60);
   --destructive: oklch(0.6 0.24 22);
   --destructive-foreground: oklch(0.99 0.005 250);
 
-  --border: oklch(0.92 0.012 250);
-  --input: oklch(0.94 0.012 250);
-  --ring: oklch(0.42 0.18 265);
+  --border: oklch(0.92 0.008 240);
+  --input: oklch(0.94 0.008 240);
+  --ring: oklch(0.72 0.17 160);
 
-  /* Deep royal blue wallet banner (#04113E → #0B2578) */
-  --gradient-wallet: radial-gradient(circle at 85% 20%, oklch(0.4 0.18 265 / 0.55) 0%, transparent 55%),
-    linear-gradient(135deg, #04113E 0%, #081b58 55%, #0B2578 100%);
-  --gradient-brand: linear-gradient(135deg, var(--brand) 0%, var(--brand-glow) 100%);
-  --shadow-card: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 8px 24px -16px oklch(0.2 0.08 265 / 0.18);
-  --shadow-wallet: 0 24px 50px -22px oklch(0.15 0.15 265 / 0.45);
-  --shadow-glow: 0 0 0 1px oklch(0.2 0.05 265 / 0.06), 0 20px 40px -20px oklch(0.4 0.18 265 / 0.3);
+  /* Dark navy wallet banner (#0F172A) with subtle emerald glow */
+  --gradient-wallet: radial-gradient(circle at 85% 20%, rgba(22, 199, 132, 0.28) 0%, transparent 55%),
+    linear-gradient(135deg, #0F172A 0%, #111c36 55%, #0F172A 100%);
+  --gradient-brand: linear-gradient(135deg, #16C784 0%, #0D9488 100%);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-wallet: 0 20px 40px -20px rgba(15, 23, 42, 0.35);
+  --shadow-glow: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 20px 40px -20px rgba(22, 199, 132, 0.3);
 }
 
 @layer base {
