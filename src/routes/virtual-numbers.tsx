@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Search, Copy, Check, Timer } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
+import { DEFAULT_PRICING, loadPricing, priceInNaira, naira, type PricingConfig } from "@/lib/pricing";
 
 export const Route = createFileRoute("/virtual-numbers")({
   head: () => ({
@@ -17,8 +18,17 @@ export const Route = createFileRoute("/virtual-numbers")({
   component: VirtualNumbers,
 });
 
-const servers = ["USA S1", "USA S2", "USA S3", "All Countries S1", "All Countries S2"];
-const services = ["WhatsApp", "Telegram", "OpenAI / ChatGPT", "Tinder", "TikTok", "Google", "Instagram", "Facebook"];
+const services: { name: string; costUsd: number }[] = [
+  { name: "WhatsApp", costUsd: 0.42 },
+  { name: "Telegram", costUsd: 0.38 },
+  { name: "OpenAI / ChatGPT", costUsd: 0.75 },
+  { name: "Tinder", costUsd: 0.65 },
+  { name: "TikTok", costUsd: 0.3 },
+  { name: "Google", costUsd: 0.35 },
+  { name: "Instagram", costUsd: 0.33 },
+  { name: "Facebook", costUsd: 0.36 },
+];
+
 
 const orders = [
   {
@@ -43,10 +53,17 @@ const orders = [
 ];
 
 function VirtualNumbers() {
-  const [server, setServer] = useState(servers[0]);
+  const [cfg, setCfg] = useState<PricingConfig>(DEFAULT_PRICING);
+  const otpServers = cfg.servers.filter((s) => s.scope !== "rental");
+  const [serverId, setServerId] = useState(otpServers[0].id);
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
-  const filtered = services.filter((s) => s.toLowerCase().includes(query.toLowerCase()));
+  const filtered = services.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()));
+  const activeServer = cfg.servers.find((s) => s.id === serverId) ?? otpServers[0];
+
+  useEffect(() => {
+    setCfg(loadPricing());
+  }, []);
 
   const copy = async (value: string, key: string, label: string) => {
     try {
@@ -66,24 +83,28 @@ function VirtualNumbers() {
       {/* Server pills */}
       <div className="px-5 pt-5">
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {servers.map((s) => {
-            const active = s === server;
+          {otpServers.map((s) => {
+            const active = s.id === serverId;
             return (
               <button
-                key={s}
-                onClick={() => setServer(s)}
+                key={s.id}
+                onClick={() => setServerId(s.id)}
                 className={`whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition ${
                   active
-                    ? "border-transparent brand-gradient text-white shadow-[0_8px_20px_-8px_oklch(0.6_0.22_262/0.7)]"
+                    ? "border-transparent brand-gradient text-white shadow-[0_8px_20px_-8px_rgba(22,199,132,0.7)]"
                     : "border-border bg-surface text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {s}
+                {s.label}
               </button>
             );
           })}
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Provider: <span className="font-semibold text-foreground">{activeServer.provider}</span>
+        </p>
       </div>
+
 
       {/* Search */}
       <div className="px-5 pt-4">
@@ -111,19 +132,22 @@ function VirtualNumbers() {
               <li className="p-3 text-xs text-muted-foreground">No services match "{query}"</li>
             ) : (
               filtered.map((s) => (
-                <li key={s}>
+                <li key={s.name}>
                   <button
                     onClick={() => {
-                      toast.success(`${s} order placed on ${server}`);
+                      toast.success(`${s.name} order placed on ${activeServer.label}`);
                       setQuery("");
                     }}
                     className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-accent/60"
                   >
-                    <span>{s}</span>
-                    <span className="text-[11px] font-semibold text-primary">Order →</span>
+                    <span>{s.name}</span>
+                    <span className="text-[11px] font-black tabular-nums text-primary">
+                      {naira(priceInNaira(s.costUsd, cfg, serverId))}
+                    </span>
                   </button>
                 </li>
               ))
+
             )}
           </ul>
         )}
