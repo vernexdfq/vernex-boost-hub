@@ -53,10 +53,17 @@ const orders = [
 ];
 
 function VirtualNumbers() {
-  const [server, setServer] = useState(servers[0]);
+  const [cfg, setCfg] = useState<PricingConfig>(DEFAULT_PRICING);
+  const otpServers = cfg.servers.filter((s) => s.scope !== "rental");
+  const [serverId, setServerId] = useState(otpServers[0].id);
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
-  const filtered = services.filter((s) => s.toLowerCase().includes(query.toLowerCase()));
+  const filtered = services.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()));
+  const activeServer = cfg.servers.find((s) => s.id === serverId) ?? otpServers[0];
+
+  useEffect(() => {
+    setCfg(loadPricing());
+  }, []);
 
   const copy = async (value: string, key: string, label: string) => {
     try {
@@ -76,24 +83,28 @@ function VirtualNumbers() {
       {/* Server pills */}
       <div className="px-5 pt-5">
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {servers.map((s) => {
-            const active = s === server;
+          {otpServers.map((s) => {
+            const active = s.id === serverId;
             return (
               <button
-                key={s}
-                onClick={() => setServer(s)}
+                key={s.id}
+                onClick={() => setServerId(s.id)}
                 className={`whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition ${
                   active
-                    ? "border-transparent brand-gradient text-white shadow-[0_8px_20px_-8px_oklch(0.6_0.22_262/0.7)]"
+                    ? "border-transparent brand-gradient text-white shadow-[0_8px_20px_-8px_rgba(22,199,132,0.7)]"
                     : "border-border bg-surface text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {s}
+                {s.label}
               </button>
             );
           })}
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Provider: <span className="font-semibold text-foreground">{activeServer.provider}</span>
+        </p>
       </div>
+
 
       {/* Search */}
       <div className="px-5 pt-4">
