@@ -132,19 +132,22 @@ function VirtualNumbers() {
               <li className="p-3 text-xs text-muted-foreground">No services match "{query}"</li>
             ) : (
               filtered.map((s) => (
-                <li key={s}>
+                <li key={s.name}>
                   <button
                     onClick={() => {
-                      toast.success(`${s} order placed on ${server}`);
+                      toast.success(`${s.name} order placed on ${activeServer.label}`);
                       setQuery("");
                     }}
                     className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-accent/60"
                   >
-                    <span>{s}</span>
-                    <span className="text-[11px] font-semibold text-primary">Order →</span>
+                    <span>{s.name}</span>
+                    <span className="text-[11px] font-black tabular-nums text-primary">
+                      {naira(priceInNaira(s.costUsd, cfg, serverId))}
+                    </span>
                   </button>
                 </li>
               ))
+
             )}
           </ul>
         )}
