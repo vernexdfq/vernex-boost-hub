@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Search, Copy, Check, Timer } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
+import { DEFAULT_PRICING, loadPricing, priceInNaira, naira, type PricingConfig } from "@/lib/pricing";
 
 export const Route = createFileRoute("/virtual-numbers")({
   head: () => ({
@@ -17,8 +18,17 @@ export const Route = createFileRoute("/virtual-numbers")({
   component: VirtualNumbers,
 });
 
-const servers = ["USA S1", "USA S2", "USA S3", "All Countries S1", "All Countries S2"];
-const services = ["WhatsApp", "Telegram", "OpenAI / ChatGPT", "Tinder", "TikTok", "Google", "Instagram", "Facebook"];
+const services: { name: string; costUsd: number }[] = [
+  { name: "WhatsApp", costUsd: 0.42 },
+  { name: "Telegram", costUsd: 0.38 },
+  { name: "OpenAI / ChatGPT", costUsd: 0.75 },
+  { name: "Tinder", costUsd: 0.65 },
+  { name: "TikTok", costUsd: 0.3 },
+  { name: "Google", costUsd: 0.35 },
+  { name: "Instagram", costUsd: 0.33 },
+  { name: "Facebook", costUsd: 0.36 },
+];
+
 
 const orders = [
   {
