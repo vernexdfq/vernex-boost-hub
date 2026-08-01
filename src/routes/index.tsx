@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 
-const AUTH_KEY = "vernex-authed";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
