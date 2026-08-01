@@ -18,10 +18,13 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { TelegramModal } from "@/components/telegram-modal";
+import { fetchAccount } from "@/lib/account";
 
-export const Route = createFileRoute("/dashboard")({
+
+export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — Vernex" },
@@ -65,18 +68,28 @@ function formatNaira(n: number) {
 
 function Dashboard() {
   const [hidden, setHidden] = useState(false);
-  const balance = 0.27;
+  const { user } = Route.useRouteContext();
+  const { data } = useQuery({
+    queryKey: ["account", user.id],
+    queryFn: () => fetchAccount(user.id),
+  });
+
+  const displayName =
+    data?.profile?.full_name?.split(" ")[0] ??
+    (user.email ? user.email.split("@")[0] : "there");
+  const initial = displayName.charAt(0).toUpperCase();
+  const balance = data?.wallet?.balance ?? 0;
   const g = greeting();
 
   return (
     <AppShell>
       <header className="flex items-center gap-3 px-5 pt-6">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(22,199,132,0.5)]">
-          D
+          {initial}
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[17px] font-bold leading-tight">
-            {g.text}, Denny <span className="ml-0.5">{g.emoji}</span>
+            {g.text}, {displayName} <span className="ml-0.5">{g.emoji}</span>
           </h1>
           <p className="truncate text-xs text-muted-foreground">Your Vernex Dashboard</p>
         </div>
@@ -89,6 +102,7 @@ function Dashboard() {
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-surface" />
         </Link>
       </header>
+
 
       <section className="px-5 pt-5">
         <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 shadow-wallet">

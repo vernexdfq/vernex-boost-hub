@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/buy-accounts")({
+export const Route = createFileRoute("/_authenticated/buy-accounts")({
   head: () => ({
     meta: [
       { title: "Buy Logs & Aged Accounts — Vernex" },

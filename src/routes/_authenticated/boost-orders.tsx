@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/boost-orders")({
+export const Route = createFileRoute("/_authenticated/boost-orders")({
   head: () => ({
     meta: [
       { title: "Boost Orders — Vernex" },

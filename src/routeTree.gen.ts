@@ -9,91 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VirtualNumbersRouteImport } from './routes/virtual-numbers'
-import { Route as RewardRouteImport } from './routes/reward'
-import { Route as RentNumberRouteImport } from './routes/rent-number'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as NumberOrdersRouteImport } from './routes/number-orders'
-import { Route as LogHistoryRouteImport } from './routes/log-history'
-import { Route as HistoryRouteImport } from './routes/history'
-import { Route as FundRouteImport } from './routes/fund'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as BuyAccountsRouteImport } from './routes/buy-accounts'
-import { Route as BoostOrdersRouteImport } from './routes/boost-orders'
-import { Route as BoostRouteImport } from './routes/boost'
-import { Route as AlertsRouteImport } from './routes/alerts'
-import { Route as AffiliateRouteImport } from './routes/affiliate'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
+import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
+import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
+import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedNumberOrdersRouteImport } from './routes/_authenticated/number-orders'
+import { Route as AuthenticatedLogHistoryRouteImport } from './routes/_authenticated/log-history'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedFundRouteImport } from './routes/_authenticated/fund'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBuyAccountsRouteImport } from './routes/_authenticated/buy-accounts'
+import { Route as AuthenticatedBoostOrdersRouteImport } from './routes/_authenticated/boost-orders'
+import { Route as AuthenticatedBoostRouteImport } from './routes/_authenticated/boost'
+import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedAffiliateRouteImport } from './routes/_authenticated/affiliate'
+import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
 
-const VirtualNumbersRoute = VirtualNumbersRouteImport.update({
-  id: '/virtual-numbers',
-  path: '/virtual-numbers',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RewardRoute = RewardRouteImport.update({
-  id: '/reward',
-  path: '/reward',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RentNumberRoute = RentNumberRouteImport.update({
-  id: '/rent-number',
-  path: '/rent-number',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NumberOrdersRoute = NumberOrdersRouteImport.update({
-  id: '/number-orders',
-  path: '/number-orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogHistoryRoute = LogHistoryRouteImport.update({
-  id: '/log-history',
-  path: '/log-history',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HistoryRoute = HistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FundRoute = FundRouteImport.update({
-  id: '/fund',
-  path: '/fund',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuyAccountsRoute = BuyAccountsRouteImport.update({
-  id: '/buy-accounts',
-  path: '/buy-accounts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BoostOrdersRoute = BoostOrdersRouteImport.update({
-  id: '/boost-orders',
-  path: '/boost-orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BoostRoute = BoostRouteImport.update({
-  id: '/boost',
-  path: '/boost',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlertsRoute = AlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AffiliateRoute = AffiliateRouteImport.update({
-  id: '/affiliate',
-  path: '/affiliate',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -101,71 +42,151 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPricingRoute = AdminPricingRouteImport.update({
-  id: '/admin/pricing',
-  path: '/admin/pricing',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedVirtualNumbersRoute =
+  AuthenticatedVirtualNumbersRouteImport.update({
+    id: '/virtual-numbers',
+    path: '/virtual-numbers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRewardRoute = AuthenticatedRewardRouteImport.update({
+  id: '/reward',
+  path: '/reward',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRentNumberRoute = AuthenticatedRentNumberRouteImport.update({
+  id: '/rent-number',
+  path: '/rent-number',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNumberOrdersRoute =
+  AuthenticatedNumberOrdersRouteImport.update({
+    id: '/number-orders',
+    path: '/number-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLogHistoryRoute = AuthenticatedLogHistoryRouteImport.update({
+  id: '/log-history',
+  path: '/log-history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFundRoute = AuthenticatedFundRouteImport.update({
+  id: '/fund',
+  path: '/fund',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBuyAccountsRoute =
+  AuthenticatedBuyAccountsRouteImport.update({
+    id: '/buy-accounts',
+    path: '/buy-accounts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBoostOrdersRoute =
+  AuthenticatedBoostOrdersRouteImport.update({
+    id: '/boost-orders',
+    path: '/boost-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBoostRoute = AuthenticatedBoostRouteImport.update({
+  id: '/boost',
+  path: '/boost',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminPricingRoute =
+  AuthenticatedAdminPricingRouteImport.update({
+    id: '/admin/pricing',
+    path: '/admin/pricing',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/affiliate': typeof AffiliateRoute
-  '/alerts': typeof AlertsRoute
-  '/boost': typeof BoostRoute
-  '/boost-orders': typeof BoostOrdersRoute
-  '/buy-accounts': typeof BuyAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/fund': typeof FundRoute
-  '/history': typeof HistoryRoute
-  '/log-history': typeof LogHistoryRoute
-  '/number-orders': typeof NumberOrdersRoute
-  '/profile': typeof ProfileRoute
-  '/rent-number': typeof RentNumberRoute
-  '/reward': typeof RewardRoute
-  '/virtual-numbers': typeof VirtualNumbersRoute
-  '/admin/pricing': typeof AdminPricingRoute
+  '/auth': typeof AuthRoute
+  '/affiliate': typeof AuthenticatedAffiliateRoute
+  '/alerts': typeof AuthenticatedAlertsRoute
+  '/boost': typeof AuthenticatedBoostRoute
+  '/boost-orders': typeof AuthenticatedBoostOrdersRoute
+  '/buy-accounts': typeof AuthenticatedBuyAccountsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/fund': typeof AuthenticatedFundRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/log-history': typeof AuthenticatedLogHistoryRoute
+  '/number-orders': typeof AuthenticatedNumberOrdersRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/rent-number': typeof AuthenticatedRentNumberRoute
+  '/reward': typeof AuthenticatedRewardRoute
+  '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/affiliate': typeof AffiliateRoute
-  '/alerts': typeof AlertsRoute
-  '/boost': typeof BoostRoute
-  '/boost-orders': typeof BoostOrdersRoute
-  '/buy-accounts': typeof BuyAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/fund': typeof FundRoute
-  '/history': typeof HistoryRoute
-  '/log-history': typeof LogHistoryRoute
-  '/number-orders': typeof NumberOrdersRoute
-  '/profile': typeof ProfileRoute
-  '/rent-number': typeof RentNumberRoute
-  '/reward': typeof RewardRoute
-  '/virtual-numbers': typeof VirtualNumbersRoute
-  '/admin/pricing': typeof AdminPricingRoute
+  '/auth': typeof AuthRoute
+  '/affiliate': typeof AuthenticatedAffiliateRoute
+  '/alerts': typeof AuthenticatedAlertsRoute
+  '/boost': typeof AuthenticatedBoostRoute
+  '/boost-orders': typeof AuthenticatedBoostOrdersRoute
+  '/buy-accounts': typeof AuthenticatedBuyAccountsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/fund': typeof AuthenticatedFundRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/log-history': typeof AuthenticatedLogHistoryRoute
+  '/number-orders': typeof AuthenticatedNumberOrdersRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/rent-number': typeof AuthenticatedRentNumberRoute
+  '/reward': typeof AuthenticatedRewardRoute
+  '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/affiliate': typeof AffiliateRoute
-  '/alerts': typeof AlertsRoute
-  '/boost': typeof BoostRoute
-  '/boost-orders': typeof BoostOrdersRoute
-  '/buy-accounts': typeof BuyAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/fund': typeof FundRoute
-  '/history': typeof HistoryRoute
-  '/log-history': typeof LogHistoryRoute
-  '/number-orders': typeof NumberOrdersRoute
-  '/profile': typeof ProfileRoute
-  '/rent-number': typeof RentNumberRoute
-  '/reward': typeof RewardRoute
-  '/virtual-numbers': typeof VirtualNumbersRoute
-  '/admin/pricing': typeof AdminPricingRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/affiliate': typeof AuthenticatedAffiliateRoute
+  '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
+  '/_authenticated/boost': typeof AuthenticatedBoostRoute
+  '/_authenticated/boost-orders': typeof AuthenticatedBoostOrdersRoute
+  '/_authenticated/buy-accounts': typeof AuthenticatedBuyAccountsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/fund': typeof AuthenticatedFundRoute
+  '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/log-history': typeof AuthenticatedLogHistoryRoute
+  '/_authenticated/number-orders': typeof AuthenticatedNumberOrdersRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/rent-number': typeof AuthenticatedRentNumberRoute
+  '/_authenticated/reward': typeof AuthenticatedRewardRoute
+  '/_authenticated/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/affiliate'
     | '/alerts'
     | '/boost'
@@ -184,6 +205,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/affiliate'
     | '/alerts'
     | '/boost'
@@ -202,140 +224,45 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/affiliate'
-    | '/alerts'
-    | '/boost'
-    | '/boost-orders'
-    | '/buy-accounts'
-    | '/dashboard'
-    | '/fund'
-    | '/history'
-    | '/log-history'
-    | '/number-orders'
-    | '/profile'
-    | '/rent-number'
-    | '/reward'
-    | '/virtual-numbers'
-    | '/admin/pricing'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/affiliate'
+    | '/_authenticated/alerts'
+    | '/_authenticated/boost'
+    | '/_authenticated/boost-orders'
+    | '/_authenticated/buy-accounts'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/fund'
+    | '/_authenticated/history'
+    | '/_authenticated/log-history'
+    | '/_authenticated/number-orders'
+    | '/_authenticated/profile'
+    | '/_authenticated/rent-number'
+    | '/_authenticated/reward'
+    | '/_authenticated/virtual-numbers'
+    | '/_authenticated/admin/pricing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AffiliateRoute: typeof AffiliateRoute
-  AlertsRoute: typeof AlertsRoute
-  BoostRoute: typeof BoostRoute
-  BoostOrdersRoute: typeof BoostOrdersRoute
-  BuyAccountsRoute: typeof BuyAccountsRoute
-  DashboardRoute: typeof DashboardRoute
-  FundRoute: typeof FundRoute
-  HistoryRoute: typeof HistoryRoute
-  LogHistoryRoute: typeof LogHistoryRoute
-  NumberOrdersRoute: typeof NumberOrdersRoute
-  ProfileRoute: typeof ProfileRoute
-  RentNumberRoute: typeof RentNumberRoute
-  RewardRoute: typeof RewardRoute
-  VirtualNumbersRoute: typeof VirtualNumbersRoute
-  AdminPricingRoute: typeof AdminPricingRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/virtual-numbers': {
-      id: '/virtual-numbers'
-      path: '/virtual-numbers'
-      fullPath: '/virtual-numbers'
-      preLoaderRoute: typeof VirtualNumbersRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reward': {
-      id: '/reward'
-      path: '/reward'
-      fullPath: '/reward'
-      preLoaderRoute: typeof RewardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rent-number': {
-      id: '/rent-number'
-      path: '/rent-number'
-      fullPath: '/rent-number'
-      preLoaderRoute: typeof RentNumberRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/number-orders': {
-      id: '/number-orders'
-      path: '/number-orders'
-      fullPath: '/number-orders'
-      preLoaderRoute: typeof NumberOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/log-history': {
-      id: '/log-history'
-      path: '/log-history'
-      fullPath: '/log-history'
-      preLoaderRoute: typeof LogHistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/history': {
-      id: '/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof HistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fund': {
-      id: '/fund'
-      path: '/fund'
-      fullPath: '/fund'
-      preLoaderRoute: typeof FundRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/buy-accounts': {
-      id: '/buy-accounts'
-      path: '/buy-accounts'
-      fullPath: '/buy-accounts'
-      preLoaderRoute: typeof BuyAccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/boost-orders': {
-      id: '/boost-orders'
-      path: '/boost-orders'
-      fullPath: '/boost-orders'
-      preLoaderRoute: typeof BoostOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/boost': {
-      id: '/boost'
-      path: '/boost'
-      fullPath: '/boost'
-      preLoaderRoute: typeof BoostRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alerts': {
-      id: '/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AlertsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/affiliate': {
-      id: '/affiliate'
-      path: '/affiliate'
-      fullPath: '/affiliate'
-      preLoaderRoute: typeof AffiliateRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -345,33 +272,157 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/pricing': {
-      id: '/admin/pricing'
+    '/_authenticated/virtual-numbers': {
+      id: '/_authenticated/virtual-numbers'
+      path: '/virtual-numbers'
+      fullPath: '/virtual-numbers'
+      preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reward': {
+      id: '/_authenticated/reward'
+      path: '/reward'
+      fullPath: '/reward'
+      preLoaderRoute: typeof AuthenticatedRewardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rent-number': {
+      id: '/_authenticated/rent-number'
+      path: '/rent-number'
+      fullPath: '/rent-number'
+      preLoaderRoute: typeof AuthenticatedRentNumberRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/number-orders': {
+      id: '/_authenticated/number-orders'
+      path: '/number-orders'
+      fullPath: '/number-orders'
+      preLoaderRoute: typeof AuthenticatedNumberOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/log-history': {
+      id: '/_authenticated/log-history'
+      path: '/log-history'
+      fullPath: '/log-history'
+      preLoaderRoute: typeof AuthenticatedLogHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fund': {
+      id: '/_authenticated/fund'
+      path: '/fund'
+      fullPath: '/fund'
+      preLoaderRoute: typeof AuthenticatedFundRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buy-accounts': {
+      id: '/_authenticated/buy-accounts'
+      path: '/buy-accounts'
+      fullPath: '/buy-accounts'
+      preLoaderRoute: typeof AuthenticatedBuyAccountsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/boost-orders': {
+      id: '/_authenticated/boost-orders'
+      path: '/boost-orders'
+      fullPath: '/boost-orders'
+      preLoaderRoute: typeof AuthenticatedBoostOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/boost': {
+      id: '/_authenticated/boost'
+      path: '/boost'
+      fullPath: '/boost'
+      preLoaderRoute: typeof AuthenticatedBoostRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/alerts': {
+      id: '/_authenticated/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AuthenticatedAlertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/affiliate': {
+      id: '/_authenticated/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/pricing': {
+      id: '/_authenticated/admin/pricing'
       path: '/admin/pricing'
       fullPath: '/admin/pricing'
-      preLoaderRoute: typeof AdminPricingRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAffiliateRoute: typeof AuthenticatedAffiliateRoute
+  AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
+  AuthenticatedBoostRoute: typeof AuthenticatedBoostRoute
+  AuthenticatedBoostOrdersRoute: typeof AuthenticatedBoostOrdersRoute
+  AuthenticatedBuyAccountsRoute: typeof AuthenticatedBuyAccountsRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFundRoute: typeof AuthenticatedFundRoute
+  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedLogHistoryRoute: typeof AuthenticatedLogHistoryRoute
+  AuthenticatedNumberOrdersRoute: typeof AuthenticatedNumberOrdersRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedRentNumberRoute: typeof AuthenticatedRentNumberRoute
+  AuthenticatedRewardRoute: typeof AuthenticatedRewardRoute
+  AuthenticatedVirtualNumbersRoute: typeof AuthenticatedVirtualNumbersRoute
+  AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAffiliateRoute: AuthenticatedAffiliateRoute,
+  AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
+  AuthenticatedBoostRoute: AuthenticatedBoostRoute,
+  AuthenticatedBoostOrdersRoute: AuthenticatedBoostOrdersRoute,
+  AuthenticatedBuyAccountsRoute: AuthenticatedBuyAccountsRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFundRoute: AuthenticatedFundRoute,
+  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedLogHistoryRoute: AuthenticatedLogHistoryRoute,
+  AuthenticatedNumberOrdersRoute: AuthenticatedNumberOrdersRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedRentNumberRoute: AuthenticatedRentNumberRoute,
+  AuthenticatedRewardRoute: AuthenticatedRewardRoute,
+  AuthenticatedVirtualNumbersRoute: AuthenticatedVirtualNumbersRoute,
+  AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AffiliateRoute: AffiliateRoute,
-  AlertsRoute: AlertsRoute,
-  BoostRoute: BoostRoute,
-  BoostOrdersRoute: BoostOrdersRoute,
-  BuyAccountsRoute: BuyAccountsRoute,
-  DashboardRoute: DashboardRoute,
-  FundRoute: FundRoute,
-  HistoryRoute: HistoryRoute,
-  LogHistoryRoute: LogHistoryRoute,
-  NumberOrdersRoute: NumberOrdersRoute,
-  ProfileRoute: ProfileRoute,
-  RentNumberRoute: RentNumberRoute,
-  RewardRoute: RewardRoute,
-  VirtualNumbersRoute: VirtualNumbersRoute,
-  AdminPricingRoute: AdminPricingRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

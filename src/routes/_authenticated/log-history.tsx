@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { FileText } from "lucide-react";
 
-export const Route = createFileRoute("/log-history")({
+export const Route = createFileRoute("/_authenticated/log-history")({
   head: () => ({
     meta: [
       { title: "Log History — Vernex" },

@@ -5,7 +5,7 @@ import { Copy, Check, Zap, Building2, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/fund")({
+export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
     meta: [
       { title: "Fund Wallet — Vernex" },

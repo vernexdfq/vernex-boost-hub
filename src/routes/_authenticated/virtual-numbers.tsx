@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { DEFAULT_PRICING, loadPricing, priceInNaira, naira, type PricingConfig } from "@/lib/pricing";
 
-export const Route = createFileRoute("/virtual-numbers")({
+export const Route = createFileRoute("/_authenticated/virtual-numbers")({
   head: () => ({
     meta: [
       { title: "Virtual Numbers — Vernex" },

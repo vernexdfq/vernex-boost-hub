@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { naira } from "@/lib/pricing";
 
-export const Route = createFileRoute("/affiliate")({
+export const Route = createFileRoute("/_authenticated/affiliate")({
   head: () => ({
     meta: [
       { title: "Get Affiliate Website — Vernex" },
