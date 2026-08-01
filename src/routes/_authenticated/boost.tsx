@@ -5,7 +5,7 @@ import { Rocket } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/boost")({
+export const Route = createFileRoute("/_authenticated/boost")({
   head: () => ({
     meta: [
       { title: "Boost Account — Vernex" },

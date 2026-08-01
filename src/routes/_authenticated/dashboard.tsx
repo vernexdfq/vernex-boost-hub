@@ -21,7 +21,7 @@ import {
 import { AppShell } from "@/components/app-shell";
 import { TelegramModal } from "@/components/telegram-modal";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — Vernex" },

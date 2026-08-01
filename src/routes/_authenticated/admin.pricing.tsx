@@ -14,7 +14,7 @@ import {
   type ServerConfig,
 } from "@/lib/pricing";
 
-export const Route = createFileRoute("/admin/pricing")({
+export const Route = createFileRoute("/_authenticated/admin/pricing")({
   head: () => ({
     meta: [
       { title: "Admin — Pricing Settings — Vernex" },

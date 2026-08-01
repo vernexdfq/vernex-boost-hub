@@ -3,7 +3,7 @@ import { Bell, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/alerts")({
+export const Route = createFileRoute("/_authenticated/alerts")({
   head: () => ({
     meta: [
       { title: "Alerts — Vernex" },

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { naira } from "@/lib/pricing";
 
-export const Route = createFileRoute("/rent-number")({
+export const Route = createFileRoute("/_authenticated/rent-number")({
   head: () => ({
     meta: [
       { title: "Rent & Call — Vernex" },

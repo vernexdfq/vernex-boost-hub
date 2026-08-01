@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { Check, Timer, X } from "lucide-react";
 
-export const Route = createFileRoute("/number-orders")({
+export const Route = createFileRoute("/_authenticated/number-orders")({
   head: () => ({
     meta: [
       { title: "Number Orders — Vernex" },

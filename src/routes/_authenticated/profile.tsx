@@ -3,7 +3,7 @@ import { ChevronRight, Shield, KeyRound, Globe, LogOut, HelpCircle } from "lucid
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
       { title: "Profile — Vernex" },
