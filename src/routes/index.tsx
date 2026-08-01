@@ -35,16 +35,19 @@ function Landing() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.localStorage.getItem(AUTH_KEY)) {
-      navigate({ to: "/dashboard", replace: true });
-    }
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session) navigate({ to: "/dashboard", replace: true });
+    });
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   const enter = () => {
-    if (typeof window !== "undefined") window.localStorage.setItem(AUTH_KEY, "1");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/auth" });
   };
+
 
   const navLinks = [
     { label: "How it works", href: "#how" },
