@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, Loader2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { naira } from "@/lib/pricing";
+import { createAffiliateOrder, listAffiliateOrders } from "@/lib/functions/affiliate.functions";
 
 export const Route = createFileRoute("/_authenticated/affiliate")({
   head: () => ({
@@ -37,9 +40,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
-        <span className="grid h-6 w-6 place-items-center rounded-full bg-[#0F172A] text-[11px] font-black text-white">
-          {n}
-        </span>
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-[#0F172A] text-[11px] font-black text-white">{n}</span>
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{title}</p>
       </div>
       {children}
@@ -48,20 +49,49 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 }
 
 function Affiliate() {
+  const { user } = Route.useRouteContext();
+  const queryClient = useQueryClient();
+  const submitOrder = useServerFn(createAffiliateOrder);
+  const fetchOrders = useServerFn(listAffiliateOrders);
+
   const [domain, setDomain] = useState(domains[0]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const submit = () => {
+  const { data: orders } = useQuery({
+    queryKey: ["affiliate-orders", user.id],
+    queryFn: () => fetchOrders({ data: undefined }),
+  });
+
+  const submit = async () => {
     if (!name.trim() || !phone.trim()) {
       toast.error("Please enter your website name and contact phone");
       return;
     }
-    toast.success(`Order placed: ${name}${domain.ext} — our team will contact you on ${phone}`);
-    setName("");
-    setPhone("");
-    setNotes("");
+    setBusy(true);
+    try {
+      await submitOrder({
+        data: {
+          websiteName: name,
+          domain: name,
+          domainExt: domain.ext,
+          phone,
+          notes,
+          amount: domain.price,
+        },
+      });
+      toast.success(`Order placed: ${name}${domain.ext} — our team will contact you on ${phone}`);
+      setName("");
+      setPhone("");
+      setNotes("");
+      queryClient.invalidateQueries({ queryKey: ["affiliate-orders", user.id] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Order failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -73,21 +103,14 @@ function Affiliate() {
           <div className="absolute inset-0 dotted-bg opacity-40" />
           <div className="relative">
             <Globe className="h-8 w-8 text-primary" />
-            <h2 className="mt-3 text-xl font-black leading-tight">
-              Own Your Own Platform. Sell Every Vernex Product.
-            </h2>
-            <p className="mt-2 text-xs text-white/70">
-              Launch a fully branded reseller site with our complete product catalog under your control.
-            </p>
+            <h2 className="mt-3 text-xl font-black leading-tight">Own Your Own Platform. Sell Every Vernex Product.</h2>
+            <p className="mt-2 text-xs text-white/70">Launch a fully branded reseller site with our complete product catalog under your control.</p>
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
           {features.map((f) => (
-            <span
-              key={f}
-              className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary"
-            >
+            <span key={f} className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
               <Check className="h-3 w-3" /> {f}
             </span>
           ))}
@@ -122,9 +145,7 @@ function Affiliate() {
                 placeholder="yoursite"
                 className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm outline-none"
               />
-              <span className="grid place-items-center self-stretch bg-accent px-3 text-sm font-bold text-primary">
-                {domain.ext}
-              </span>
+              <span className="grid place-items-center self-stretch bg-accent px-3 text-sm font-bold text-primary">{domain.ext}</span>
             </div>
           </Step>
 
@@ -149,20 +170,37 @@ function Affiliate() {
 
           <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Total
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Total</p>
               <p className="text-2xl font-black tabular-nums">{naira(domain.price)}</p>
             </div>
           </div>
 
           <button
             onClick={submit}
-            className="w-full rounded-2xl bg-[#16C784] py-4 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(22,199,132,0.8)] transition active:scale-[0.99]"
+            disabled={busy}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#16C784] py-4 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(22,199,132,0.8)] transition active:scale-[0.99] disabled:opacity-60"
           >
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             Order My Website
           </button>
         </div>
+
+        {orders && orders.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Your orders</h3>
+            <ul className="mt-3 space-y-2">
+              {orders.map((o) => (
+                <li key={o.id} className="rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold">{o.website_name}{o.domain_ext}</span>
+                    <span className="rounded-full bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase text-amber-600">{o.status}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{o.phone}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </AppShell>
   );

@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { ArrowDownLeft, ArrowUpRight, Rocket, Phone } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getDashboardSummary } from "@/lib/functions/dashboard.functions";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
@@ -15,41 +18,53 @@ export const Route = createFileRoute("/_authenticated/history")({
   component: HistoryPage,
 });
 
-const items = [
-  { id: 1, label: "Boosting: Instagram", sub: "5,000 followers", amount: -386.96, icon: Rocket, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]" },
-  { id: 2, label: "Refund: Virtual Number", sub: "WhatsApp • USA S1", amount: 191.1, icon: ArrowDownLeft, tint: "bg-[oklch(0.4_0.15_165)]/25 text-[oklch(0.78_0.17_165)]" },
-  { id: 3, label: "Wallet Funding", sub: "Paga transfer", amount: 5000, icon: ArrowUpRight, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]" },
-  { id: 4, label: "Virtual Number: Telegram", sub: "USA S2 • Completed", amount: -420, icon: Phone, tint: "bg-[oklch(0.4_0.15_262)]/25 text-[oklch(0.78_0.16_262)]" },
-  { id: 5, label: "Boosting: TikTok", sub: "10,000 views", amount: -1250.5, icon: Rocket, tint: "bg-[oklch(0.35_0.18_300)]/25 text-[oklch(0.78_0.2_300)]" },
-];
-
-const fmt = (n: number) => `₦${Math.abs(n).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 function HistoryPage() {
+  const { user } = Route.useRouteContext();
+  const fetchSummary = useServerFn(getDashboardSummary);
+
+  const { data: summary, isLoading } = useQuery({
+    queryKey: ["dashboard", user.id],
+    queryFn: () => fetchSummary({ data: { limit: 50 } }),
+  });
+
+  const transactions = summary?.transactions ?? [];
+
   return (
     <AppShell>
       <PageHeader title="History" subtitle="All wallet movements & orders" />
       <div className="px-5 pt-5">
-        <ul className="space-y-2">
-          {items.map((row) => {
-            const Icon = row.icon;
-            const pos = row.amount >= 0;
-            return (
-              <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
-                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${row.tint}`}>
-                  <Icon className="h-5 w-5" strokeWidth={2.2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{row.label}</p>
-                  <p className="truncate text-xs text-muted-foreground">{row.sub}</p>
-                </div>
-                <span className={`shrink-0 text-sm font-bold tabular-nums ${pos ? "text-emerald-400" : "text-destructive"}`}>
-                  {pos ? "+" : "-"}{fmt(row.amount)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+            No transactions yet. Fund your wallet to get started.
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {transactions.map((row) => {
+              const pos = row.type === "credit";
+              const Icon = pos ? ArrowDownLeft : ArrowUpRight;
+              return (
+                <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${pos ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-600"}`}>
+                    <Icon className="h-5 w-5" strokeWidth={2.2} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{row.description}</p>
+                    <p className="truncate text-xs text-muted-foreground">{row.payment_method ?? "Wallet"} • {row.status}</p>
+                  </div>
+                  <span className={`shrink-0 text-sm font-bold tabular-nums ${pos ? "text-primary" : "text-destructive"}`}>
+                    {pos ? "+" : "-"}{fmt(row.amount)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </AppShell>
   );
