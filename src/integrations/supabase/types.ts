@@ -351,6 +351,110 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_numbers: {
+        Row: {
+          area_code: string | null
+          carrier: string
+          country_code: string
+          country_name: string
+          created_at: string
+          dial_code: string
+          expires_at: string
+          id: string
+          is_available: boolean
+          monthly_price_ngn: number
+          number_type: Database["public"]["Enums"]["rental_number_type"]
+          phone_number: string
+          provider: string
+          region_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          area_code?: string | null
+          carrier: string
+          country_code: string
+          country_name: string
+          created_at?: string
+          dial_code: string
+          expires_at: string
+          id?: string
+          is_available?: boolean
+          monthly_price_ngn: number
+          number_type?: Database["public"]["Enums"]["rental_number_type"]
+          phone_number: string
+          provider: string
+          region_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area_code?: string | null
+          carrier?: string
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          dial_code?: string
+          expires_at?: string
+          id?: string
+          is_available?: boolean
+          monthly_price_ngn?: number
+          number_type?: Database["public"]["Enums"]["rental_number_type"]
+          phone_number?: string
+          provider?: string
+          region_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rentals: {
+        Row: {
+          amount_paid: number
+          auto_renew: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          plan: string
+          renews_at: string
+          rental_number_id: string
+          status: Database["public"]["Enums"]["rental_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid: number
+          auto_renew?: boolean
+          created_at?: string
+          expires_at: string
+          id?: string
+          plan: string
+          renews_at: string
+          rental_number_id: string
+          status?: Database["public"]["Enums"]["rental_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          auto_renew?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          plan?: string
+          renews_at?: string
+          rental_number_id?: string
+          status?: Database["public"]["Enums"]["rental_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rentals_rental_number_id_fkey"
+            columns: ["rental_number_id"]
+            isOneToOne: false
+            referencedRelation: "rental_numbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -485,6 +589,8 @@ export type Database = {
         | "expired"
         | "cancelled"
         | "refunded"
+      rental_number_type: "mobile" | "business"
+      rental_status: "active" | "expired" | "cancelled"
       transaction_status: "pending" | "success" | "failed" | "refunded"
       transaction_type: "credit" | "debit"
       user_tier: "tier_1" | "tier_2" | "tier_3"
@@ -625,6 +731,8 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      rental_number_type: ["mobile", "business"],
+      rental_status: ["active", "expired", "cancelled"],
       transaction_status: ["pending", "success", "failed", "refunded"],
       transaction_type: ["credit", "debit"],
       user_tier: ["tier_1", "tier_2", "tier_3"],
