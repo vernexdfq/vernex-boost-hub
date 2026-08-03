@@ -1,55 +1,80 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   Phone,
   Grid3X3,
-  MessageSquare,
   Hash,
   Wallet,
   Settings,
   Delete,
   ChevronDown,
+  ChevronRight,
   ArrowLeft,
-  PhoneIncoming,
-  PhoneOutgoing,
-  PhoneMissed,
-  Plus,
-  Check,
+  Search,
+  Loader2,
+  Globe,
+  BadgeCheck,
+  CalendarClock,
 } from "lucide-react";
 import { naira } from "@/lib/pricing";
+import {
+  listRentalCountries,
+  listRentalNumbers,
+  listMyRentals,
+  createRental,
+  type RentalCountry,
+} from "@/lib/functions/rentals.functions";
 
 export const Route = createFileRoute("/_authenticated/rent-number")({
   head: () => ({
     meta: [
-      { title: "Rent & Call — Vernex" },
-      { name: "description", content: "Rent long-term Non-VoIP numbers with a native dialer: calls, keypad, messages, credit and settings." },
-      { property: "og:title", content: "Vernex — Rent & Call" },
-      { property: "og:description", content: "Telnyx-powered persistent numbers with inbound/outbound calls and SMS." },
+      { title: "Rent a Number — Vernex" },
+      {
+        name: "description",
+        content:
+          "Rent long-term Non-VoIP numbers by country, carrier, state and area code. Live inventory with expiry dates and instant activation.",
+      },
+      { property: "og:title", content: "Vernex — Rent a Number" },
+      {
+        property: "og:description",
+        content: "Browse live rental inventory across Austria, Canada, Israel, the UK and the US.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: RentNumber,
 });
 
-type TabId = "calls" | "keypad" | "messages" | "numbers" | "credit" | "settings";
+type TabId = "browse" | "numbers" | "keypad" | "credit" | "settings";
 
 const tabs: { id: TabId; label: string; icon: typeof Phone }[] = [
-  { id: "calls", label: "Calls", icon: Phone },
+  { id: "browse", label: "Browse", icon: Globe },
+  { id: "numbers", label: "My Nos.", icon: Hash },
   { id: "keypad", label: "Keypad", icon: Grid3X3 },
-  { id: "messages", label: "Messages", icon: MessageSquare },
-  { id: "numbers", label: "Numbers", icon: Hash },
   { id: "credit", label: "Credit", icon: Wallet },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const countries = [
-  { flag: "🇳🇬", name: "Nigeria", dial: "+234" },
-  { flag: "🇺🇸", name: "United States", dial: "+1" },
-  { flag: "🇬🇧", name: "United Kingdom", dial: "+44" },
-  { flag: "🇨🇦", name: "Canada", dial: "+1" },
-  { flag: "🇩🇪", name: "Germany", dial: "+49" },
-  { flag: "🇮🇩", name: "Indonesia", dial: "+62" },
-];
+const plans = ["1 Week", "1 Month", "1 Year"] as const;
+const planMultiplier: Record<string, number> = { "1 Week": 0.35, "1 Month": 1, "1 Year": 10 };
+
+function flagOf(code: string) {
+  return code
+    .toUpperCase()
+    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
 const keyLetters: Record<string, string> = {
@@ -57,83 +82,357 @@ const keyLetters: Record<string, string> = {
   "6": "MNO", "7": "PQRS", "8": "TUV", "9": "WXYZ", "0": "+",
 };
 
-const callLog = [
-  { id: 1, name: "+1 341 802 7714", when: "Today, 4:12 PM", dir: "in" as const, dur: "2m 14s" },
-  { id: 2, name: "+44 7700 900021", when: "Today, 1:03 PM", dir: "out" as const, dur: "48s" },
-  { id: 3, name: "+1 725 555 0198", when: "Yesterday", dir: "missed" as const, dur: "—" },
-];
-
-const messages = [
-  { id: 1, from: "WhatsApp", body: "Your code is 483-921", when: "4:10 PM" },
-  { id: 2, from: "+1 341 802 7714", body: "Package delivered to your address.", when: "1:52 PM" },
-  { id: 3, from: "Telegram", body: "Login code: 55219", when: "Yesterday" },
-];
-
-const rentedNumbers = [
-  { id: 1, flag: "🇺🇸", number: "+1 341 802 7714", plan: "Monthly", renews: "12 Aug", price: 22500 },
-  { id: 2, flag: "🇬🇧", number: "+44 7700 900021", plan: "Weekly", renews: "3 Aug", price: 8500 },
-];
-
-const durations = [
-  { label: "1 Week", mult: 5.5 },
-  { label: "1 Month", mult: 18 },
-  { label: "1 Year", mult: 180 },
-];
-
-function FlagPicker({
-  value,
-  onChange,
+function CountryPicker({
+  countries,
+  loading,
+  onSelect,
 }: {
-  value: (typeof countries)[number];
-  onChange: (c: (typeof countries)[number]) => void;
+  countries: RentalCountry[];
+  loading: boolean;
+  onSelect: (c: RentalCountry) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return countries;
+    return countries.filter(
+      (c) =>
+        c.country_name.toLowerCase().includes(term) ||
+        c.dial_code.includes(term) ||
+        c.carriers.some((x) => x.toLowerCase().includes(term)),
+    );
+  }, [countries, q]);
+
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Select country"
-        className="flex items-center gap-1 rounded-2xl border border-border bg-surface px-2.5 py-2"
-      >
-        <span className="text-xl leading-none">{value.flag}</span>
-        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-      </button>
-      {open && (
-        <ul className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-64 w-52 overflow-auto rounded-2xl border border-border bg-surface p-1 shadow-card-elev">
-          {countries.map((c) => (
-            <li key={c.name}>
-              <button
-                onClick={() => {
-                  onChange(c);
-                  setOpen(false);
-                }}
-                className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm hover:bg-accent"
-              >
-                <span className="text-lg leading-none">{c.flag}</span>
-                <span className="flex-1 truncate">{c.name}</span>
-                <span className="text-xs text-muted-foreground">{c.dial}</span>
-                {c.name === value.name && <Check className="h-3.5 w-3.5 text-primary" />}
-              </button>
-            </li>
-          ))}
-        </ul>
+    <div className="space-y-3 px-5 py-4">
+      <label className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-3">
+        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search country, code or carrier"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+      </label>
+
+      {loading && (
+        <div className="flex items-center justify-center py-16 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
       )}
+
+      {!loading && filtered.length === 0 && (
+        <p className="py-16 text-center text-sm text-muted-foreground">No countries match that search.</p>
+      )}
+
+      <ul className="space-y-2">
+        {filtered.map((c) => (
+          <li key={c.country_code}>
+            <button
+              onClick={() => onSelect(c)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left shadow-card-elev transition active:scale-[0.99]"
+            >
+              <span className="text-2xl leading-none">{flagOf(c.country_code)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold">
+                  {c.country_name} <span className="text-muted-foreground">{c.dial_code}</span>
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {c.available} available · {c.carriers.slice(0, 3).join(", ")}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-black tabular-nums">{naira(c.from_price_ngn)}</p>
+                <p className="text-[10px] text-muted-foreground">from / month</p>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function RentNumber() {
-  const [tab, setTab] = useState<TabId>("keypad");
-  const [country, setCountry] = useState(countries[0]);
-  const [digits, setDigits] = useState("");
-  const [duration, setDuration] = useState(durations[1]);
+function NumberCatalog({
+  country,
+  onBack,
+}: {
+  country: RentalCountry;
+  onBack: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [carrier, setCarrier] = useState<string | null>(null);
+  const [numberType, setNumberType] = useState<"mobile" | "business" | null>(null);
+  const [search, setSearch] = useState("");
+  const [plan, setPlan] = useState<(typeof plans)[number]>("1 Month");
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const base = 2500;
-  const rentTotal = Math.ceil(base * duration.mult);
+  const fetchNumbers = useServerFn(listRentalNumbers);
+  const rent = useServerFn(createRental);
+
+  const { data: numbers = [], isLoading } = useQuery({
+    queryKey: ["rental-numbers", country.country_code, carrier, numberType, search],
+    queryFn: () =>
+      fetchNumbers({
+        data: {
+          countryCode: country.country_code,
+          ...(carrier ? { carrier } : {}),
+          ...(numberType ? { numberType } : {}),
+          ...(search.trim() ? { search: search.trim() } : {}),
+        },
+      }),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (rentalNumberId: string) => rent({ data: { rentalNumberId, plan } }),
+    onSuccess: () => {
+      toast.success(`Number rented for ${plan}`);
+      queryClient.invalidateQueries({ queryKey: ["rental-numbers"] });
+      queryClient.invalidateQueries({ queryKey: ["my-rentals"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPendingId(null),
+  });
+
+  const regional = country.regions.length > 0;
+
+  return (
+    <div className="space-y-3 px-5 py-4">
+      <button
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> All countries
+      </button>
+
+      <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <span className="text-2xl leading-none">{flagOf(country.country_code)}</span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold">
+            {country.country_name} <span className="text-muted-foreground">{country.dial_code}</span>
+          </p>
+          <p className="text-[11px] text-muted-foreground">{country.available} numbers in stock</p>
+        </div>
+      </div>
+
+      {regional && (
+        <label className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-3">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by state or area code (e.g. Florida, 424)"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+        </label>
+      )}
+
+      {regional && (
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {country.regions.map((r) => (
+            <button
+              key={r}
+              onClick={() => setSearch(search === r ? "" : r)}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
+                search === r ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {[null, ...country.carriers].map((c) => (
+          <button
+            key={c ?? "all"}
+            onClick={() => setCarrier(c)}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
+              carrier === c ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
+            }`}
+          >
+            {c ?? "All carriers"}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {([null, "mobile", "business"] as const).map((t) => (
+          <button
+            key={t ?? "any"}
+            onClick={() => setNumberType(t)}
+            className={`rounded-2xl border py-2.5 text-[12px] font-bold capitalize ${
+              numberType === t ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
+            }`}
+          >
+            {t ?? "All types"}
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-surface p-3 shadow-card-elev">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Rental period
+        </p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {plans.map((p) => (
+            <button
+              key={p}
+              onClick={() => setPlan(p)}
+              className={`rounded-2xl border py-2.5 text-[12px] font-bold ${
+                plan === p ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-14 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      )}
+
+      {!isLoading && numbers.length === 0 && (
+        <p className="py-14 text-center text-sm text-muted-foreground">
+          No numbers match these filters. Try another state, area code or carrier.
+        </p>
+      )}
+
+      <ul className="space-y-2">
+        {numbers.map((n) => {
+          const price = Math.ceil(n.monthly_price_ngn * (planMultiplier[plan] ?? 1));
+          const busy = mutation.isPending && pendingId === n.id;
+          return (
+            <li key={n.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+              <div className="flex items-start gap-3">
+                <span className="text-xl leading-none">{flagOf(n.country_code)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-black tabular-nums">{n.phone_number}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                    {n.carrier}
+                    {n.region_name ? ` · ${n.region_name}` : ""}
+                    {n.area_code ? ` · area ${n.area_code}` : ""}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    n.number_type === "business"
+                      ? "bg-[#0F172A]/10 text-[#0F172A]"
+                      : "bg-primary/10 text-primary"
+                  }`}
+                >
+                  {n.number_type}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <CalendarClock className="h-3.5 w-3.5" /> Expires {formatDate(n.expires_at)}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <BadgeCheck className="h-3.5 w-3.5" /> {n.provider}
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xl font-black tabular-nums">{naira(price)}</p>
+                  <p className="text-[10px] text-muted-foreground">{plan} · all inbound SMS &amp; calls</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setPendingId(n.id);
+                    mutation.mutate(n.id);
+                  }}
+                  disabled={mutation.isPending}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
+                >
+                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} Rent
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function MyRentals() {
+  const fetchRentals = useServerFn(listMyRentals);
+  const { data: rentals = [], isLoading } = useQuery({
+    queryKey: ["my-rentals"],
+    queryFn: () => fetchRentals(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    );
+  }
+
+  if (rentals.length === 0) {
+    return (
+      <p className="px-5 py-16 text-center text-sm text-muted-foreground">
+        You have no rented numbers yet. Browse the catalog to rent one.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-2 px-5 py-4">
+      {rentals.map((r) => {
+        const n = r.rental_numbers;
+        return (
+          <li key={r.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+            <div className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-black tabular-nums">{n?.phone_number}</p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {n?.country_name} · {n?.carrier}
+                  {n?.region_name ? ` · ${n.region_name}` : ""}
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                {r.status}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>
+                {r.plan} · renews {formatDate(r.renews_at)}
+              </span>
+              <span className="font-bold text-foreground">{naira(Number(r.amount_paid))}</span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function RentNumber() {
+  const [tab, setTab] = useState<TabId>("browse");
+  const [selected, setSelected] = useState<RentalCountry | null>(null);
+  const [digits, setDigits] = useState("");
+
+  const fetchCountries = useServerFn(listRentalCountries);
+  const { data: countries = [], isLoading } = useQuery({
+    queryKey: ["rental-countries"],
+    queryFn: () => fetchCountries(),
+  });
+
+  const dial = selected?.dial_code ?? "+1";
 
   return (
     <div className="fixed inset-0 z-50 flex h-[100dvh] w-screen flex-col overflow-hidden bg-background text-foreground">
-      {/* Header */}
       <header className="flex shrink-0 items-center gap-3 border-b border-border bg-surface px-4 py-3">
         <Link
           to="/dashboard"
@@ -143,23 +442,30 @@ function RentNumber() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold">Rent &amp; Call</p>
-          <p className="truncate text-[11px] text-muted-foreground">Non-VoIP numbers · Telnyx</p>
+          <h1 className="truncate text-sm font-bold">Rent a Number</h1>
+          <p className="truncate text-[11px] text-muted-foreground">Non-VoIP · long-term rentals</p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#22C55E]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">
           <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" /> Live
         </span>
       </header>
 
-      {/* Body */}
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        {tab === "browse" &&
+          (selected ? (
+            <NumberCatalog country={selected} onBack={() => setSelected(null)} />
+          ) : (
+            <CountryPicker countries={countries} loading={isLoading} onSelect={setSelected} />
+          ))}
+
+        {tab === "numbers" && <MyRentals />}
+
         {tab === "keypad" && (
           <div className="flex min-h-full flex-col px-5 pt-4">
             <div className="flex items-center gap-2">
-              <FlagPicker value={country} onChange={setCountry} />
               <div className="min-w-0 flex-1 rounded-2xl border border-border bg-surface px-4 py-3">
                 <p className="truncate text-2xl font-black tabular-nums">
-                  {country.dial} {digits || <span className="text-muted-foreground">…</span>}
+                  {dial} {digits || <span className="text-muted-foreground">…</span>}
                 </p>
               </div>
               <button
@@ -190,113 +496,12 @@ function RentNumber() {
 
             <button
               onClick={() =>
-                digits
-                  ? toast.success(`Calling ${country.dial} ${digits}…`)
-                  : toast.error("Enter a number first")
+                digits ? toast.success(`Calling ${dial} ${digits}…`) : toast.error("Enter a number first")
               }
-              className="my-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#16C784] py-4 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(22,199,132,0.8)]"
+              className="my-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-bold text-primary-foreground"
             >
               <Phone className="h-4 w-4" /> Call
             </button>
-          </div>
-        )}
-
-        {tab === "calls" && (
-          <ul className="space-y-2 px-5 py-4">
-            {callLog.map((c) => {
-              const Icon =
-                c.dir === "in" ? PhoneIncoming : c.dir === "out" ? PhoneOutgoing : PhoneMissed;
-              return (
-                <li
-                  key={c.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card-elev"
-                >
-                  <span
-                    className={`grid h-10 w-10 place-items-center rounded-2xl ${
-                      c.dir === "missed" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold tabular-nums">{c.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{c.when}</p>
-                  </div>
-                  <span className="text-[11px] font-semibold text-muted-foreground">{c.dur}</span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {tab === "messages" && (
-          <ul className="space-y-2 px-5 py-4">
-            {messages.map((m) => (
-              <li key={m.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-bold">{m.from}</p>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">{m.when}</span>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{m.body}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {tab === "numbers" && (
-          <div className="space-y-4 px-5 py-4">
-            <ul className="space-y-2">
-              {rentedNumbers.map((n) => (
-                <li
-                  key={n.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card-elev"
-                >
-                  <span className="text-2xl leading-none">{n.flag}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold tabular-nums">{n.number}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {n.plan} · renews {n.renews}
-                    </p>
-                  </div>
-                  <span className="text-sm font-black tabular-nums">{naira(n.price)}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Rent a new number
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <FlagPicker value={country} onChange={setCountry} />
-                <span className="text-sm font-semibold">{country.name}</span>
-              </div>
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                {durations.map((d) => (
-                  <button
-                    key={d.label}
-                    onClick={() => setDuration(d)}
-                    className={`rounded-2xl border py-3 text-sm font-bold ${
-                      duration.label === d.label
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background"
-                    }`}
-                  >
-                    {d.label}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-3 text-3xl font-black tabular-nums">{naira(rentTotal)}</p>
-              <p className="text-[11px] text-muted-foreground">
-                Unlimited inbound SMS &amp; calls for the rental period
-              </p>
-              <button
-                onClick={() => toast.success(`Rental confirmed: ${country.name} for ${duration.label}`)}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#16C784] py-3.5 text-sm font-bold text-white"
-              >
-                <Plus className="h-4 w-4" /> Rent Now
-              </button>
-            </div>
           </div>
         )}
 
@@ -306,28 +511,19 @@ function RentNumber() {
               <div className="absolute inset-0 dotted-bg opacity-40" />
               <div className="relative">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
-                  Call credit
+                  Rental billing
                 </p>
-                <p className="mt-2 text-3xl font-black tabular-nums">₦1,240.00</p>
-                <p className="mt-1 text-[11px] text-white/60">≈ 62 mins to 🇺🇸 · 41 mins to 🇬🇧</p>
+                <p className="mt-2 text-3xl font-black">Wallet-funded</p>
+                <p className="mt-1 text-[11px] text-white/60">
+                  Rentals are debited from your Vernex wallet at checkout.
+                </p>
               </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[1000, 2500, 5000].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => toast.success(`${naira(v)} credit top-up started`)}
-                  className="rounded-2xl border border-border bg-surface py-3 text-sm font-bold shadow-card-elev"
-                >
-                  {naira(v)}
-                </button>
-              ))}
             </div>
             <Link
               to="/fund"
-              className="block rounded-2xl bg-[#16C784] py-3.5 text-center text-sm font-bold text-white"
+              className="block rounded-2xl bg-primary py-3.5 text-center text-sm font-bold text-primary-foreground"
             >
-              Fund from wallet
+              Fund wallet
             </Link>
           </div>
         )}
@@ -354,12 +550,8 @@ function RentNumber() {
         )}
       </main>
 
-      {/* Sub navigation */}
-      <nav
-        aria-label="Rent and call sections"
-        className="shrink-0 border-t border-border bg-surface pb-6 pt-2"
-      >
-        <ul className="grid grid-cols-6 px-1">
+      <nav aria-label="Rent sections" className="shrink-0 border-t border-border bg-surface pb-6 pt-2">
+        <ul className="grid grid-cols-5 px-1">
           {tabs.map((t) => {
             const active = t.id === tab;
             const Icon = t.icon;
