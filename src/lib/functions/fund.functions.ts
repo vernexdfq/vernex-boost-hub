@@ -3,9 +3,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type WalletFundingDetails = {
   bankName: string;
-  accountNumber: string;
+  accountNumber: string | null;
   accountName: string;
   reference: string;
+  pending: boolean;
 };
 
 export const getWalletFundingDetails = createServerFn({ method: "GET" })
@@ -21,13 +22,9 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
 
     if (error) throw new Error(`Failed to load wallet details: ${error.message}`);
 
-    const bankName = wallet?.virtual_bank_name ?? "Paga MFB";
-    const accountNumber = wallet?.virtual_account_number ?? generateVirtualAccountNumber();
-    const reference = wallet?.virtual_account_reference ?? "VNX-" + userId.slice(0, 8).toUpperCase();
-
     const { data: profile } = await supabase
       .from("profiles")
-      .select("full_name")
+      .select("full_name, email, phone")
       .eq("id", userId)
       .maybeSingle();
 
@@ -35,9 +32,25 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       ? `VERNEX / ${profile.full_name.toUpperCase()}`
       : "VERNEX / CUSTOMER";
 
-    return { bankName, accountNumber, accountName, reference };
-  });
+    let accountNumber = wallet?.virtual_account_number ?? null;
+    let bankName = wallet?.virtual_bank_name ?? "Wema Bank";
+    let reference = wallet?.virtual_account_reference ?? `VNX-${userId.slice(0, 8).toUpperCase()}`;
 
-function generateVirtualAccountNumber(): string {
-  return "81" + Math.floor(10000000 + Math.random() * 89999999).toString();
-}
+    // Backfill for accounts created before Flutterwave was connected.
+    if (!accountNumber && profile?.email) {
+      const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
+      const provisioned = await provisionVirtualAccount({
+        userId,
+        email: profile.email,
+        fullName: profile.full_name ?? "Vernex Customer",
+        phone: profile.phone ?? null,
+      });
+      if (provisioned) {
+        accountNumber = provisioned.accountNumber;
+        bankName = provisioned.bankName;
+        reference = provisioned.reference;
+      }
+    }
+
+    return { bankName, accountNumber, accountName, reference, pending: !accountNumber };
+  });

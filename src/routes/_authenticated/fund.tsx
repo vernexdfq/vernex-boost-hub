@@ -56,6 +56,11 @@ function FundPage() {
             <div className="relative mt-8 flex items-center justify-center py-8">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             </div>
+          ) : account?.pending ? (
+            <p className="relative mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80">
+              We're setting up your dedicated account number. Refresh in a moment — it stays yours
+              permanently once ready.
+            </p>
           ) : (
             <dl className="relative mt-4 space-y-3">
               <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
