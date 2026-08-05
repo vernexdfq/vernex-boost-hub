@@ -489,6 +489,7 @@ function SignUpScreen(props: {
 }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -498,9 +499,12 @@ function SignUpScreen(props: {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const usernameOk = /^[a-zA-Z0-9_]{3,20}$/.test(username.trim());
+
   const valid =
     nameSchema.safeParse(firstName).success &&
     nameSchema.safeParse(lastName).success &&
+    usernameOk &&
     isValidPhone(phone) &&
     isValidEmail(email) &&
     passwordSchema.safeParse(password).success &&
@@ -516,6 +520,7 @@ function SignUpScreen(props: {
       const payload = {
         firstName,
         lastName,
+        username: username.trim(),
         phone,
         email,
         password,
