@@ -101,13 +101,12 @@ function AuthPage() {
   const [tab, setTab] = useState<SignInTab>("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | null>(null);
 
-  const continueEnabled = tab === "phone" ? isValidPhone(phone) : isValidEmail(email) && password.length >= 8;
+  const identifier = tab === "phone" ? phone : email.trim();
+  const continueEnabled = tab === "phone" ? isValidPhone(phone) : isValidEmail(email);
 
   async function handleContinue(e: React.FormEvent) {
     e.preventDefault();
@@ -115,23 +114,18 @@ function AuthPage() {
     setFieldError(null);
     setBusy(true);
     try {
-      if (tab === "phone") {
-        const { exists } = await checkPhoneRegistered({ data: { phone } });
-        if (!exists) {
-          setFieldError("We couldn't find an account with that number.");
-          return;
-        }
-        setPin("");
-        setPinError(null);
-        setScreen("pin");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: emailSchema.parse(email),
-          password,
-        });
-        if (error) throw error;
-        toast.success("Signed in");
+      const { exists } = await checkIdentifierRegistered({ data: { identifier } });
+      if (!exists) {
+        setFieldError(
+          tab === "phone"
+            ? "We couldn't find an account with that number."
+            : "We couldn't find an account with that email.",
+        );
+        return;
       }
+      setPin("");
+      setPinError(null);
+      setScreen("pin");
     } catch (err) {
       setFieldError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -144,7 +138,7 @@ function AuthPage() {
     setBusy(true);
     setPinError(null);
     try {
-      const ticket = await signInWithPhonePin({ data: { phone, pin: value } });
+      const ticket = await signInWithPin({ data: { identifier, pin: value } });
       const { error } = await supabase.auth.verifyOtp({
         email: ticket.email,
         token: ticket.token,
@@ -159,6 +153,7 @@ function AuthPage() {
       setBusy(false);
     }
   }
+
 
   function pressKey(key: string) {
     if (busy) return;
