@@ -287,10 +287,7 @@ function SignInScreen(props: {
   setPhone: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
-  password: string;
-  setPassword: (v: string) => void;
-  showPassword: boolean;
-  toggleShowPassword: () => void;
+  busy: boolean;
   busy: boolean;
   enabled: boolean;
   error: string | null;
