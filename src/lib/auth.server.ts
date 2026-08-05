@@ -12,6 +12,7 @@
 export type RegisterInput = {
   firstName: string;
   lastName: string;
+  username: string;
   phone: string;
   email: string;
   password: string;
@@ -21,6 +22,11 @@ export type RegisterInput = {
 
 export type PhonePinInput = {
   phone: string;
+  pin: string;
+};
+
+export type IdentifierPinInput = {
+  identifier: string;
   pin: string;
 };
 
