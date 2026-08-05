@@ -18,8 +18,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  checkPhoneRegistered,
-  signInWithPhonePin,
+  checkIdentifierRegistered,
+  signInWithPin,
   signUpWithPin,
 } from "@/lib/functions/auth.functions";
 
