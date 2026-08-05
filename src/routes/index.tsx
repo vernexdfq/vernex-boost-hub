@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { VernexMark } from "@/components/brand";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,7 +65,7 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl brand-gradient text-sm font-black text-white">V</span>
+            <VernexMark className="h-9 w-9" />
             <span className="text-lg font-black tracking-tight">Vernex</span>
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
