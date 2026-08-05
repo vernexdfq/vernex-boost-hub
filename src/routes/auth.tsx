@@ -288,7 +288,6 @@ function SignInScreen(props: {
   email: string;
   setEmail: (v: string) => void;
   busy: boolean;
-  busy: boolean;
   enabled: boolean;
   error: string | null;
   onSubmit: (e: React.FormEvent) => void;
