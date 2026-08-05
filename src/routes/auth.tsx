@@ -333,39 +333,18 @@ function SignInScreen(props: {
             />
           </Field>
         ) : (
-          <>
-            <Field icon={Mail} label="Email address">
-              <input
-                value={props.email}
-                onChange={(e) => props.setEmail(e.target.value)}
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                maxLength={255}
-                placeholder="you@example.com"
-                className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-              />
-            </Field>
-            <Field icon={Lock} label="Password">
-              <input
-                value={props.password}
-                onChange={(e) => props.setPassword(e.target.value)}
-                type={props.showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                maxLength={72}
-                placeholder="••••••••"
-                className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-              />
-              <button
-                type="button"
-                onClick={props.toggleShowPassword}
-                aria-label={props.showPassword ? "Hide password" : "Show password"}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {props.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </Field>
-          </>
+          <Field icon={Mail} label="Email address">
+            <input
+              value={props.email}
+              onChange={(e) => props.setEmail(e.target.value)}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              maxLength={255}
+              placeholder="you@example.com"
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+            />
+          </Field>
         )}
 
         {props.error && (
