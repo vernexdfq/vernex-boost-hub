@@ -135,6 +135,20 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
     throw new Error("We could not finish setting up your account. Please try again.");
   }
 
+  // Provision a permanent Flutterwave virtual account for wallet funding.
+  // Best-effort: signup must never fail because the provider is unreachable.
+  try {
+    const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
+    await provisionVirtualAccount({
+      userId: created.user.id,
+      email,
+      fullName,
+      phone,
+    });
+  } catch (error) {
+    console.error("[Vernex] virtual account provisioning failed at signup", error);
+  }
+
   return { email };
 }
 
