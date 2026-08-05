@@ -18,8 +18,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  checkPhoneRegistered,
-  signInWithPhonePin,
+  checkIdentifierRegistered,
+  signInWithPin,
   signUpWithPin,
 } from "@/lib/functions/auth.functions";
 
@@ -101,13 +101,12 @@ function AuthPage() {
   const [tab, setTab] = useState<SignInTab>("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | null>(null);
 
-  const continueEnabled = tab === "phone" ? isValidPhone(phone) : isValidEmail(email) && password.length >= 8;
+  const identifier = tab === "phone" ? phone : email.trim();
+  const continueEnabled = tab === "phone" ? isValidPhone(phone) : isValidEmail(email);
 
   async function handleContinue(e: React.FormEvent) {
     e.preventDefault();
@@ -115,23 +114,18 @@ function AuthPage() {
     setFieldError(null);
     setBusy(true);
     try {
-      if (tab === "phone") {
-        const { exists } = await checkPhoneRegistered({ data: { phone } });
-        if (!exists) {
-          setFieldError("We couldn't find an account with that number.");
-          return;
-        }
-        setPin("");
-        setPinError(null);
-        setScreen("pin");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: emailSchema.parse(email),
-          password,
-        });
-        if (error) throw error;
-        toast.success("Signed in");
+      const { exists } = await checkIdentifierRegistered({ data: { identifier } });
+      if (!exists) {
+        setFieldError(
+          tab === "phone"
+            ? "We couldn't find an account with that number."
+            : "We couldn't find an account with that email.",
+        );
+        return;
       }
+      setPin("");
+      setPinError(null);
+      setScreen("pin");
     } catch (err) {
       setFieldError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -144,7 +138,7 @@ function AuthPage() {
     setBusy(true);
     setPinError(null);
     try {
-      const ticket = await signInWithPhonePin({ data: { phone, pin: value } });
+      const ticket = await signInWithPin({ data: { identifier, pin: value } });
       const { error } = await supabase.auth.verifyOtp({
         email: ticket.email,
         token: ticket.token,
@@ -159,6 +153,7 @@ function AuthPage() {
       setBusy(false);
     }
   }
+
 
   function pressKey(key: string) {
     if (busy) return;
@@ -216,10 +211,6 @@ function AuthPage() {
                 setEmail(v);
                 setFieldError(null);
               }}
-              password={password}
-              setPassword={setPassword}
-              showPassword={showPassword}
-              toggleShowPassword={() => setShowPassword((s) => !s)}
               busy={busy}
               enabled={continueEnabled}
               error={fieldError}
@@ -233,7 +224,7 @@ function AuthPage() {
 
           {screen === "pin" && (
             <PinScreen
-              phone={formatPhone(phone) || phone}
+              identifier={tab === "phone" ? formatPhone(phone) || phone : email.trim()}
               pin={pin}
               busy={busy}
               error={pinError}
@@ -269,7 +260,7 @@ function BrandHeading({ screen }: { screen: Screen }) {
     screen === "signup"
       ? { title: "Create your account 🚀", sub: "Fill in your details below to get started for free" }
       : screen === "pin"
-        ? { title: "Enter your PIN 🔐", sub: "Authorise your login with your 4-digit Vernex PIN" }
+        ? { title: "Enter your PIN 🔒", sub: "Authorise your login with your 4-digit Vernex PIN" }
         : { title: "Welcome back 👋", sub: "Sign in to your Vernex account" };
 
   return (
@@ -296,10 +287,6 @@ function SignInScreen(props: {
   setPhone: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
-  password: string;
-  setPassword: (v: string) => void;
-  showPassword: boolean;
-  toggleShowPassword: () => void;
   busy: boolean;
   enabled: boolean;
   error: string | null;
@@ -346,39 +333,18 @@ function SignInScreen(props: {
             />
           </Field>
         ) : (
-          <>
-            <Field icon={Mail} label="Email address">
-              <input
-                value={props.email}
-                onChange={(e) => props.setEmail(e.target.value)}
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                maxLength={255}
-                placeholder="you@example.com"
-                className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-              />
-            </Field>
-            <Field icon={Lock} label="Password">
-              <input
-                value={props.password}
-                onChange={(e) => props.setPassword(e.target.value)}
-                type={props.showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                maxLength={72}
-                placeholder="••••••••"
-                className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-              />
-              <button
-                type="button"
-                onClick={props.toggleShowPassword}
-                aria-label={props.showPassword ? "Hide password" : "Show password"}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {props.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </Field>
-          </>
+          <Field icon={Mail} label="Email address">
+            <input
+              value={props.email}
+              onChange={(e) => props.setEmail(e.target.value)}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              maxLength={255}
+              placeholder="you@example.com"
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+            />
+          </Field>
         )}
 
         {props.error && (
@@ -420,7 +386,7 @@ function SignInScreen(props: {
 /* ------------------------------------------------------------------ */
 
 function PinScreen(props: {
-  phone: string;
+  identifier: string;
   pin: string;
   busy: boolean;
   error: string | null;
@@ -432,8 +398,9 @@ function PinScreen(props: {
   return (
     <div className="mt-8 flex flex-col items-center">
       <p className="text-sm text-muted-foreground">
-        Signing in as <span className="font-semibold text-foreground">{props.phone}</span>
+        Signing in as <span className="font-semibold text-foreground">{props.identifier}</span>
       </p>
+
 
       <div className="mt-7 flex items-center gap-4" aria-label="PIN entry">
         {[0, 1, 2, 3].map((i) => {
@@ -483,18 +450,29 @@ function PinScreen(props: {
           onClick={props.onChangeNumber}
           className="font-semibold text-muted-foreground hover:text-foreground"
         >
-          Change number
+          Change number / email
         </button>
         <button
           type="button"
-          onClick={() =>
-            toast.info("Reset your PIN by signing in with your email address, then update it in Profile.")
-          }
-          className="font-semibold text-primary underline-offset-4 hover:underline"
+          disabled={props.busy}
+          onClick={async () => {
+            const email = props.identifier.includes("@") ? props.identifier : null;
+            if (!email) {
+              toast.info("Go back and continue with your email address to reset your PIN.");
+              return;
+            }
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/auth`,
+            });
+            if (error) toast.error(error.message);
+            else toast.success(`We sent PIN recovery instructions to ${email}`);
+          }}
+          className="font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-50"
         >
           Forgot PIN?
         </button>
       </div>
+
     </div>
   );
 }
@@ -511,6 +489,7 @@ function SignUpScreen(props: {
 }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -520,9 +499,12 @@ function SignUpScreen(props: {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const usernameOk = /^[a-zA-Z0-9_]{3,20}$/.test(username.trim());
+
   const valid =
     nameSchema.safeParse(firstName).success &&
     nameSchema.safeParse(lastName).success &&
+    usernameOk &&
     isValidPhone(phone) &&
     isValidEmail(email) &&
     passwordSchema.safeParse(password).success &&
@@ -538,6 +520,7 @@ function SignUpScreen(props: {
       const payload = {
         firstName,
         lastName,
+        username: username.trim(),
         phone,
         email,
         password,
@@ -588,6 +571,21 @@ function SignUpScreen(props: {
           />
         </Field>
       </div>
+
+      <Field
+        icon={UserIcon}
+        label="Username"
+        hint="3-20 characters — letters, numbers and underscores"
+      >
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20))}
+          autoComplete="username"
+          maxLength={20}
+          placeholder="dennyokoro"
+          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+        />
+      </Field>
 
       <Field icon={Phone} label="Phone number">
         <input

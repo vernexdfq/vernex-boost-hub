@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
+  identifierExists,
+  issueIdentifierPinTicket,
   issuePhonePinTicket,
   phoneExists,
   registerAccount,
@@ -16,9 +18,23 @@ const phoneSchema = z
 
 const pinSchema = z.string().regex(/^\d{4}$/, "Your PIN must be exactly 4 digits");
 
+const identifierSchema = z
+  .string()
+  .trim()
+  .min(5, "Enter your phone number or email")
+  .max(255, "Enter your phone number or email");
+
+const usernameSchema = z
+  .string()
+  .trim()
+  .min(3, "Username must be at least 3 characters")
+  .max(20, "Username must be 20 characters or less")
+  .regex(/^[a-zA-Z0-9_]+$/, "Use letters, numbers and underscores only");
+
 const registerSchema = z.object({
   firstName: z.string().trim().min(2, "Enter your first name").max(40),
   lastName: z.string().trim().min(2, "Enter your last name").max(40),
+  username: usernameSchema,
   phone: phoneSchema,
   email: z.string().trim().email("Enter a valid email address").max(255),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
@@ -27,6 +43,7 @@ const registerSchema = z.object({
 });
 
 const phonePinSchema = z.object({ phone: phoneSchema, pin: pinSchema });
+const identifierPinSchema = z.object({ identifier: identifierSchema, pin: pinSchema });
 
 export const signUpWithPin = createServerFn({ method: "POST" })
   .inputValidator((data) => registerSchema.parse(data))
@@ -38,6 +55,16 @@ export const checkPhoneRegistered = createServerFn({ method: "POST" })
     exists: await phoneExists(data.phone),
   }));
 
+export const checkIdentifierRegistered = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ identifier: identifierSchema }).parse(data))
+  .handler(async ({ data }): Promise<{ exists: boolean }> => ({
+    exists: await identifierExists(data.identifier),
+  }));
+
 export const signInWithPhonePin = createServerFn({ method: "POST" })
   .inputValidator((data) => phonePinSchema.parse(data))
   .handler(async ({ data }): Promise<PhoneLoginTicket> => issuePhonePinTicket(data));
+
+export const signInWithPin = createServerFn({ method: "POST" })
+  .inputValidator((data) => identifierPinSchema.parse(data))
+  .handler(async ({ data }): Promise<PhoneLoginTicket> => issueIdentifierPinTicket(data));
