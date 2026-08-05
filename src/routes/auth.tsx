@@ -386,7 +386,7 @@ function SignInScreen(props: {
 /* ------------------------------------------------------------------ */
 
 function PinScreen(props: {
-  phone: string;
+  identifier: string;
   pin: string;
   busy: boolean;
   error: string | null;
@@ -398,8 +398,9 @@ function PinScreen(props: {
   return (
     <div className="mt-8 flex flex-col items-center">
       <p className="text-sm text-muted-foreground">
-        Signing in as <span className="font-semibold text-foreground">{props.phone}</span>
+        Signing in as <span className="font-semibold text-foreground">{props.identifier}</span>
       </p>
+
 
       <div className="mt-7 flex items-center gap-4" aria-label="PIN entry">
         {[0, 1, 2, 3].map((i) => {
