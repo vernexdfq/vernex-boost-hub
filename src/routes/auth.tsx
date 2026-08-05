@@ -572,6 +572,21 @@ function SignUpScreen(props: {
         </Field>
       </div>
 
+      <Field
+        icon={UserIcon}
+        label="Username"
+        hint="3-20 characters — letters, numbers and underscores"
+      >
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20))}
+          autoComplete="username"
+          maxLength={20}
+          placeholder="dennyokoro"
+          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+        />
+      </Field>
+
       <Field icon={Phone} label="Phone number">
         <input
           value={phone}
