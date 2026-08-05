@@ -216,3 +216,55 @@ export async function phoneExists(rawPhone: string): Promise<boolean> {
   if (error) throw new Error("We could not verify that phone number. Try again.");
   return Boolean(data);
 }
+
+function looksLikeEmail(value: string) {
+  return value.includes("@");
+}
+
+/** Confirms a phone number OR email address belongs to a Vernex account. */
+export async function identifierExists(rawIdentifier: string): Promise<boolean> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const raw = rawIdentifier.trim();
+
+  const query = supabaseAdmin.from("profiles").select("id");
+  const { data, error } = looksLikeEmail(raw)
+    ? await query.ilike("email", raw.toLowerCase()).maybeSingle()
+    : await query.eq("phone", normalizePhone(raw)).maybeSingle();
+
+  if (error) throw new Error("We could not verify those details. Try again.");
+  return Boolean(data);
+}
+
+/**
+ * Validates a phone/email + PIN pair and returns a single-use email OTP the
+ * browser exchanges for a session via `supabase.auth.verifyOtp`.
+ */
+export async function issueIdentifierPinTicket(
+  input: IdentifierPinInput,
+): Promise<PhoneLoginTicket> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const raw = input.identifier.trim();
+  const generic = "Incorrect details or PIN";
+
+  const query = supabaseAdmin.from("profiles").select("id, email, pin_hash, pin_set");
+  const { data: profile, error } = looksLikeEmail(raw)
+    ? await query.ilike("email", raw.toLowerCase()).maybeSingle()
+    : await query.eq("phone", normalizePhone(raw)).maybeSingle();
+
+  if (error) throw new Error("We could not sign you in. Please try again.");
+  if (!profile || !profile.email) throw new Error(generic);
+
+  const ok = await verifyPin(input.pin, profile.pin_hash);
+  if (!ok) throw new Error(generic);
+
+  const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    type: "magiclink",
+    email: profile.email,
+  });
+
+  const token = link?.properties?.email_otp;
+  if (linkError || !token) throw new Error("We could not start your session. Please try again.");
+
+  return { email: profile.email, token };
+}
+
