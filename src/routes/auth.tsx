@@ -260,7 +260,7 @@ function BrandHeading({ screen }: { screen: Screen }) {
     screen === "signup"
       ? { title: "Create your account 🚀", sub: "Fill in your details below to get started for free" }
       : screen === "pin"
-        ? { title: "Enter your PIN 🔐", sub: "Authorise your login with your 4-digit Vernex PIN" }
+        ? { title: "Enter your PIN 🔒", sub: "Authorise your login with your 4-digit Vernex PIN" }
         : { title: "Welcome back 👋", sub: "Sign in to your Vernex account" };
 
   return (
