@@ -22,6 +22,7 @@ import {
   signInWithPin,
   signUpWithPin,
 } from "@/lib/functions/auth.functions";
+import { VernexMark } from "@/components/brand";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -265,9 +266,7 @@ function BrandHeading({ screen }: { screen: Screen }) {
 
   return (
     <div className="mt-8 flex items-start gap-3">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl brand-gradient text-base font-black text-primary-foreground">
-        V
-      </span>
+      <VernexMark className="h-11 w-11 shrink-0" />
       <div>
         <h1 className="font-display text-xl font-black tracking-tight">{copy.title}</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">{copy.sub}</p>
