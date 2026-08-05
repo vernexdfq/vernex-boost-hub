@@ -27,29 +27,27 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseClient() {
-  // Support both standard ANON_KEY and newer PUBLISHABLE_KEY names for compatibility
-  // with Cloudflare Pages / local .env setups.
+  // Vite injects VITE_* vars at build time via import.meta.env
+  // Support both PUBLISHABLE_KEY (newer) and ANON_KEY (classic) names
   const SUPABASE_URL =
-    import.meta.env['VITE_SUPABASE_URL'] ||
-    process.env['VITE_SUPABASE_URL'] ||
-    process.env['SUPABASE_URL'];
+    (import.meta.env.VITE_SUPABASE_URL as string | undefined) ||
+    (typeof process !== 'undefined' ? process.env?.SUPABASE_URL : undefined);
 
   const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ||
-    import.meta.env['VITE_SUPABASE_ANON_KEY'] ||
-    process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ||
-    process.env['VITE_SUPABASE_ANON_KEY'] ||
-    process.env['SUPABASE_PUBLISHABLE_KEY'] ||
-    process.env['SUPABASE_ANON_KEY'];
+    (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
+    (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ||
+    (typeof process !== 'undefined'
+      ? process.env?.SUPABASE_PUBLISHABLE_KEY || process.env?.SUPABASE_ANON_KEY
+      : undefined);
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
-      ...(!SUPABASE_URL ? ['VITE_SUPABASE_URL / SUPABASE_URL'] : []),
+      ...(!SUPABASE_URL ? ['VITE_SUPABASE_URL'] : []),
       ...(!SUPABASE_PUBLISHABLE_KEY
         ? ['VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY']
         : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Set them in your environment (e.g. Cloudflare Pages / .env).`;
+    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Set them in Cloudflare Pages environment variables.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
