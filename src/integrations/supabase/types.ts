@@ -322,6 +322,7 @@ export type Database = {
           pin_set: boolean
           tier: Database["public"]["Enums"]["user_tier"]
           updated_at: string
+          username: string | null
         }
         Insert: {
           bvn_status?: Database["public"]["Enums"]["kyc_status"]
@@ -335,6 +336,7 @@ export type Database = {
           pin_set?: boolean
           tier?: Database["public"]["Enums"]["user_tier"]
           updated_at?: string
+          username?: string | null
         }
         Update: {
           bvn_status?: Database["public"]["Enums"]["kyc_status"]
@@ -348,6 +350,7 @@ export type Database = {
           pin_set?: boolean
           tier?: Database["public"]["Enums"]["user_tier"]
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
