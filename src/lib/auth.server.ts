@@ -89,6 +89,7 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
 
   const phone = normalizePhone(input.phone);
   const email = input.email.trim().toLowerCase();
+  const username = input.username.trim().toLowerCase();
   const fullName = `${input.firstName.trim()} ${input.lastName.trim()}`.replace(/\s+/g, " ");
 
   const { data: existingPhone, error: lookupError } = await supabaseAdmin
@@ -100,6 +101,15 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
   if (lookupError) throw new Error("We could not verify that phone number. Try again.");
   if (existingPhone) throw new Error("That phone number is already registered. Sign in instead.");
 
+  const { data: existingUsername, error: usernameError } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .ilike("username", username)
+    .maybeSingle();
+
+  if (usernameError) throw new Error("We could not verify that username. Try again.");
+  if (existingUsername) throw new Error("That username is taken. Try another one.");
+
   const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password: input.password,
@@ -109,6 +119,7 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
       full_name: fullName,
       first_name: input.firstName.trim(),
       last_name: input.lastName.trim(),
+      username,
       phone,
       referral_code: input.referralCode?.trim() || null,
     },
@@ -128,6 +139,7 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
     .from("profiles")
     .update({
       full_name: fullName,
+      username,
       phone,
       email,
       pin_hash: pinHash,
