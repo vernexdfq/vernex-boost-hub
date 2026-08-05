@@ -450,18 +450,29 @@ function PinScreen(props: {
           onClick={props.onChangeNumber}
           className="font-semibold text-muted-foreground hover:text-foreground"
         >
-          Change number
+          Change number / email
         </button>
         <button
           type="button"
-          onClick={() =>
-            toast.info("Reset your PIN by signing in with your email address, then update it in Profile.")
-          }
-          className="font-semibold text-primary underline-offset-4 hover:underline"
+          disabled={props.busy}
+          onClick={async () => {
+            const email = props.identifier.includes("@") ? props.identifier : null;
+            if (!email) {
+              toast.info("Go back and continue with your email address to reset your PIN.");
+              return;
+            }
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/auth`,
+            });
+            if (error) toast.error(error.message);
+            else toast.success(`We sent PIN recovery instructions to ${email}`);
+          }}
+          className="font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-50"
         >
           Forgot PIN?
         </button>
       </div>
+
     </div>
   );
 }
