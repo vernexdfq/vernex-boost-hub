@@ -27,34 +27,31 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseClient() {
-  // Vite injects VITE_* vars at build time via import.meta.env
-  // Support both PUBLISHABLE_KEY (newer) and ANON_KEY (classic) names
+  // Cloudflare Pages currently has VITE_SUPABASE_ANON_KEY + VITE_SUPABASE_URL
+  // Also support PUBLISHABLE_KEY for local .env / future renames
   const SUPABASE_URL =
-    (import.meta.env.VITE_SUPABASE_URL as string | undefined) ||
-    (typeof process !== 'undefined' ? process.env?.SUPABASE_URL : undefined);
+    import.meta.env.VITE_SUPABASE_URL ||
+    import.meta.env['VITE_SUPABASE_URL'];
 
-  const SUPABASE_PUBLISHABLE_KEY =
-    (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
-    (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ||
-    (typeof process !== 'undefined'
-      ? process.env?.SUPABASE_PUBLISHABLE_KEY || process.env?.SUPABASE_ANON_KEY
-      : undefined);
+  const SUPABASE_KEY =
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env['VITE_SUPABASE_ANON_KEY'] ||
+    import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
     const missing = [
       ...(!SUPABASE_URL ? ['VITE_SUPABASE_URL'] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY
-        ? ['VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY']
-        : []),
+      ...(!SUPABASE_KEY ? ['VITE_SUPABASE_ANON_KEY'] : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Set them in Cloudflare Pages environment variables.`;
+    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Set them in Cloudflare Pages → Settings → Environment variables.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
     global: {
-      fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
+      fetch: createSupabaseFetch(SUPABASE_KEY),
     },
     auth: {
       storage: typeof window !== 'undefined' ? localStorage : undefined,
