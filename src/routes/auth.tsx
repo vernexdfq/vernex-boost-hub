@@ -211,10 +211,6 @@ function AuthPage() {
                 setEmail(v);
                 setFieldError(null);
               }}
-              password={password}
-              setPassword={setPassword}
-              showPassword={showPassword}
-              toggleShowPassword={() => setShowPassword((s) => !s)}
               busy={busy}
               enabled={continueEnabled}
               error={fieldError}
@@ -228,7 +224,7 @@ function AuthPage() {
 
           {screen === "pin" && (
             <PinScreen
-              phone={formatPhone(phone) || phone}
+              identifier={tab === "phone" ? formatPhone(phone) || phone : email.trim()}
               pin={pin}
               busy={busy}
               error={pinError}
