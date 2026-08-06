@@ -64,7 +64,57 @@ const flags: Record<string, string> = {
   GB: "🇬🇧",
   NG: "🇳🇬",
   RU: "🇷🇺",
+  CA: "🇨🇦",
+  UK: "🇬🇧",
 };
+
+/** Preferred display order matching commercial panel layout */
+const SERVER_ORDER = [
+  "US-S1",
+  "US-S2",
+  "US-S3",
+  "US-S4",
+  "US-S5",
+  "ALL-S1",
+  "ALL-S2",
+  "ALL-S3",
+  "ALL-S4",
+  "ALL-S5",
+];
+
+function formatServerLabel(countryCode: string, countryName: string, serverId: string): string {
+  const sid = String(serverId).toUpperCase().replace(/^SERVER[-_]?/i, "S");
+  const slot = sid.startsWith("S") ? sid : `S${sid}`;
+  const isUs =
+    countryCode === "US" ||
+    /united states|usa/i.test(countryName) ||
+    /^usa/i.test(String(serverId));
+  if (isUs) return `USA (${slot})`;
+  if (/all|global|world/i.test(countryName) || /all|global/i.test(String(serverId))) {
+    return `All Countries (${slot})`;
+  }
+  const short =
+    countryName === "United States"
+      ? "USA"
+      : countryName.length > 14
+        ? countryCode
+        : countryName;
+  return `${short} (${slot})`;
+}
+
+function serverSortKey(countryCode: string, countryName: string, serverId: string): string {
+  const sid = String(serverId).toUpperCase().replace(/^SERVER[-_]?/i, "S");
+  const slot = sid.startsWith("S") ? sid : `S${sid}`;
+  const isUs =
+    countryCode === "US" ||
+    /united states|usa/i.test(countryName) ||
+    /^usa/i.test(String(serverId));
+  if (isUs) return `US-${slot}`;
+  if (/all|global|world/i.test(countryName) || /all|global/i.test(String(serverId))) {
+    return `ALL-${slot}`;
+  }
+  return `${countryCode}-${slot}`;
+}
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -127,13 +177,27 @@ function VirtualNumbers() {
       list.push(p);
       map.set(key, list);
     }
-    return Array.from(map.entries()).map(([key, list]) => ({
-      key,
-      label: `${list[0].country_name === "United States" ? "USA" : list[0].country_name} (${list[0].server_id})`,
-      flag: flags[list[0].country_code] ?? "🌐",
-      provider: list[0].provider,
-      items: list,
-    }));
+    const list = Array.from(map.entries()).map(([key, items]) => {
+      const first = items[0];
+      const sortKey = serverSortKey(first.country_code, first.country_name, first.server_id);
+      return {
+        key,
+        sortKey,
+        label: formatServerLabel(first.country_code, first.country_name, first.server_id),
+        flag: flags[first.country_code] ?? "🌐",
+        provider: first.provider,
+        items,
+      };
+    });
+    list.sort((a, b) => {
+      const ai = SERVER_ORDER.indexOf(a.sortKey);
+      const bi = SERVER_ORDER.indexOf(b.sortKey);
+      if (ai === -1 && bi === -1) return a.label.localeCompare(b.label);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+    return list;
   }, [products]);
 
   useEffect(() => {
@@ -144,13 +208,17 @@ function VirtualNumbers() {
   const services = activeServer?.items ?? [];
 
   useEffect(() => {
-    if (services.length > 0 && !services.some((s) => s.id === serviceId)) {
-      setServiceId(services[0].id);
+    if (services.length === 0) return;
+    // Prefer WhatsApp as default when available
+    const wa = services.find((s) => /whatsapp/i.test(s.service_name));
+    if (!serviceId || !services.some((s) => s.id === serviceId)) {
+      setServiceId(wa?.id ?? services[0].id);
     }
   }, [services, serviceId]);
 
   const selected = services.find((s) => s.id === serviceId) ?? null;
-  const totalStock = services.reduce((sum, s) => sum + s.stock_count, 0);
+  const totalStock = services.reduce((sum, s) => sum + (s.stock_count > 0 ? s.stock_count : 0), 0);
+  const serviceCount = services.length;
 
   const filteredServices = useMemo(
     () => services.filter((s) => s.service_name.toLowerCase().includes(query.toLowerCase())),
@@ -171,16 +239,16 @@ function VirtualNumbers() {
       await navigator.clipboard.writeText(value);
       setCopied(key);
       toast.success(`${label} copied`);
-      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1400);
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
     } catch {
-      toast.error("Copy failed");
+      toast.error("Could not copy");
     }
   }
 
   async function handleOrder() {
-    if (!selected || busy) return;
+    if (!selected) return;
     if (selected.stock_count <= 0) {
-      toast.error("This service is out of stock");
+      toast.error("This service is out of stock on the selected server");
       return;
     }
     if (balance < selected.selling_price_ngn) {
@@ -192,11 +260,10 @@ function VirtualNumbers() {
       await orderNumber({
         data: { productId: selected.id, amount: selected.selling_price_ngn },
       });
-      toast.success(`${selected.service_name} number reserved`);
+      toast.success("Number ordered — waiting for OTP");
       queryClient.invalidateQueries({ queryKey: ["number-orders", user.id] });
       queryClient.invalidateQueries({ queryKey: ["number-products"] });
       queryClient.invalidateQueries({ queryKey: ["account", user.id] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Order failed");
     } finally {
@@ -206,48 +273,51 @@ function VirtualNumbers() {
 
   return (
     <AppShell>
-      {/* Top bar */}
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+      {/* Top bar — Back · Title · Balance · Bell */}
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
         <Link
           to="/dashboard"
           aria-label="Back"
-          className="inline-flex items-center gap-1 text-sm font-bold text-primary"
+          className="inline-flex shrink-0 items-center gap-0.5 text-sm font-bold text-primary"
         >
           <ChevronLeft className="h-5 w-5" />
-          Back
+          <span className="hidden xs:inline">Back</span>
         </Link>
-        <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold">Virtual Numbers</h1>
-        <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-black tabular-nums text-primary">
+        <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold tracking-tight">
+          Virtual Numbers
+        </h1>
+        <span className="shrink-0 rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-emerald-600">
           {naira(Math.round(balance))}
         </span>
         <Link
           to="/alerts"
           aria-label="Notifications"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border bg-surface"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-surface"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4 text-foreground/80" />
         </Link>
       </header>
 
+      {/* Intro */}
       <div className="px-5 pt-5">
-        <h2 className="text-2xl font-black tracking-tight">Virtual Numbers</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h2 className="text-[22px] font-black tracking-tight text-foreground">Virtual Numbers</h2>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
           Buy a temporary phone number to receive OTP codes
         </p>
       </div>
 
-      {/* Server selection */}
+      {/* Server selection — 2-column pills */}
       <div className="px-5 pt-4">
         {productsLoading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-12" />
+          <div className="grid grid-cols-2 gap-2.5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-11 rounded-2xl" />
             ))}
           </div>
         ) : productsError ? (
           <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-center">
             <AlertCircle className="mx-auto h-5 w-5 text-destructive" />
-            <p className="mt-2 text-sm font-semibold">Couldn't load servers</p>
+            <p className="mt-2 text-sm font-semibold">Couldn&apos;t load servers</p>
             <button
               onClick={() => refetchProducts()}
               className="mt-2 rounded-lg brand-gradient px-3 py-1.5 text-[11px] font-bold text-white"
@@ -255,24 +325,30 @@ function VirtualNumbers() {
               Retry
             </button>
           </div>
+        ) : servers.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-surface p-4 text-center text-sm text-muted-foreground">
+            No servers available right now. Please check back shortly.
+          </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {servers.map((s) => {
               const active = s.key === serverKey;
               return (
                 <button
                   key={s.key}
+                  type="button"
                   onClick={() => {
                     setServerKey(s.key);
                     setQuery("");
+                    setPickerOpen(false);
                   }}
-                  className={`rounded-2xl border px-3 py-3 text-sm font-bold transition-all duration-200 ${
+                  className={`rounded-2xl border px-3 py-2.5 text-left text-[13px] font-bold transition-all duration-200 ${
                     active
-                      ? "border-transparent brand-gradient text-white shadow-[0_10px_24px_-12px_rgba(22,199,132,0.9)]"
-                      : "border-border bg-surface text-foreground hover:border-primary/40"
+                      ? "border-transparent brand-gradient text-white shadow-[0_10px_22px_-12px_rgba(16,185,129,0.85)]"
+                      : "border-border/80 bg-surface text-foreground hover:border-primary/35"
                   }`}
                 >
-                  <span className="mr-1.5">{s.flag}</span>
+                  <span className="mr-1.5 text-[15px] leading-none">{s.flag}</span>
                   {s.label}
                 </button>
               );
@@ -283,23 +359,24 @@ function VirtualNumbers() {
 
       {/* Order a Number */}
       <section className="px-5 pt-5">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-          <h3 className="text-base font-black">Order a Number</h3>
+        <div className="rounded-[20px] border border-border/80 bg-surface p-4 shadow-card-elev">
+          <h3 className="text-[16px] font-black tracking-tight">Order a Number</h3>
 
-          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
             Service{" "}
-            <span className="normal-case tracking-normal">
-              ({totalStock.toLocaleString("en-NG")} available)
+            <span className="normal-case tracking-normal text-muted-foreground/90">
+              ({serviceCount.toLocaleString("en-NG")} available)
             </span>
           </p>
 
           <div ref={pickerRef} className="relative mt-2">
             <button
+              type="button"
               onClick={() => setPickerOpen((o) => !o)}
               disabled={services.length === 0}
-              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background px-3 py-3 text-left disabled:opacity-60"
+              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background px-3 py-3 text-left transition hover:border-primary/30 disabled:opacity-60"
             >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/12 text-emerald-600">
                 <Smartphone className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1 truncate text-[15px] font-bold">
@@ -311,67 +388,73 @@ function VirtualNumbers() {
             </button>
 
             {pickerOpen && (
-              <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
-                <label className="flex items-center gap-2 border-b border-border px-3 py-2.5">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <input
-                    autoFocus
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search services…"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                  />
-                </label>
-                <ul className="max-h-64 overflow-y-auto">
+              <div className="absolute z-30 mt-2 max-h-72 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
+                <div className="border-b border-border p-2">
+                  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
+                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <input
+                      autoFocus
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search services…"
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                    />
+                  </div>
+                </div>
+                <ul className="max-h-52 overflow-y-auto py-1">
                   {filteredServices.length === 0 ? (
                     <li className="px-4 py-6 text-center text-sm text-muted-foreground">
-                      No services match "{query}"
+                      No matching services
                     </li>
                   ) : (
-                    filteredServices.map((s) => (
-                      <li key={s.id}>
-                        <button
-                          onClick={() => {
-                            setServiceId(s.id);
-                            setPickerOpen(false);
-                            setQuery("");
-                          }}
-                          className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-surface-2 ${
-                            s.id === serviceId ? "bg-primary/5 font-bold text-primary" : ""
-                          }`}
-                        >
-                          <span className="truncate">{s.service_name}</span>
-                          <span className="shrink-0 text-[11px] font-semibold tabular-nums text-muted-foreground">
-                            {naira(s.selling_price_ngn)}
-                          </span>
-                        </button>
-                      </li>
-                    ))
+                    filteredServices.map((s) => {
+                      const active = s.id === serviceId;
+                      return (
+                        <li key={s.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setServiceId(s.id);
+                              setPickerOpen(false);
+                              setQuery("");
+                            }}
+                            className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition ${
+                              active
+                                ? "bg-emerald-500/10 font-bold text-emerald-700"
+                                : "hover:bg-muted/50"
+                            }`}
+                          >
+                            <span className="truncate">{s.service_name}</span>
+                            <span className="shrink-0 tabular-nums text-xs font-semibold text-muted-foreground">
+                              {naira(s.selling_price_ngn)}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })
                   )}
                 </ul>
               </div>
             )}
           </div>
 
-          {/* Price & stock */}
-          <div className="mt-3 rounded-2xl border border-border bg-background px-4 py-3">
-            {productsLoading ? (
-              <Skeleton className="h-10" />
-            ) : selected ? (
-              <div className="flex items-center justify-between gap-3">
+          {/* Price + stock */}
+          <div className="mt-4 rounded-2xl border border-border/70 bg-background px-4 py-3.5">
+            {selected ? (
+              <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-2xl font-black tabular-nums text-primary">
-                    {naira(selected.selling_price_ngn)}.00
+                  <p className="text-[26px] font-black leading-none tabular-nums text-emerald-600">
+                    {naira(selected.selling_price_ngn)}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {selected.stock_count.toLocaleString("en-NG")} numbers in stock ·{" "}
-                    {activeServer?.provider}
+                  <p className="mt-1.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                    <span className="inline-block h-3.5 w-3.5 rounded-sm bg-muted" aria-hidden />
+                    {selected.stock_count.toLocaleString("en-NG")} numbers in stock
                   </p>
                 </div>
                 <span
                   className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold ${
                     selected.stock_count > 0
-                      ? "bg-emerald-400/10 text-emerald-600"
+                      ? "bg-emerald-400/15 text-emerald-600"
                       : "bg-destructive/10 text-destructive"
                   }`}
                 >
@@ -384,9 +467,10 @@ function VirtualNumbers() {
           </div>
 
           <button
+            type="button"
             onClick={handleOrder}
             disabled={busy || !selected || selected.stock_count <= 0}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(22,199,132,0.9)] disabled:opacity-50"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(16,185,129,0.9)] transition active:scale-[0.99] disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
             Order Number
@@ -395,7 +479,7 @@ function VirtualNumbers() {
       </section>
 
       {/* Recent orders */}
-      <section className="px-5 pt-6">
+      <section className="px-5 pb-4 pt-6">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-base font-black">Recent Orders</h2>
           <Link
@@ -418,70 +502,76 @@ function VirtualNumbers() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {orders.slice(0, 5).map((o) => {
-              const status: OrderStatus = (o.status as OrderStatus) ?? "pending";
-              const b = badge[status];
+            {orders.slice(0, 8).map((o) => {
+              const status = (o.status as OrderStatus) || "pending";
+              const b = badge[status] ?? badge.pending;
               const product = o.number_products as {
                 service_name?: string;
                 country_name?: string;
                 server_id?: string;
-                provider?: string;
               } | null;
-              const serviceName = product?.service_name ?? "Unknown";
-              const country = product?.country_name ?? "—";
-              const number = o.phone_number ?? "Allocating number…";
+              const serviceName = product?.service_name ?? "Number";
+              const country = product?.country_name ?? "";
               return (
-                <li key={o.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+                <li
+                  key={o.id}
+                  className="rounded-2xl border border-border/80 bg-surface p-4 shadow-sm"
+                >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                        <Smartphone className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold">{serviceName}</p>
-                        <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground">
-                          {country} {product?.server_id ?? ""} · {timeAgo(o.created_at)}
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] font-bold">{serviceName}</p>
+                      <p className="mt-0.5 text-[12px] text-muted-foreground">
+                        {country}
+                        {product?.server_id ? ` · ${product.server_id}` : ""} · {timeAgo(o.created_at)}
+                      </p>
                     </div>
                     <span
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${b.c}`}
+                      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${b.c}`}
                     >
-                      {status === "active" || status === "pending" ? (
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
-                      ) : (
-                        <Check className="h-3 w-3" />
-                      )}
                       {b.label}
                     </span>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/50 px-3 py-2.5">
-                    <span className="truncate text-sm font-semibold tabular-nums">{number}</span>
-                    <button
-                      onClick={() => copy(number, `num-${o.id}`, "Number")}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg brand-gradient px-3 py-1.5 text-[11px] font-bold text-white"
-                    >
-                      {copied === `num-${o.id}` ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                      {copied === `num-${o.id}` ? "Copied" : "Copy"}
-                    </button>
-                  </div>
+                  {o.phone_number && (
+                    <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
+                      <p className="min-w-0 flex-1 truncate font-mono text-sm font-semibold tracking-wide">
+                        {o.phone_number}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => copy(o.phone_number!, `phone-${o.id}`, "Number")}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11px] font-bold text-primary"
+                      >
+                        {copied === `phone-${o.id}` ? (
+                          <Check className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                        Copy
+                      </button>
+                    </div>
+                  )}
 
-                  {status === "received" && o.otp_code && (
-                    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/5 px-3 py-2.5">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/80">
-                          OTP Code
+                  {o.otp_code && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                          OTP
                         </p>
-                        <p className="truncate text-lg font-black tabular-nums tracking-[0.3em] text-emerald-600">
+                        <p className="font-mono text-lg font-black tracking-[0.2em] text-emerald-700">
                           {o.otp_code}
                         </p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => copy(o.otp_code!.replace(/\s/g, ""), `otp-${o.id}`, "OTP")}
                         className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-[11px] font-bold text-white"
                       >
-                        {copied === `otp-${o.id}` ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                        {copied === `otp-${o.id}` ? (
+                          <Check className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
                         Copy OTP
                       </button>
                     </div>
@@ -517,6 +607,7 @@ function VirtualNumbers() {
             </p>
             <div className="mt-4 flex gap-2">
               <button
+                type="button"
                 onClick={() => setShowFund(false)}
                 className="flex-1 rounded-xl border border-border bg-background py-3 text-sm font-bold"
               >
