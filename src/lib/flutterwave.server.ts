@@ -1,16 +1,9 @@
 /**
  * Server-only Flutterwave helpers for Vernex.
+ * Endpoint: POST https://api.flutterwave.com/v3/virtual-account-numbers
  *
- * Creates permanent (static) NGN virtual account numbers so a user can fund
- * their wallet by bank transfer, and credits the wallet when Flutterwave
- * notifies us of a completed transfer.
- *
- * Env:
- *   FLUTTERWAVE_SECRET_KEY (or FLW_SECRET_KEY) — required
- *   FLUTTERWAVE_PUBLIC_KEY — optional
- *   FLUTTERWAVE_ENCRYPTION_KEY — optional
- *   FLUTTERWAVE_BVN — optional shared BVN when provider requires it
- *   FLW_WEBHOOK_HASH / FLUTTERWAVE_WEBHOOK_HASH — webhook verif-hash
+ * Static (permanent) NGN accounts require BVN or NIN in live mode.
+ * When BVN is missing we create a dynamic (temporary) account so funding still works.
  */
 
 const FLW_BASE = "https://api.flutterwave.com/v3";
@@ -22,6 +15,7 @@ type FlwVirtualAccount = {
   flw_ref?: string;
   note?: string;
   amount?: number | null;
+  expiry_date?: string | null;
 };
 
 export function flutterwaveSecretKey(): string | null {
@@ -33,18 +27,16 @@ export function flutterwaveSecretKey(): string | null {
   return key || null;
 }
 
+export function isFlutterwaveConfigured(): boolean {
+  return Boolean(flutterwaveSecretKey());
+}
+
 function requireSecretKey(): string {
   const key = flutterwaveSecretKey();
   if (!key) {
-    throw new Error(
-      "Flutterwave is not configured. Set FLUTTERWAVE_SECRET_KEY in Cloudflare environment variables.",
-    );
+    throw new Error("Flutterwave is not configured. Set FLUTTERWAVE_SECRET_KEY.");
   }
   return key;
-}
-
-export function isFlutterwaveConfigured(): boolean {
-  return Boolean(flutterwaveSecretKey());
 }
 
 export type CreateVirtualAccountInput = {
@@ -53,6 +45,8 @@ export type CreateVirtualAccountInput = {
   fullName: string;
   phone?: string | null;
   bvn?: string | null;
+  /** When no BVN, dynamic VA is created for this amount (NGN). Default 100. */
+  amount?: number;
 };
 
 function splitName(fullName: string): { firstname: string; lastname: string } {
@@ -71,13 +65,50 @@ function normalizeNgPhone(phone?: string | null): string | undefined {
   return p || undefined;
 }
 
+async function callFlutterwaveCreate(
+  payload: Record<string, unknown>,
+): Promise<{ ok: true; data: FlwVirtualAccount } | { ok: false; message: string }> {
+  try {
+    const res = await fetch(`${FLW_BASE}/virtual-account-numbers`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${requireSecretKey()}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    const body = (await res.json()) as {
+      status?: string;
+      message?: string;
+      data?: FlwVirtualAccount;
+    };
+    if (!res.ok || body.status !== "success" || !body.data?.account_number) {
+      const msg = body?.message || `HTTP ${res.status}`;
+      console.error("[Flutterwave] create VA failed:", msg, JSON.stringify(body));
+      return { ok: false, message: msg };
+    }
+    return { ok: true, data: body.data };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Network error";
+    console.error("[Flutterwave] create VA request error", error);
+    return { ok: false, message: msg };
+  }
+}
+
 /**
- * Calls Flutterwave and persists the resulting static account on the wallet.
- * Returns null when the provider rejects the request (never throws to callers).
+ * Provision a virtual account for the user and persist on wallets.
+ * Prefer permanent (static) when BVN is available; otherwise dynamic.
  */
 export async function provisionVirtualAccount(
   input: CreateVirtualAccountInput,
-): Promise<{ accountNumber: string; bankName: string; reference: string } | null> {
+): Promise<{
+  accountNumber: string;
+  bankName: string;
+  reference: string;
+  permanent: boolean;
+  message?: string;
+} | null> {
   if (!flutterwaveSecretKey()) {
     console.error("[Flutterwave] missing FLUTTERWAVE_SECRET_KEY");
     return null;
@@ -103,11 +134,12 @@ export async function provisionVirtualAccount(
         accountNumber: wallet.virtual_account_number,
         bankName: wallet.virtual_bank_name ?? "Wema Bank",
         reference: wallet.virtual_account_reference ?? "",
+        permanent: true,
       };
     }
 
     if (!wallet) {
-      const { error: upsertError } = await supabaseAdmin.from("wallets").upsert(
+      await supabaseAdmin.from("wallets").upsert(
         {
           user_id: input.userId,
           balance: 0,
@@ -116,14 +148,11 @@ export async function provisionVirtualAccount(
         },
         { onConflict: "user_id" },
       );
-      if (upsertError) {
-        console.error("[Flutterwave] wallet upsert failed", upsertError.message);
-      }
     }
 
     const reference =
       wallet?.virtual_account_reference ??
-      `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+      `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 
     const { firstname, lastname } = splitName(input.fullName || "Vernex Customer");
     const email =
@@ -136,68 +165,92 @@ export async function provisionVirtualAccount(
       process.env["FLW_BVN"]?.trim() ||
       undefined;
 
-    const payload: Record<string, unknown> = {
+    const basePayload: Record<string, unknown> = {
       email,
       tx_ref: reference,
-      is_permanent: true,
+      currency: "NGN",
       narration: `Vernex / ${firstname} ${lastname}`.slice(0, 100),
       firstname,
       lastname,
     };
-    if (phonenumber) payload["phonenumber"] = phonenumber;
-    if (bvn) payload["bvn"] = bvn;
+    if (phonenumber) basePayload["phonenumber"] = phonenumber;
 
-    const res = await fetch(`${FLW_BASE}/virtual-account-numbers`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${requireSecretKey()}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    let permanent = false;
+    let account: FlwVirtualAccount | null = null;
+    let lastError = "";
 
-    const body = (await res.json()) as {
-      status?: string;
-      message?: string;
-      data?: FlwVirtualAccount;
-    };
+    // 1) Static / permanent when BVN available (required in live mode)
+    if (bvn) {
+      const staticResult = await callFlutterwaveCreate({
+        ...basePayload,
+        is_permanent: true,
+        bvn,
+      });
+      if (staticResult.ok) {
+        account = staticResult.data;
+        permanent = true;
+      } else {
+        lastError = staticResult.message;
+      }
+    }
 
-    if (!res.ok || body.status !== "success" || !body.data?.account_number) {
-      console.error(
-        "[Flutterwave] virtual account failed:",
-        body?.message ?? res.status,
-        JSON.stringify(body),
-      );
+    // 2) Dynamic fallback so the user can still fund immediately
+    if (!account) {
+      const amount = Math.max(100, Math.round(Number(input.amount) || 100));
+      const dynamicRef = `${reference}-D`;
+      const dynamicResult = await callFlutterwaveCreate({
+        ...basePayload,
+        tx_ref: dynamicRef,
+        is_permanent: false,
+        amount,
+      });
+      if (dynamicResult.ok) {
+        account = dynamicResult.data;
+        permanent = false;
+      } else {
+        lastError = dynamicResult.message || lastError;
+      }
+    }
+
+    if (!account?.account_number) {
+      console.error("[Flutterwave] no account created:", lastError);
       return null;
     }
 
-    const accountNumber = body.data.account_number;
-    const bankName = body.data.bank_name ?? "Wema Bank";
+    const accountNumber = account.account_number;
+    const bankName = account.bank_name ?? "Wema Bank";
 
-    const { error: updateError } = await supabaseAdmin
-      .from("wallets")
-      .update({
-        virtual_account_number: accountNumber,
-        virtual_bank_name: bankName,
-        virtual_account_reference: reference,
-      })
-      .eq("user_id", input.userId);
+    // Only persist permanent accounts; dynamic ones expire
+    if (permanent) {
+      const { error: updateError } = await supabaseAdmin
+        .from("wallets")
+        .update({
+          virtual_account_number: accountNumber,
+          virtual_bank_name: bankName,
+          virtual_account_reference: reference,
+        })
+        .eq("user_id", input.userId);
 
-    if (updateError) {
-      console.error("[Flutterwave] could not persist virtual account", updateError.message);
-      // Still return the account so the user can fund once.
-      return { accountNumber, bankName, reference };
+      if (updateError) {
+        console.error("[Flutterwave] persist failed", updateError.message);
+      }
     }
 
-    return { accountNumber, bankName, reference };
+    return {
+      accountNumber,
+      bankName,
+      reference: permanent ? reference : account.order_ref || reference,
+      permanent,
+      message: permanent
+        ? undefined
+        : "Temporary account generated. Transfer any amount soon — it may expire in about 1 hour.",
+    };
   } catch (error) {
     console.error("[Flutterwave] provisionVirtualAccount error", error);
     return null;
   }
 }
 
-/** Credits a wallet for a verified Flutterwave transfer (idempotent by reference). */
 export async function creditWalletFromTransfer(params: {
   reference: string;
   amount: number;
@@ -246,7 +299,7 @@ export async function creditWalletFromTransfer(params: {
     }
 
     if (!userId) {
-      console.error("[Flutterwave] no wallet matched for transfer", params.reference);
+      console.error("[Flutterwave] no wallet matched", params.reference);
       return { credited: false };
     }
 
