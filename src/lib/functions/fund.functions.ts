@@ -8,21 +8,26 @@ export type WalletFundingDetails = {
   reference: string;
   pending: boolean;
   configured: boolean;
+  message?: string | null;
 };
 
 /**
  * Returns the user's permanent Flutterwave virtual account.
- * Auto-provisions one on first request if missing (login / fund page).
+ * Auto-provisions one on first request if missing.
+ * Soft-fails (pending=true) instead of throwing when Flutterwave is slow / rejects.
  */
 export const getWalletFundingDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<WalletFundingDetails> => {
     const { supabase, userId } = context;
-    const { isFlutterwaveConfigured, provisionVirtualAccount } = await import(
-      "@/lib/flutterwave.server"
-    );
 
-    const configured = isFlutterwaveConfigured();
+    let configured = false;
+    try {
+      const flw = await import("@/lib/flutterwave.server");
+      configured = flw.isFlutterwaveConfigured();
+    } catch {
+      configured = false;
+    }
 
     const { data: wallet, error } = await supabase
       .from("wallets")
@@ -30,7 +35,19 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (error) throw new Error(`Failed to load wallet details: ${error.message}`);
+    if (error) {
+      // Soft-fail so the UI can still render
+      console.error("[fund] wallet load error", error.message);
+      return {
+        bankName: "Wema Bank",
+        accountNumber: null,
+        accountName: "VERNEX / CUSTOMER",
+        reference: `VNX-${userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`,
+        pending: true,
+        configured,
+        message: `Could not load wallet: ${error.message}`,
+      };
+    }
 
     const { data: profile } = await supabase
       .from("profiles")
@@ -47,22 +64,37 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
     let reference =
       wallet?.virtual_account_reference ??
       `VNX-${userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+    let message: string | null = null;
 
-    // Provision (or backfill) permanent VA when Flutterwave is configured
     if (!accountNumber && configured) {
-      const provisioned = await provisionVirtualAccount({
-        userId,
-        email:
-          profile?.email ??
-          `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
-        fullName: profile?.full_name ?? "Vernex Customer",
-        phone: profile?.phone ?? null,
-      });
-      if (provisioned) {
-        accountNumber = provisioned.accountNumber;
-        bankName = provisioned.bankName;
-        reference = provisioned.reference;
+      try {
+        const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
+        const provisioned = await provisionVirtualAccount({
+          userId,
+          email:
+            profile?.email ??
+            `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
+          fullName: profile?.full_name ?? "Vernex Customer",
+          phone: profile?.phone ?? null,
+        });
+        if (provisioned) {
+          accountNumber = provisioned.accountNumber;
+          bankName = provisioned.bankName;
+          reference = provisioned.reference;
+        } else {
+          message =
+            "Flutterwave could not create a virtual account yet. Confirm FLUTTERWAVE_SECRET_KEY is set, then tap Refresh.";
+        }
+      } catch (err) {
+        console.error("[fund] provision error", err);
+        message =
+          err instanceof Error
+            ? err.message
+            : "Could not reach Flutterwave. Try again in a moment.";
       }
+    } else if (!accountNumber && !configured) {
+      message =
+        "Flutterwave is not configured on the server. Set FLUTTERWAVE_SECRET_KEY in Cloudflare Pages environment variables.";
     }
 
     return {
@@ -72,5 +104,6 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       reference,
       pending: !accountNumber,
       configured,
+      message,
     };
   });
