@@ -10,57 +10,78 @@ import {
   Wallet,
   Settings,
   Delete,
-  ChevronDown,
   ChevronRight,
   ArrowLeft,
   Search,
   Loader2,
   Globe,
-  BadgeCheck,
-  CalendarClock,
+  Plus,
+  Clock,
+  Users,
+  Video,
+  MessageSquare,
+  PhoneCall,
 } from "lucide-react";
 import { naira } from "@/lib/pricing";
+import { fetchAccount } from "@/lib/account";
 import {
   listRentalCountries,
   listRentalNumbers,
   listMyRentals,
   createRental,
   type RentalCountry,
+  type RentalNumber,
 } from "@/lib/functions/rentals.functions";
 
 export const Route = createFileRoute("/_authenticated/rent-number")({
   head: () => ({
     meta: [
-      { title: "Rent a Number — Vernex" },
+      { title: "Rent Numbers — Vernex" },
       {
         name: "description",
         content:
-          "Rent long-term Non-VoIP numbers by country, carrier, state and area code. Live inventory with expiry dates and instant activation.",
+          "Rent long-term Non-VoIP numbers. USA via SignalWire, worldwide via DIDWW.",
       },
-      { property: "og:title", content: "Vernex — Rent a Number" },
+      { property: "og:title", content: "Vernex — Rent Numbers" },
       {
         property: "og:description",
-        content: "Browse live rental inventory across Austria, Canada, Israel, the UK and the US.",
+        content: "Call, message, and manage rented numbers from one clean dialer.",
       },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: RentNumber,
+  component: RentNumberApp,
 });
 
-type TabId = "browse" | "numbers" | "keypad" | "credit" | "settings";
+type TabId = "history" | "contacts" | "keypad" | "numbers" | "credit" | "settings";
 
-const tabs: { id: TabId; label: string; icon: typeof Phone }[] = [
-  { id: "browse", label: "Browse", icon: Globe },
-  { id: "numbers", label: "My Nos.", icon: Hash },
+const TABS: { id: TabId; label: string; icon: typeof Phone }[] = [
+  { id: "history", label: "History", icon: Clock },
+  { id: "contacts", label: "Contacts", icon: Users },
   { id: "keypad", label: "Keypad", icon: Grid3X3 },
+  { id: "numbers", label: "Numbers", icon: Hash },
   { id: "credit", label: "Credit", icon: Wallet },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const plans = ["1 Week", "1 Month", "1 Year"] as const;
-const planMultiplier: Record<string, number> = { "1 Week": 0.35, "1 Month": 1, "1 Year": 10 };
+const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"] as const;
+const KEY_LETTERS: Record<string, string> = {
+  "2": "ABC",
+  "3": "DEF",
+  "4": "GHI",
+  "5": "JKL",
+  "6": "MNO",
+  "7": "PQRS",
+  "8": "TUV",
+  "9": "WXYZ",
+  "0": "+",
+};
+
+const PLANS = ["1 Week", "1 Month", "1 Year"] as const;
+const PLAN_MULT: Record<string, number> = {
+  "1 Week": 0.35,
+  "1 Month": 1,
+  "1 Year": 10,
+};
 
 function flagOf(code: string) {
   return code
@@ -76,20 +97,26 @@ function formatDate(value: string) {
   });
 }
 
-const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
-const keyLetters: Record<string, string> = {
-  "2": "ABC", "3": "DEF", "4": "GHI", "5": "JKL",
-  "6": "MNO", "7": "PQRS", "8": "TUV", "9": "WXYZ", "0": "+",
-};
+function providerLabel(countryCode: string, provider?: string) {
+  const code = countryCode.toUpperCase();
+  if (code === "US" || code === "USA" || provider === "signalwire") return "SignalWire";
+  return "DIDWW";
+}
 
-function CountryPicker({
+/* ------------------------------------------------------------------ */
+/* Country directory (Globe)                                           */
+/* ------------------------------------------------------------------ */
+
+function CountryDirectory({
   countries,
   loading,
   onSelect,
+  onClose,
 }: {
   countries: RentalCountry[];
   loading: boolean;
   onSelect: (c: RentalCountry) => void;
+  onClose: () => void;
 }) {
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
@@ -99,60 +126,81 @@ function CountryPicker({
       (c) =>
         c.country_name.toLowerCase().includes(term) ||
         c.dial_code.includes(term) ||
-        c.carriers.some((x) => x.toLowerCase().includes(term)),
+        c.country_code.toLowerCase().includes(term),
     );
   }, [countries, q]);
 
   return (
-    <div className="space-y-3 px-5 py-4">
-      <label className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-3">
-        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search country, code or carrier"
-          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-        />
-      </label>
-
-      {loading && (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
+    <div className="flex h-full flex-col bg-background">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="grid h-9 w-9 place-items-center rounded-lg border border-border"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold">Choose country</h2>
+          <p className="text-[11px] text-muted-foreground">
+            USA · SignalWire · Other · DIDWW
+          </p>
         </div>
-      )}
+      </div>
 
-      {!loading && filtered.length === 0 && (
-        <p className="py-16 text-center text-sm text-muted-foreground">No countries match that search.</p>
-      )}
+      <div className="border-b border-border px-4 py-3">
+        <label className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search country or dial code"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+        </label>
+      </div>
 
-      <ul className="space-y-2">
-        {filtered.map((c) => (
-          <li key={c.country_code}>
-            <button
-              onClick={() => onSelect(c)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left shadow-card-elev transition active:scale-[0.99]"
-            >
-              <span className="text-2xl leading-none">{flagOf(c.country_code)}</span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">
-                  {c.country_name} <span className="text-muted-foreground">{c.dial_code}</span>
-                </p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {c.available} available · {c.carriers.slice(0, 3).join(", ")}
-                </p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-sm font-black tabular-nums">{naira(c.from_price_ngn)}</p>
-                <p className="text-[10px] text-muted-foreground">from / month</p>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="flex-1 overflow-y-auto">
+        {loading && (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {!loading && filtered.length === 0 && (
+          <p className="py-20 text-center text-sm text-muted-foreground">No countries found</p>
+        )}
+        <ul className="divide-y divide-border">
+          {filtered.map((c) => (
+            <li key={c.country_code}>
+              <button
+                type="button"
+                onClick={() => onSelect(c)}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted/40"
+              >
+                <span className="text-xl leading-none">{flagOf(c.country_code)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {c.country_name}{" "}
+                    <span className="font-normal text-muted-foreground">{c.dial_code}</span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {c.available} available · from {naira(c.from_price_ngn)}/mo ·{" "}
+                    {providerLabel(c.country_code)}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Number catalog for a country                                        */
+/* ------------------------------------------------------------------ */
 
 function NumberCatalog({
   country,
@@ -162,199 +210,355 @@ function NumberCatalog({
   onBack: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [carrier, setCarrier] = useState<string | null>(null);
-  const [numberType, setNumberType] = useState<"mobile" | "business" | null>(null);
-  const [search, setSearch] = useState("");
-  const [plan, setPlan] = useState<(typeof plans)[number]>("1 Month");
-  const [pendingId, setPendingId] = useState<string | null>(null);
-
   const fetchNumbers = useServerFn(listRentalNumbers);
-  const rent = useServerFn(createRental);
+  const rentFn = useServerFn(createRental);
+  const [plan, setPlan] = useState<(typeof PLANS)[number]>("1 Month");
+  const [picked, setPicked] = useState<RentalNumber | null>(null);
 
   const { data: numbers = [], isLoading } = useQuery({
-    queryKey: ["rental-numbers", country.country_code, carrier, numberType, search],
-    queryFn: () =>
-      fetchNumbers({
-        data: {
-          countryCode: country.country_code,
-          ...(carrier ? { carrier } : {}),
-          ...(numberType ? { numberType } : {}),
-          ...(search.trim() ? { search: search.trim() } : {}),
-        },
-      }),
+    queryKey: ["rental-numbers", country.country_code],
+    queryFn: () => fetchNumbers({ data: { countryCode: country.country_code } }),
   });
 
-  const mutation = useMutation({
-    mutationFn: (rentalNumberId: string) => rent({ data: { rentalNumberId, plan } }),
+  const rent = useMutation({
+    mutationFn: async (numberId: string) =>
+      rentFn({ data: { rentalNumberId: numberId, plan } }),
     onSuccess: () => {
-      toast.success(`Number rented for ${plan}`);
-      queryClient.invalidateQueries({ queryKey: ["rental-numbers"] });
+      toast.success("Number rented");
+      setPicked(null);
       queryClient.invalidateQueries({ queryKey: ["my-rentals"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["rental-numbers", country.country_code] });
+      queryClient.invalidateQueries({ queryKey: ["rental-countries"] });
+      queryClient.invalidateQueries({ queryKey: ["account"] });
     },
-    onError: (e: Error) => toast.error(e.message),
-    onSettled: () => setPendingId(null),
+    onError: (err: Error) => toast.error(err.message || "Rental failed"),
   });
-
-  const regional = country.regions.length > 0;
 
   return (
-    <div className="space-y-3 px-5 py-4">
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> All countries
-      </button>
-
-      <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-        <span className="text-2xl leading-none">{flagOf(country.country_code)}</span>
+    <div className="flex h-full flex-col bg-background">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="grid h-9 w-9 place-items-center rounded-lg border border-border"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold">
-            {country.country_name} <span className="text-muted-foreground">{country.dial_code}</span>
+          <h2 className="truncate text-sm font-semibold">
+            {flagOf(country.country_code)} {country.country_name}
+          </h2>
+          <p className="text-[11px] text-muted-foreground">
+            {providerLabel(country.country_code)} · {country.dial_code}
           </p>
-          <p className="text-[11px] text-muted-foreground">{country.available} numbers in stock</p>
         </div>
       </div>
 
-      {regional && (
-        <label className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-3">
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter by state or area code (e.g. Florida, 424)"
-            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-        </label>
-      )}
-
-      {regional && (
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {country.regions.map((r) => (
-            <button
-              key={r}
-              onClick={() => setSearch(search === r ? "" : r)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
-                search === r ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {[null, ...country.carriers].map((c) => (
+      <div className="flex gap-2 border-b border-border px-4 py-2">
+        {PLANS.map((p) => (
           <button
-            key={c ?? "all"}
-            onClick={() => setCarrier(c)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
-              carrier === c ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
+            key={p}
+            type="button"
+            onClick={() => setPlan(p)}
+            className={`rounded-md border px-3 py-1.5 text-[12px] font-semibold ${
+              plan === p
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-surface text-muted-foreground"
             }`}
           >
-            {c ?? "All carriers"}
+            {p}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {([null, "mobile", "business"] as const).map((t) => (
+      <div className="flex-1 overflow-y-auto">
+        {isLoading && (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {!isLoading && numbers.length === 0 && (
+          <p className="py-20 text-center text-sm text-muted-foreground">
+            No numbers available in this country right now.
+          </p>
+        )}
+        <ul className="divide-y divide-border">
+          {numbers.map((n) => {
+            const price = Math.ceil(n.monthly_price_ngn * (PLAN_MULT[plan] ?? 1));
+            return (
+              <li key={n.id}>
+                <button
+                  type="button"
+                  onClick={() => setPicked(n)}
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted/40"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-mono text-sm font-semibold tabular-nums">
+                      {n.phone_number}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {n.carrier}
+                      {n.region_name ? ` · ${n.region_name}` : ""}
+                      {n.area_code ? ` · ${n.area_code}` : ""} ·{" "}
+                      {providerLabel(n.country_code, n.provider)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-bold tabular-nums">{naira(price)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {picked && (
+        <div className="fixed inset-0 z-50 grid place-items-end bg-black/40 sm:place-items-center">
+          <div className="w-full max-w-md rounded-t-2xl border border-border bg-surface p-5 sm:rounded-2xl">
+            <p className="font-mono text-lg font-bold tabular-nums">{picked.phone_number}</p>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              {picked.country_name} · {picked.carrier} ·{" "}
+              {providerLabel(picked.country_code, picked.provider)} · {plan}
+            </p>
+            <p className="mt-3 text-2xl font-bold tabular-nums text-primary">
+              {naira(Math.ceil(picked.monthly_price_ngn * (PLAN_MULT[plan] ?? 1)))}
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPicked(null)}
+                className="flex-1 rounded-lg border border-border py-3 text-sm font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={rent.isPending}
+                onClick={() => rent.mutate(picked.id)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                {rent.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Rent number
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Tab panels                                                          */
+/* ------------------------------------------------------------------ */
+
+function HistoryPanel() {
+  const rows = [
+    { id: 1, name: "Outgoing", number: "+1 (415) 555-0142", when: "Today, 2:14 PM", kind: "call" },
+    { id: 2, name: "Missed", number: "+1 (212) 555-0198", when: "Yesterday", kind: "missed" },
+    { id: 3, name: "SMS", number: "+44 7700 900123", when: "Mon", kind: "sms" },
+  ];
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <ul className="divide-y divide-border">
+        {rows.map((r) => (
+          <li key={r.id} className="flex items-center gap-3 px-4 py-3.5">
+            <span
+              className={`grid h-10 w-10 place-items-center rounded-full ${
+                r.kind === "missed"
+                  ? "bg-destructive/10 text-destructive"
+                  : r.kind === "sms"
+                    ? "bg-sky-500/10 text-sky-600"
+                    : "bg-primary/10 text-primary"
+              }`}
+            >
+              {r.kind === "sms" ? (
+                <MessageSquare className="h-4 w-4" />
+              ) : (
+                <PhoneCall className="h-4 w-4" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{r.name}</p>
+              <p className="font-mono text-[12px] text-muted-foreground tabular-nums">
+                {r.number}
+              </p>
+            </div>
+            <span className="text-[11px] text-muted-foreground">{r.when}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="px-4 py-6 text-center text-[12px] text-muted-foreground">
+        Live call / SMS history appears here once your rented line is active.
+      </p>
+    </div>
+  );
+}
+
+function ContactsPanel() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+      <Users className="h-10 w-10 text-muted-foreground" />
+      <p className="mt-3 text-sm font-semibold">No contacts yet</p>
+      <p className="mt-1 text-[13px] text-muted-foreground">
+        Contacts you call or message from your rented numbers will show up here.
+      </p>
+    </div>
+  );
+}
+
+function KeypadPanel({
+  digits,
+  setDigits,
+  dialPrefix,
+}: {
+  digits: string;
+  setDigits: (v: string) => void;
+  dialPrefix: string;
+}) {
+  function press(k: string) {
+    if (digits.length >= 18) return;
+    setDigits(digits + k);
+  }
+
+  function call() {
+    if (!digits) {
+      toast.message("Enter a number to call");
+      return;
+    }
+    toast.message(`Calling ${dialPrefix}${digits}…`, {
+      description: "Voice connects when your rental line is provisioned.",
+    });
+  }
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col items-center justify-center px-4">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Outbound · {dialPrefix}
+        </p>
+        <p className="mt-2 min-h-[2.5rem] font-mono text-3xl font-semibold tracking-wide tabular-nums">
+          {digits || "—"}
+        </p>
+      </div>
+
+      <div className="mx-auto grid w-full max-w-xs grid-cols-3 gap-3 px-6 pb-4">
+        {KEYS.map((k) => (
           <button
-            key={t ?? "any"}
-            onClick={() => setNumberType(t)}
-            className={`rounded-2xl border py-2.5 text-[12px] font-bold capitalize ${
-              numberType === t ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface"
-            }`}
+            key={k}
+            type="button"
+            onClick={() => press(k)}
+            className="flex h-16 flex-col items-center justify-center rounded-full border border-border bg-surface active:bg-muted"
           >
-            {t ?? "All types"}
+            <span className="text-xl font-semibold tabular-nums">{k}</span>
+            {KEY_LETTERS[k] && (
+              <span className="text-[9px] font-medium tracking-widest text-muted-foreground">
+                {KEY_LETTERS[k]}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-3 shadow-card-elev">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Rental period
-        </p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {plans.map((p) => (
-            <button
-              key={p}
-              onClick={() => setPlan(p)}
-              className={`rounded-2xl border py-2.5 text-[12px] font-bold ${
-                plan === p ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+      <div className="mx-auto flex w-full max-w-xs items-center justify-between px-10 pb-6">
+        <button
+          type="button"
+          onClick={() =>
+            toast.message("Video", {
+              description: "Video sessions attach to your active rented line.",
+            })
+          }
+          className="grid h-12 w-12 place-items-center rounded-full border border-border text-muted-foreground"
+          aria-label="Video"
+        >
+          <Video className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          onClick={call}
+          className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground"
+          aria-label="Call"
+        >
+          <Phone className="h-6 w-6" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setDigits(digits.slice(0, -1))}
+          className="grid h-12 w-12 place-items-center rounded-full border border-border text-muted-foreground"
+          aria-label="Delete"
+        >
+          <Delete className="h-5 w-5" />
+        </button>
       </div>
+    </div>
+  );
+}
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-14 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
-      )}
+function NumbersPanel({
+  onBrowse,
+}: {
+  onBrowse: () => void;
+}) {
+  const fetchMine = useServerFn(listMyRentals);
+  const { data: rentals = [], isLoading } = useQuery({
+    queryKey: ["my-rentals"],
+    queryFn: () => fetchMine({ data: undefined }),
+  });
 
-      {!isLoading && numbers.length === 0 && (
-        <p className="py-14 text-center text-sm text-muted-foreground">
-          No numbers match these filters. Try another state, area code or carrier.
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (rentals.length === 0) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <Hash className="h-10 w-10 text-muted-foreground" />
+        <p className="mt-3 text-sm font-semibold">No rented numbers</p>
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          Open the globe to browse USA (SignalWire) and global (DIDWW) inventory.
         </p>
-      )}
+        <button
+          type="button"
+          onClick={onBrowse}
+          className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+        >
+          Browse numbers
+        </button>
+      </div>
+    );
+  }
 
-      <ul className="space-y-2">
-        {numbers.map((n) => {
-          const price = Math.ceil(n.monthly_price_ngn * (planMultiplier[plan] ?? 1));
-          const busy = mutation.isPending && pendingId === n.id;
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <ul className="divide-y divide-border">
+        {rentals.map((r) => {
+          const n = r.rental_numbers as RentalNumber | null;
           return (
-            <li key={n.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-              <div className="flex items-start gap-3">
-                <span className="text-xl leading-none">{flagOf(n.country_code)}</span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-black tabular-nums">{n.phone_number}</p>
-                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                    {n.carrier}
-                    {n.region_name ? ` · ${n.region_name}` : ""}
-                    {n.area_code ? ` · area ${n.area_code}` : ""}
+            <li key={r.id} className="px-4 py-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-sm font-semibold tabular-nums">
+                    {n?.phone_number ?? "—"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {n?.country_name} · {n?.carrier}
+                    {n ? ` · ${providerLabel(n.country_code, n.provider)}` : ""}
                   </p>
                 </div>
-                <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                    n.number_type === "business"
-                      ? "bg-[#0F172A]/10 text-[#0F172A]"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                >
-                  {n.number_type}
+                <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                  {r.status}
                 </span>
               </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <CalendarClock className="h-3.5 w-3.5" /> Expires {formatDate(n.expires_at)}
+              <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground">
+                <span>
+                  {r.plan} · renews {formatDate(r.renews_at)}
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  <BadgeCheck className="h-3.5 w-3.5" /> {n.provider}
+                <span className="font-semibold text-foreground">
+                  {naira(Number(r.amount_paid))}
                 </span>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xl font-black tabular-nums">{naira(price)}</p>
-                  <p className="text-[10px] text-muted-foreground">{plan} · all inbound SMS &amp; calls</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setPendingId(n.id);
-                    mutation.mutate(n.id);
-                  }}
-                  disabled={mutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
-                >
-                  {busy && <Loader2 className="h-4 w-4 animate-spin" />} Rent
-                </button>
               </div>
             </li>
           );
@@ -364,207 +568,196 @@ function NumberCatalog({
   );
 }
 
-function MyRentals() {
-  const fetchRentals = useServerFn(listMyRentals);
-  const { data: rentals = [], isLoading } = useQuery({
-    queryKey: ["my-rentals"],
-    queryFn: () => fetchRentals(),
+function CreditPanel() {
+  const { user } = Route.useRouteContext();
+  const { data: account } = useQuery({
+    queryKey: ["account", user.id],
+    queryFn: () => fetchAccount(user.id),
+  });
+  const balance = account?.wallet?.balance ?? 0;
+
+  return (
+    <div className="flex-1 overflow-y-auto px-4 py-5">
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Available credit
+        </p>
+        <p className="mt-1 text-3xl font-bold tabular-nums text-primary">
+          {naira(Math.round(balance))}
+        </p>
+        <p className="mt-2 text-[12px] text-muted-foreground">
+          Credit is shared with your Vernex wallet. Rentals and outbound usage draw from this
+          balance.
+        </p>
+        <Link
+          to="/fund"
+          className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+        >
+          Add credit
+        </Link>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-border bg-surface p-4">
+        <p className="text-sm font-semibold">How billing works</p>
+        <ul className="mt-2 space-y-1.5 text-[13px] text-muted-foreground">
+          <li>· USA numbers provisioned on SignalWire</li>
+          <li>· Other countries provisioned on DIDWW</li>
+          <li>· Plans: 1 Week · 1 Month · 1 Year</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPanel() {
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <ul className="divide-y divide-border">
+        {[
+          { t: "Default outbound region", d: "+1 United States" },
+          { t: "Caller ID", d: "Use active rented number" },
+          { t: "Call recording", d: "Off" },
+          { t: "Video sessions", d: "Available on active lines" },
+          { t: "Notifications", d: "SMS & missed calls" },
+        ].map((row) => (
+          <li key={row.t} className="flex items-center justify-between px-4 py-3.5">
+            <div>
+              <p className="text-sm font-semibold">{row.t}</p>
+              <p className="text-[12px] text-muted-foreground">{row.d}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shell                                                               */
+/* ------------------------------------------------------------------ */
+
+function RentNumberApp() {
+  const [tab, setTab] = useState<TabId>("keypad");
+  const [digits, setDigits] = useState("");
+  const [showGlobe, setShowGlobe] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<RentalCountry | null>(null);
+
+  const fetchCountries = useServerFn(listRentalCountries);
+  const { data: countries = [], isLoading: countriesLoading } = useQuery({
+    queryKey: ["rental-countries"],
+    queryFn: () => fetchCountries({ data: undefined }),
   });
 
-  if (isLoading) {
+  // Keypad always defaults to +1 (USA)
+  const dialPrefix = selectedCountry?.dial_code ?? "+1";
+
+  const title =
+    tab === "history"
+      ? "History"
+      : tab === "contacts"
+        ? "Contacts"
+        : tab === "keypad"
+          ? "Keypad"
+          : tab === "numbers"
+            ? "Numbers"
+            : tab === "credit"
+              ? "Credit"
+              : "Settings";
+
+  if (showGlobe && !selectedCountry) {
     return (
-      <div className="flex items-center justify-center py-16 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
+      <div className="fixed inset-0 z-50 flex h-[100dvh] w-screen flex-col bg-background">
+        <CountryDirectory
+          countries={countries}
+          loading={countriesLoading}
+          onSelect={(c) => setSelectedCountry(c)}
+          onClose={() => setShowGlobe(false)}
+        />
       </div>
     );
   }
 
-  if (rentals.length === 0) {
+  if (selectedCountry) {
     return (
-      <p className="px-5 py-16 text-center text-sm text-muted-foreground">
-        You have no rented numbers yet. Browse the catalog to rent one.
-      </p>
+      <div className="fixed inset-0 z-50 flex h-[100dvh] w-screen flex-col bg-background">
+        <NumberCatalog
+          country={selectedCountry}
+          onBack={() => {
+            setSelectedCountry(null);
+            setShowGlobe(true);
+          }}
+        />
+      </div>
     );
   }
 
   return (
-    <ul className="space-y-2 px-5 py-4">
-      {rentals.map((r) => {
-        const n = r.rental_numbers;
-        return (
-          <li key={r.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-            <div className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-black tabular-nums">{n?.phone_number}</p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {n?.country_name} · {n?.carrier}
-                  {n?.region_name ? ` · ${n.region_name}` : ""}
-                </p>
-              </div>
-              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                {r.status}
-              </span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>
-                {r.plan} · renews {formatDate(r.renews_at)}
-              </span>
-              <span className="font-bold text-foreground">{naira(Number(r.amount_paid))}</span>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-function RentNumber() {
-  const [tab, setTab] = useState<TabId>("browse");
-  const [selected, setSelected] = useState<RentalCountry | null>(null);
-  const [digits, setDigits] = useState("");
-
-  const fetchCountries = useServerFn(listRentalCountries);
-  const { data: countries = [], isLoading } = useQuery({
-    queryKey: ["rental-countries"],
-    queryFn: () => fetchCountries(),
-  });
-
-  const dial = selected?.dial_code ?? "+1";
-
-  return (
     <div className="fixed inset-0 z-50 flex h-[100dvh] w-screen flex-col overflow-hidden bg-background text-foreground">
-      <header className="flex shrink-0 items-center gap-3 border-b border-border bg-surface px-4 py-3">
+      {/* Header */}
+      <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-3">
         <Link
           to="/dashboard"
-          aria-label="Back to dashboard"
-          className="grid h-9 w-9 place-items-center rounded-2xl border border-border"
+          aria-label="Back"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-border"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-sm font-bold">Rent a Number</h1>
-          <p className="truncate text-[11px] text-muted-foreground">Non-VoIP · long-term rentals</p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#22C55E]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" /> Live
-        </span>
+        <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-semibold">
+          {tab === "keypad" ? "Rent Numbers" : title}
+        </h1>
+        <button
+          type="button"
+          onClick={() => setShowGlobe(true)}
+          aria-label="Browse countries"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-border"
+        >
+          <Globe className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("credit")}
+          aria-label="Credit"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-border"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {tab === "browse" &&
-          (selected ? (
-            <NumberCatalog country={selected} onBack={() => setSelected(null)} />
-          ) : (
-            <CountryPicker countries={countries} loading={isLoading} onSelect={setSelected} />
-          ))}
-
-        {tab === "numbers" && <MyRentals />}
-
+      {/* Body */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {tab === "history" && <HistoryPanel />}
+        {tab === "contacts" && <ContactsPanel />}
         {tab === "keypad" && (
-          <div className="flex min-h-full flex-col px-5 pt-4">
-            <div className="flex items-center gap-2">
-              <div className="min-w-0 flex-1 rounded-2xl border border-border bg-surface px-4 py-3">
-                <p className="truncate text-2xl font-black tabular-nums">
-                  {dial} {digits || <span className="text-muted-foreground">…</span>}
-                </p>
-              </div>
-              <button
-                onClick={() => setDigits((d) => d.slice(0, -1))}
-                aria-label="Delete digit"
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-border"
-              >
-                <Delete className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="mt-4 grid flex-1 grid-cols-3 content-center gap-2.5">
-              {keys.map((k) => (
-                <button
-                  key={k}
-                  onClick={() => setDigits((d) => d + k)}
-                  className="flex aspect-[5/3] flex-col items-center justify-center rounded-2xl border border-border bg-surface transition active:scale-95 active:bg-accent"
-                >
-                  <span className="text-2xl font-black leading-none">{k}</span>
-                  {keyLetters[k] && (
-                    <span className="mt-0.5 text-[9px] font-semibold tracking-[0.18em] text-muted-foreground">
-                      {keyLetters[k]}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() =>
-                digits ? toast.success(`Calling ${dial} ${digits}…`) : toast.error("Enter a number first")
-              }
-              className="my-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-bold text-primary-foreground"
-            >
-              <Phone className="h-4 w-4" /> Call
-            </button>
-          </div>
+          <KeypadPanel digits={digits} setDigits={setDigits} dialPrefix={dialPrefix} />
         )}
+        {tab === "numbers" && <NumbersPanel onBrowse={() => setShowGlobe(true)} />}
+        {tab === "credit" && <CreditPanel />}
+        {tab === "settings" && <SettingsPanel />}
+      </div>
 
-        {tab === "credit" && (
-          <div className="space-y-4 px-5 py-4">
-            <div className="relative overflow-hidden rounded-2xl bg-[#0F172A] p-5 text-white shadow-wallet">
-              <div className="absolute inset-0 dotted-bg opacity-40" />
-              <div className="relative">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
-                  Rental billing
-                </p>
-                <p className="mt-2 text-3xl font-black">Wallet-funded</p>
-                <p className="mt-1 text-[11px] text-white/60">
-                  Rentals are debited from your Vernex wallet at checkout.
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/fund"
-              className="block rounded-2xl bg-primary py-3.5 text-center text-sm font-bold text-primary-foreground"
-            >
-              Fund wallet
-            </Link>
-          </div>
-        )}
-
-        {tab === "settings" && (
-          <div className="space-y-2 px-5 py-4">
-            {[
-              "Caller ID",
-              "Auto-renew rentals",
-              "SMS forwarding to email",
-              "Voicemail transcription",
-              "Blocked numbers",
-            ].map((s) => (
-              <button
-                key={s}
-                onClick={() => toast.success(`${s} updated`)}
-                className="flex w-full items-center justify-between rounded-2xl border border-border bg-surface p-4 text-left text-sm font-semibold shadow-card-elev"
-              >
-                {s}
-                <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground" />
-              </button>
-            ))}
-          </div>
-        )}
-      </main>
-
-      <nav aria-label="Rent sections" className="shrink-0 border-t border-border bg-surface pb-6 pt-2">
-        <ul className="grid grid-cols-5 px-1">
-          {tabs.map((t) => {
-            const active = t.id === tab;
+      {/* Bottom nav */}
+      <nav className="shrink-0 border-t border-border bg-surface pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-1">
+        <ul className="mx-auto grid max-w-md grid-cols-6 px-1">
+          {TABS.map((t) => {
+            const active = tab === t.id;
             const Icon = t.icon;
             return (
-              <li key={t.id} className="flex">
+              <li key={t.id}>
                 <button
+                  type="button"
                   onClick={() => setTab(t.id)}
-                  className={`flex flex-1 flex-col items-center gap-1 rounded-2xl px-1 py-1.5 text-[10px] font-semibold ${
-                    active ? "text-primary" : "text-muted-foreground"
-                  }`}
+                  className="flex w-full flex-col items-center gap-0.5 py-1.5"
                 >
-                  <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 2} />
-                  {t.label}
+                  <Icon
+                    className={`h-[20px] w-[20px] ${active ? "text-primary" : "text-muted-foreground"}`}
+                    strokeWidth={active ? 2.35 : 1.9}
+                  />
+                  <span
+                    className={`text-[9px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}
+                  >
+                    {t.label}
+                  </span>
                 </button>
               </li>
             );
