@@ -2,8 +2,9 @@
  * Server-only Flutterwave helpers for Vernex.
  * Endpoint: POST https://api.flutterwave.com/v3/virtual-account-numbers
  *
- * Static (permanent) NGN accounts require BVN or NIN in live mode.
- * When BVN is missing we create a dynamic (temporary) account so funding still works.
+ * Static (permanent) NGN accounts use is_permanent: true and amount: 0.
+ * Live mode requires BVN (or NIN). Set FLUTTERWAVE_BVN or store bvn on the profile.
+ * Dynamic accounts are only a last-resort fallback.
  */
 
 const FLW_BASE = "https://api.flutterwave.com/v3";
@@ -97,8 +98,9 @@ async function callFlutterwaveCreate(
 }
 
 /**
- * Provision a virtual account for the user and persist on wallets.
- * Prefer permanent (static) when BVN is available; otherwise dynamic.
+ * Provision a STATIC (permanent) Flutterwave virtual account for the user.
+ * Payload uses is_permanent: true, amount: 0, customer name/email, and BVN/NIN.
+ * Dynamic accounts are only used as a last-resort fallback when static is rejected.
  */
 export async function provisionVirtualAccount(
   input: CreateVirtualAccountInput,
@@ -129,6 +131,7 @@ export async function provisionVirtualAccount(
       .eq("user_id", input.userId)
       .maybeSingle();
 
+    // Reuse existing persisted (static) account
     if (wallet?.virtual_account_number) {
       return {
         accountNumber: wallet.virtual_account_number,
@@ -150,59 +153,104 @@ export async function provisionVirtualAccount(
       );
     }
 
+    // Load any KYC identifiers stored on the profile (optional columns)
+    let profileBvn: string | undefined;
+    let profileNin: string | undefined;
+    try {
+      const { data: profileRow } = await supabaseAdmin
+        .from("profiles")
+        .select("*")
+        .eq("id", input.userId)
+        .maybeSingle();
+      const row = (profileRow || {}) as Record<string, unknown>;
+      const rawBvn = row["bvn"] ?? row["bvn_number"];
+      const rawNin = row["nin"] ?? row["nin_number"];
+      if (typeof rawBvn === "string" && rawBvn.trim()) profileBvn = rawBvn.trim();
+      if (typeof rawNin === "string" && rawNin.trim()) profileNin = rawNin.trim();
+    } catch {
+      /* profiles may not expose bvn/nin columns yet */
+    }
+
     const reference =
       wallet?.virtual_account_reference ??
-      `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 
     const { firstname, lastname } = splitName(input.fullName || "Vernex Customer");
+    const accountLabel = `VERNEX / ${firstname} ${lastname}`.toUpperCase().slice(0, 100);
     const email =
       (input.email || "").trim() ||
       `${input.userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`;
     const phonenumber = normalizeNgPhone(input.phone);
+
     const bvn =
       input.bvn?.trim() ||
+      profileBvn ||
       process.env["FLUTTERWAVE_BVN"]?.trim() ||
       process.env["FLW_BVN"]?.trim() ||
+      undefined;
+    const nin =
+      profileNin ||
+      process.env["FLUTTERWAVE_NIN"]?.trim() ||
+      process.env["FLW_NIN"]?.trim() ||
       undefined;
 
     const basePayload: Record<string, unknown> = {
       email,
       tx_ref: reference,
       currency: "NGN",
-      narration: `Vernex / ${firstname} ${lastname}`.slice(0, 100),
+      // Personalized narration shows on the bank transfer receipt
+      narration: accountLabel,
       firstname,
       lastname,
+      // Static / permanent virtual account
+      is_permanent: true,
+      amount: 0,
     };
     if (phonenumber) basePayload["phonenumber"] = phonenumber;
+    if (bvn) basePayload["bvn"] = bvn;
+    if (nin) basePayload["nin"] = nin;
 
     let permanent = false;
     let account: FlwVirtualAccount | null = null;
     let lastError = "";
 
-    // 1) Static / permanent when BVN available (required in live mode)
-    if (bvn) {
-      const staticResult = await callFlutterwaveCreate({
+    // 1) Preferred: permanent static account
+    const staticResult = await callFlutterwaveCreate(basePayload);
+    if (staticResult.ok) {
+      account = staticResult.data;
+      permanent = true;
+    } else {
+      lastError = staticResult.message;
+      console.error("[Flutterwave] static VA rejected:", lastError);
+
+      // Retry static once with a unique tx_ref (in case of duplicate ref)
+      const retryRef = `${reference}-${Date.now().toString(36).toUpperCase()}`;
+      const retryResult = await callFlutterwaveCreate({
         ...basePayload,
-        is_permanent: true,
-        bvn,
+        tx_ref: retryRef,
       });
-      if (staticResult.ok) {
-        account = staticResult.data;
+      if (retryResult.ok) {
+        account = retryResult.data;
         permanent = true;
       } else {
-        lastError = staticResult.message;
+        lastError = retryResult.message || lastError;
       }
     }
 
-    // 2) Dynamic fallback so the user can still fund immediately
+    // 2) Last-resort dynamic only if static truly cannot be created
+    //    (e.g. missing BVN on a live Flutterwave account)
     if (!account) {
       const amount = Math.max(100, Math.round(Number(input.amount) || 100));
-      const dynamicRef = `${reference}-D`;
       const dynamicResult = await callFlutterwaveCreate({
-        ...basePayload,
-        tx_ref: dynamicRef,
+        email,
+        tx_ref: `${reference}-TMP`,
+        currency: "NGN",
+        narration: accountLabel,
+        firstname,
+        lastname,
         is_permanent: false,
         amount,
+        ...(phonenumber ? { phonenumber } : {}),
       });
       if (dynamicResult.ok) {
         account = dynamicResult.data;
@@ -219,15 +267,16 @@ export async function provisionVirtualAccount(
 
     const accountNumber = account.account_number;
     const bankName = account.bank_name ?? "Wema Bank";
+    const savedRef = permanent ? reference : account.order_ref || reference;
 
-    // Only persist permanent accounts; dynamic ones expire
+    // Persist static accounts so the user keeps the same number forever
     if (permanent) {
       const { error: updateError } = await supabaseAdmin
         .from("wallets")
         .update({
           virtual_account_number: accountNumber,
           virtual_bank_name: bankName,
-          virtual_account_reference: reference,
+          virtual_account_reference: savedRef,
         })
         .eq("user_id", input.userId);
 
@@ -239,11 +288,13 @@ export async function provisionVirtualAccount(
     return {
       accountNumber,
       bankName,
-      reference: permanent ? reference : account.order_ref || reference,
+      reference: savedRef,
       permanent,
       message: permanent
         ? undefined
-        : "Temporary account generated. Transfer any amount soon — it may expire in about 1 hour.",
+        : lastError
+          ? `Could not create a permanent account (${lastError}). Temporary account issued — add BVN/NIN or set FLUTTERWAVE_BVN for static accounts.`
+          : "Temporary account generated. Set FLUTTERWAVE_BVN (or user BVN) for a permanent static account.",
     };
   } catch (error) {
     console.error("[Flutterwave] provisionVirtualAccount error", error);
