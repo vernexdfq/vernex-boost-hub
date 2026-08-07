@@ -7,12 +7,22 @@ export type WalletFundingDetails = {
   accountName: string;
   reference: string;
   pending: boolean;
+  configured: boolean;
 };
 
+/**
+ * Returns the user's permanent Flutterwave virtual account.
+ * Auto-provisions one on first request if missing (login / fund page).
+ */
 export const getWalletFundingDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<WalletFundingDetails> => {
     const { supabase, userId } = context;
+    const { isFlutterwaveConfigured, provisionVirtualAccount } = await import(
+      "@/lib/flutterwave.server"
+    );
+
+    const configured = isFlutterwaveConfigured();
 
     const { data: wallet, error } = await supabase
       .from("wallets")
@@ -34,16 +44,19 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
 
     let accountNumber = wallet?.virtual_account_number ?? null;
     let bankName = wallet?.virtual_bank_name ?? "Wema Bank";
-    let reference = wallet?.virtual_account_reference ?? `VNX-${userId.slice(0, 8).toUpperCase()}`;
+    let reference =
+      wallet?.virtual_account_reference ??
+      `VNX-${userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 
-    // Backfill for accounts created before Flutterwave was connected.
-    if (!accountNumber && profile?.email) {
-      const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
+    // Provision (or backfill) permanent VA when Flutterwave is configured
+    if (!accountNumber && configured) {
       const provisioned = await provisionVirtualAccount({
         userId,
-        email: profile.email,
-        fullName: profile.full_name ?? "Vernex Customer",
-        phone: profile.phone ?? null,
+        email:
+          profile?.email ??
+          `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
+        fullName: profile?.full_name ?? "Vernex Customer",
+        phone: profile?.phone ?? null,
       });
       if (provisioned) {
         accountNumber = provisioned.accountNumber;
@@ -52,5 +65,12 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       }
     }
 
-    return { bankName, accountNumber, accountName, reference, pending: !accountNumber };
+    return {
+      bankName,
+      accountNumber,
+      accountName,
+      reference,
+      pending: !accountNumber,
+      configured,
+    };
   });
