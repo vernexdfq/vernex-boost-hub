@@ -1,134 +1,216 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, Check, Zap, Building2, ShieldCheck } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Copy,
+  Check,
+  Building2,
+  ShieldCheck,
+  Loader2,
+  ChevronLeft,
+  RefreshCw,
+  Wallet,
+} from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
-import { PageHeader } from "@/components/page-header";
+import { naira } from "@/lib/pricing";
+import { fetchAccount } from "@/lib/account";
 import { getWalletFundingDetails } from "@/lib/functions/fund.functions";
 
 export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
     meta: [
       { title: "Fund Wallet — Vernex" },
-      { name: "description", content: "Fund your Vernex wallet instantly via dedicated virtual bank account or Paystack." },
-      { property: "og:title", content: "Fund your Vernex wallet" },
-      { property: "og:description", content: "Transfer to your dedicated Nigerian virtual account and get credited instantly." },
+      {
+        name: "description",
+        content: "Fund your Vernex wallet via bank transfer to your permanent virtual account.",
+      },
     ],
   }),
   component: FundPage,
 });
 
 function FundPage() {
-  const [copied, setCopied] = useState<string | null>(null);
   const { user } = Route.useRouteContext();
-  const fetchDetails = useServerFn(getWalletFundingDetails);
+  const queryClient = useQueryClient();
+  const fetchFunding = useServerFn(getWalletFundingDetails);
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const { data: account, isLoading } = useQuery({
-    queryKey: ["fund-details", user.id],
-    queryFn: () => fetchDetails({ data: undefined }),
+  const { data: account } = useQuery({
+    queryKey: ["account", user.id],
+    queryFn: () => fetchAccount(user.id),
   });
 
-  const copy = async (value: string, key: string, label: string) => {
+  const {
+    data: funding,
+    isLoading,
+    isFetching,
+    refetch,
+    isError,
+  } = useQuery({
+    queryKey: ["wallet-funding", user.id],
+    queryFn: () => fetchFunding({ data: undefined }),
+    staleTime: 30_000,
+  });
+
+  const balance = account?.wallet?.balance ?? 0;
+
+  async function copy(value: string, key: string) {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(key);
-      toast.success(`${label} copied`);
-      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1400);
+      toast.success("Copied");
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
     } catch {
-      toast.error("Copy failed");
+      toast.error("Could not copy");
     }
-  };
+  }
+
+  function Row({
+    label,
+    value,
+    mono,
+    copyKey,
+  }: {
+    label: string;
+    value: string;
+    mono?: boolean;
+    copyKey?: string;
+  }) {
+    return (
+      <div className="flex items-center justify-between gap-3 border-b border-border py-3 last:border-0">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {label}
+          </p>
+          <p className={`mt-0.5 text-sm font-bold ${mono ? "font-mono tabular-nums" : ""}`}>
+            {value}
+          </p>
+        </div>
+        {copyKey && (
+          <button
+            type="button"
+            onClick={() => copy(value, copyKey)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-bold text-primary"
+          >
+            {copied === copyKey ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            Copy
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <AppShell>
-      <PageHeader title="Fund Wallet" subtitle="Instant credit on bank transfer" />
-
-      <section className="px-5 pt-5">
-        <div className="relative overflow-hidden rounded-3xl wallet-gradient p-5 shadow-wallet">
-          <div className="absolute inset-0 dotted-bg opacity-30" />
-          <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
-            <Building2 className="h-3.5 w-3.5" /> Your dedicated account
-          </div>
-
-          {isLoading ? (
-            <div className="relative mt-8 flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            </div>
-          ) : account?.pending ? (
-            <p className="relative mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80">
-              We're setting up your dedicated account number. Refresh in a moment — it stays yours
-              permanently once ready.
-            </p>
-          ) : (
-            <dl className="relative mt-4 space-y-3">
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="min-w-0">
-                  <dt className="text-[10px] uppercase tracking-widest text-white/50">Bank</dt>
-                  <dd className="truncate text-sm font-bold text-white">{account?.bankName}</dd>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="min-w-0">
-                  <dt className="text-[10px] uppercase tracking-widest text-white/50">Account Number</dt>
-                  <dd className="truncate text-lg font-black tracking-wider text-white tabular-nums">
-                    {account?.accountNumber}
-                  </dd>
-                </div>
-                <button
-                  onClick={() => copy(account?.accountNumber ?? "", "num", "Account number")}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-[oklch(0.22_0.12_265)] hover:brightness-95 transition"
-                >
-                  {copied === "num" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied === "num" ? "Copied" : "Copy"}
-                </button>
-              </div>
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="min-w-0">
-                  <dt className="text-[10px] uppercase tracking-widest text-white/50">Account Name</dt>
-                  <dd className="truncate text-sm font-bold text-white">{account?.accountName}</dd>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="min-w-0">
-                  <dt className="text-[10px] uppercase tracking-widest text-white/50">Reference</dt>
-                  <dd className="truncate text-sm font-mono text-white/90">{account?.reference}</dd>
-                </div>
-              </div>
-            </dl>
-          )}
-
-          <p className="relative mt-4 flex items-start gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-3 text-[12px] leading-relaxed text-emerald-200/90">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-            Transfer any amount to this account. Your wallet is credited automatically within seconds.
-          </p>
-        </div>
-      </section>
-
-      <section className="px-5 pt-6">
-        <div className="mb-3 flex items-center gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Instant Gateway
-          </h2>
-          <div className="h-px flex-1 bg-border" />
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
+        <Link to="/dashboard" aria-label="Back" className="text-primary">
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+        <div className="min-w-0 flex-1 text-center">
+          <h1 className="text-[15px] font-bold">Fund Wallet</h1>
+          <p className="text-[11px] text-muted-foreground">Bank transfer · instant credit</p>
         </div>
         <button
-          onClick={() => toast.info("Card gateway coming live in next deployment")}
-          className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left shadow-card-elev hover:bg-surface-2 transition"
+          type="button"
+          onClick={() => {
+            refetch();
+            queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+          }}
+          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-surface"
+          aria-label="Refresh"
         >
-          <span className="grid h-11 w-11 place-items-center rounded-2xl brand-gradient text-white">
-            <Zap className="h-5 w-5" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">Pay with Paystack / Flutterwave</p>
-            <p className="text-xs text-muted-foreground">Card, USSD or bank — 1.5% fee</p>
-          </div>
-          <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-            Fast
-          </span>
+          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
         </button>
-      </section>
+      </header>
+
+      <div className="space-y-4 px-5 pt-5 pb-6">
+        {/* Balance */}
+        <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-600">
+              <Wallet className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Available balance
+              </p>
+              <p className="text-2xl font-black tabular-nums text-emerald-600">
+                {naira(Math.round(balance))}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Virtual account */}
+        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+          <div className="mb-1 flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-black">Your funding account</h2>
+          </div>
+          <p className="text-[12px] text-muted-foreground">
+            Transfer any amount from your bank app to this account. Your wallet is credited
+            automatically.
+          </p>
+
+          {isLoading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            </div>
+          ) : isError ? (
+            <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-center text-sm">
+              Could not load funding details.{" "}
+              <button type="button" onClick={() => refetch()} className="font-bold text-primary">
+                Retry
+              </button>
+            </div>
+          ) : funding?.pending ? (
+            <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm">
+              <p className="font-bold text-amber-700">Account is being generated</p>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                {funding.configured
+                  ? "Your permanent virtual account is being created with Flutterwave. Tap refresh in a few seconds."
+                  : "Flutterwave is not fully configured on the server yet. Contact support if this persists."}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="mt-3 inline-flex items-center gap-2 rounded-lg brand-gradient px-3 py-2 text-[12px] font-bold text-white"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Generate / Refresh
+              </button>
+            </div>
+          ) : (
+            <div className="mt-3">
+              <Row label="Bank" value={funding?.bankName ?? "—"} />
+              <Row
+                label="Account number"
+                value={funding?.accountNumber ?? "—"}
+                mono
+                copyKey="acct"
+              />
+              <Row label="Account name" value={funding?.accountName ?? "—"} copyKey="name" />
+              <Row label="Reference" value={funding?.reference ?? "—"} mono copyKey="ref" />
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-border bg-surface p-4">
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <div className="text-[13px] leading-relaxed text-muted-foreground">
+              <p className="font-bold text-foreground">How funding works</p>
+              <ul className="mt-2 space-y-1.5">
+                <li>· Copy the account number above into your bank app</li>
+                <li>· Send any amount in NGN (minimum ₦100 recommended)</li>
+                <li>· Wallet balance updates automatically after Flutterwave confirms</li>
+                <li>· Keep the reference if you need support on a delayed credit</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
     </AppShell>
   );
 }
