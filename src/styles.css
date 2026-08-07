@@ -146,3 +146,25 @@
   flex-shrink: 0;
   gap: 1rem;
 }
+
+
+/* Instant mobile interactions — remove 300ms tap delay, crisp press feedback */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.tap-fast {
+  transition: transform 80ms ease-out, opacity 80ms ease-out;
+}
+.tap-fast:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
