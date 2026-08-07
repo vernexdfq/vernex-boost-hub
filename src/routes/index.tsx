@@ -17,7 +17,7 @@ import { VernexMark } from "@/components/brand";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vernex — Instant Virtual Numbers, SMM Boost & Wallet" },
+      { title: "Vernex — Your digital toolkit for virtual numbers, OTP verification, and social media growth" },
       {
         name: "description",
         content:
@@ -97,9 +97,7 @@ const FAQS = [
   },
 ];
 
-function badgeClass(tone: string) {
-  if (tone === "active") return "bg-sky-500/10 text-sky-400 border-sky-500/20";
-  if (tone === "rent") return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+function badgeClass(_tone: string) {
   return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
 }
 
@@ -117,69 +115,45 @@ function LiveCard({
   tone: string;
 }) {
   return (
-    <div className="flex w-72 shrink-0 items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-4 shadow-lg">
-      <div>
-        <div className="mb-1 flex items-center space-x-2">
-          <span className="text-lg leading-none">{flag}</span>
-          <span className="text-sm font-semibold text-slate-100">{country}</span>
-        </div>
-        <p className="font-mono text-xs text-slate-400 tabular-nums">{number}</p>
-      </div>
-      <span
-        className={`rounded-md border px-2.5 py-1 text-xs font-medium ${badgeClass(tone)}`}
-      >
-        {badge}
-      </span>
-    </div>
-  );
-}
-
-function Landing() {
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [marqueePaused, setMarqueePaused] = useState(false);
-
-  const enter = () => navigate({ to: "/auth" });
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-2">
-            <VernexMark className="h-8 w-8" />
-            <span className="text-xl font-bold tracking-wider text-emerald-400">
-              Vernex<span className="text-white">.ng</span>
+          <Link to="/" className="flex items-center space-x-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-emerald-500 font-mono text-xs font-bold text-slate-950">
+              Vx
+            </span>
+            <span className="text-xl font-bold tracking-tight text-white">
+              Vernex<span className="text-emerald-500">.com.ng</span>
             </span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center space-x-4">
             <button
               type="button"
               onClick={enter}
-              className="hidden rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-600 sm:inline-flex"
+              className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:block"
             >
-              Get Started
+              Sign In
             </button>
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="grid h-10 w-10 place-items-center rounded-lg border border-slate-700 text-slate-100"
+              className="p-2 text-slate-300 transition hover:text-white"
               aria-label="Menu"
             >
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
         {menuOpen && (
-          <div className="border-t border-slate-800 bg-slate-900">
+          <div className="border-t border-slate-900 bg-slate-950">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-2">
               {NAV.map((l) => (
                 <a
                   key={l.href}
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
-                  className="border-b border-slate-800 py-3.5 text-[15px] font-medium text-slate-100"
+                  className="border-b border-slate-900 py-3.5 text-[15px] font-medium text-slate-100"
                 >
                   {l.label}
                 </a>
@@ -190,9 +164,9 @@ function Landing() {
                   setMenuOpen(false);
                   enter();
                 }}
-                className="mb-2 mt-3 w-full rounded-lg bg-emerald-500 py-3.5 text-sm font-bold text-slate-950"
+                className="mb-2 mt-3 w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950"
               >
-                Get Started →
+                Get a Number Now →
               </button>
             </nav>
           </div>
@@ -201,44 +175,63 @@ function Landing() {
 
       {/* Hero */}
       <section className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <div className="mb-6 inline-flex items-center space-x-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-emerald-400">
+        <div className="mb-6 inline-flex items-center space-x-2 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-3.5 py-1.5 text-xs text-emerald-400">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-          <span>Canada · OTP Ready</span>
+          <span>Canada - OTP Ready</span>
         </div>
-        <h1 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-6xl">
+        <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
           Your second number, anywhere in the world.
         </h1>
-        <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-400 sm:text-xl">
+        <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
           Verify accounts, rent virtual numbers, and manage your digital presence — all from one
-          powerful toolkit built for global business.
+          powerful toolkit built for Nigerians doing global business.
         </p>
-        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+
+        <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <button
             type="button"
             onClick={enter}
-            className="w-full rounded-lg bg-emerald-500 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-600 sm:w-auto"
+            className="w-full rounded-xl bg-emerald-500 px-8 py-3.5 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 sm:w-auto"
           >
-            Create Free Account
+            Get a Number Now →
           </button>
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
-            href="#how"
-            className="w-full rounded-lg border border-slate-700 px-6 py-3.5 text-sm font-semibold text-slate-100 transition hover:border-slate-500 sm:w-auto"
+            href="#download"
+            className="flex w-full items-center justify-center space-x-3 rounded-xl border border-slate-800 bg-slate-900 px-5 py-2.5 sm:w-auto"
           >
-            How it works
+            <svg className="h-6 w-6 fill-white" viewBox="0 0 24 24" aria-hidden>
+              <path d="M3.609 1.814L13.792 12 3.61 22.186a1.5 1.5 0 0 1-.944-1.39V3.204a1.5 1.5 0 0 1 .943-1.39zM15.207 13.414l2.122 2.122-11.31 6.524a1.5 1.5 0 0 1-1.545-.068l10.733-8.578zM15.207 10.586L4.394 2.008a1.5 1.5 0 0 1 1.545-.068l11.31 6.524-2.142 2.122zM17.329 12.707l3.268 1.886a1.5 1.5 0 0 1 0 2.594l-3.268 1.886-2.122-2.122 2.122-2.122z" />
+            </svg>
+            <div className="text-left">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Get it on</p>
+              <p className="text-sm font-bold">
+                Google Play{" "}
+                <span className="ml-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">
+                  LIVE
+                </span>
+              </p>
+            </div>
+          </a>
+          <a
+            href="#download"
+            className="flex w-full items-center justify-center space-x-3 rounded-xl border border-slate-800 bg-slate-900 px-5 py-2.5 sm:w-auto"
+          >
+            <svg className="h-6 w-6 fill-white" viewBox="0 0 24 24" aria-hidden>
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.1c.67-.82 1.12-1.96.99-3.1-.97.04-2.16.65-2.85 1.47-.62.72-1.16 1.87-1.01 2.98 1.08.08 2.19-.55 2.87-1.35z" />
+            </svg>
+            <div className="text-left">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Download on the</p>
+              <p className="text-sm font-bold">App Store</p>
+            </div>
           </a>
         </div>
       </section>
 
-      {/* Live marquee — continuously scrolling number cards */}
-      <section className="overflow-hidden border-y border-slate-800/60 bg-slate-900/50 py-8">
-        <div className="mx-auto mb-4 flex max-w-7xl items-center justify-between px-4 text-xs font-semibold uppercase tracking-widest text-slate-400">
-          <span>Live System Feed</span>
-          <span className="flex items-center text-emerald-400">
-            <span className="mr-1.5 h-1.5 w-1.5 animate-ping rounded-full bg-emerald-400" />
-            5 Live
-          </span>
-        </div>
-
+      {/* Live marquee */}
+      <section className="overflow-hidden border-y border-slate-900 bg-slate-900/40 py-6">
         <div className="relative w-full overflow-hidden">
           <div
             className={`vernex-marquee-track py-2${marqueePaused ? " is-paused" : ""}`}
@@ -259,9 +252,31 @@ function Landing() {
             </div>
           </div>
         </div>
+        <div className="mx-auto mt-3 flex max-w-7xl items-center justify-between px-4 font-mono text-xs text-slate-500">
+          <span>Last updated: just now</span>
+          <span className="flex items-center text-emerald-400">
+            <span className="mr-1.5 h-1.5 w-1.5 animate-ping rounded-full bg-emerald-400" />
+            5 Live
+          </span>
+        </div>
+      </section>
 
-        <div className="mx-auto mt-3 max-w-7xl px-4 text-right font-mono text-xs text-slate-500">
-          Last updated: just now
+      {/* Stats banner */}
+      <section className="bg-emerald-600 py-12 text-slate-950">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 text-center sm:px-6 md:grid-cols-4 lg:px-8">
+          {[
+            ["50+", "Countries"],
+            ["200K+", "Numbers Delivered"],
+            ["98%", "OTP Success Rate"],
+            ["24/7", "Platform Access"],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <p className="text-3xl font-extrabold tracking-tight sm:text-4xl">{value}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-wider opacity-90 sm:text-sm">
+                {label}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
