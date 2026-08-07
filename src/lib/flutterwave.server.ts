@@ -4,6 +4,14 @@
  * Creates permanent (static) NGN virtual account numbers so a user can fund
  * their wallet by bank transfer forever, and credits the wallet when
  * Flutterwave notifies us of a completed transfer.
+ *
+ * Env (Cloudflare / .env) — any of these secret key names work:
+ *   FLUTTERWAVE_SECRET_KEY  (preferred)
+ *   FLW_SECRET_KEY
+ * Optional:
+ *   FLUTTERWAVE_PUBLIC_KEY
+ *   FLUTTERWAVE_ENCRYPTION_KEY
+ *   FLW_WEBHOOK_HASH / FLUTTERWAVE_WEBHOOK_HASH  (verihash for webhooks)
  */
 
 const FLW_BASE = "https://api.flutterwave.com/v3";
@@ -15,10 +23,27 @@ type FlwVirtualAccount = {
   flw_ref?: string;
 };
 
-function secretKey(): string {
-  const key = process.env["FLW_SECRET_KEY"];
-  if (!key) throw new Error("Flutterwave is not configured");
+export function flutterwaveSecretKey(): string | null {
+  const key =
+    process.env["FLUTTERWAVE_SECRET_KEY"]?.trim() ||
+    process.env["FLW_SECRET_KEY"]?.trim() ||
+    process.env["FLUTTERWAVE_SECRET"]?.trim() ||
+    "";
+  return key || null;
+}
+
+function requireSecretKey(): string {
+  const key = flutterwaveSecretKey();
+  if (!key) {
+    throw new Error(
+      "Flutterwave is not configured. Set FLUTTERWAVE_SECRET_KEY in Cloudflare environment variables.",
+    );
+  }
   return key;
+}
+
+export function isFlutterwaveConfigured(): boolean {
+  return Boolean(flutterwaveSecretKey());
 }
 
 export type CreateVirtualAccountInput = {
@@ -36,6 +61,11 @@ export type CreateVirtualAccountInput = {
 export async function provisionVirtualAccount(
   input: CreateVirtualAccountInput,
 ): Promise<{ accountNumber: string; bankName: string; reference: string } | null> {
+  if (!flutterwaveSecretKey()) {
+    console.error("[Flutterwave] missing FLUTTERWAVE_SECRET_KEY");
+    return null;
+  }
+
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const { data: wallet } = await supabaseAdmin
@@ -52,20 +82,36 @@ export async function provisionVirtualAccount(
     };
   }
 
-  const reference =
-    wallet?.virtual_account_reference ?? `VNX-${input.userId.slice(0, 8).toUpperCase()}`;
+  // Ensure a wallet row exists
+  if (!wallet) {
+    await supabaseAdmin.from("wallets").upsert(
+      {
+        user_id: input.userId,
+        balance: 0,
+        ledger_balance: 0,
+        currency: "NGN",
+      },
+      { onConflict: "user_id" },
+    );
+  }
 
-  const nameParts = input.fullName.trim().split(/\s+/);
+  const reference =
+    wallet?.virtual_account_reference ?? `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+
+  const nameParts = (input.fullName || "Vernex Customer").trim().split(/\s+/);
+  const email =
+    input.email?.trim() ||
+    `${input.userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`;
 
   const payload: Record<string, unknown> = {
-    email: input.email,
+    email,
     tx_ref: reference,
     is_permanent: true,
-    narration: `Vernex / ${input.fullName.toUpperCase()}`,
+    narration: `Vernex / ${(input.fullName || "Customer").toUpperCase()}`,
     firstname: nameParts[0] ?? "Vernex",
     lastname: nameParts.slice(1).join(" ") || "Customer",
   };
-  if (input.phone) payload["phonenumber"] = input.phone;
+  if (input.phone) payload["phonenumber"] = input.phone.replace(/\s+/g, "");
   if (input.bvn) payload["bvn"] = input.bvn;
 
   let body: { status?: string; message?: string; data?: FlwVirtualAccount };
@@ -73,14 +119,19 @@ export async function provisionVirtualAccount(
     const res = await fetch(`${FLW_BASE}/virtual-account-numbers`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${secretKey()}`,
+        Authorization: `Bearer ${requireSecretKey()}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     });
     body = (await res.json()) as typeof body;
     if (!res.ok || body.status !== "success" || !body.data?.account_number) {
-      console.error("[Flutterwave] virtual account failed:", body?.message ?? res.status);
+      console.error(
+        "[Flutterwave] virtual account failed:",
+        body?.message ?? res.status,
+        JSON.stringify(body),
+      );
       return null;
     }
   } catch (error) {
@@ -165,10 +216,15 @@ export async function creditWalletFromTransfer(params: {
     _type: "credit",
     _amount: params.amount,
     _fee: 0,
-    _description: "Wallet funding via bank transfer",
+    _description: "Wallet top-up via bank transfer",
     _reference: params.reference,
-    _payment_method: "flutterwave_virtual_account",
-    _metadata: { provider: "flutterwave", account_number: params.accountNumber ?? null },
+    _payment_method: "flutterwave",
+    _metadata: {
+      source: "flutterwave",
+      account_number: params.accountNumber,
+      tx_ref: params.txRef,
+      customer_email: params.customerEmail,
+    },
   });
 
   if (error) {
@@ -179,8 +235,8 @@ export async function creditWalletFromTransfer(params: {
   await supabaseAdmin.from("notifications").insert({
     user_id: userId,
     title: "Wallet funded",
-    body: `₦${params.amount.toLocaleString()} has been credited to your wallet.`,
-    type: "credit",
+    body: `₦${Number(params.amount).toLocaleString("en-NG")} has been added to your wallet.`,
+    type: "wallet",
   });
 
   return { credited: true };
