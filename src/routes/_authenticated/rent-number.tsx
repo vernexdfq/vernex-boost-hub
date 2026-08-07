@@ -129,29 +129,29 @@ function CountryDirectory({
   }, [countries, q]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-slate-950/80 backdrop-blur-md sm:items-center sm:justify-center sm:p-4">
-      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-3xl border border-slate-800 bg-slate-900 shadow-2xl sm:max-w-md sm:rounded-3xl">
-        <div className="flex items-center justify-between border-b border-slate-800 p-4">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#0F172A]/80 backdrop-blur-md sm:items-center sm:justify-center sm:p-4">
+      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-3xl border border-[#1E293B] bg-[#131C31] shadow-2xl sm:max-w-md sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-[#1E293B] p-4">
           <h3 className="text-base font-bold text-white">Select Country</h3>
           <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="border-b border-slate-800/60 p-4">
+        <div className="border-b border-[#1E293B]/60 p-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search country or code..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-9 pr-4 text-sm text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#1E293B] bg-[#090D16] py-2.5 pl-9 pr-4 text-sm text-white focus:border-emerald-500 focus:outline-none"
             />
           </div>
         </div>
         <div className="space-y-1 overflow-y-auto p-2">
           {loading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
             </div>
           ) : filtered.length === 0 ? (
             <p className="px-3 py-8 text-center text-sm text-slate-400">No countries match.</p>
@@ -161,7 +161,7 @@ function CountryDirectory({
                 key={c.country_code}
                 type="button"
                 onClick={() => onPick(c)}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-slate-800/50"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-[#0F172A]/60"
               >
                 <span className="text-lg">{flagOf(c.country_code)}</span>
                 <div className="min-w-0 flex-1">
@@ -224,9 +224,9 @@ function NumberCatalog({
     : 0;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-slate-950 text-slate-100">
-      <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3">
-        <button type="button" onClick={onBack} className="text-emerald-400">
+    <div className="flex min-h-0 flex-1 flex-col bg-[#090D16] text-slate-100">
+      <div className="flex items-center gap-2 border-b border-[#1E293B] px-4 py-3">
+        <button type="button" onClick={onBack} className="text-[#16C784]">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
@@ -241,7 +241,7 @@ function NumberCatalog({
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
           </div>
         ) : numbers.length === 0 ? (
           <p className="py-12 text-center text-sm text-slate-400">No numbers available right now.</p>
@@ -254,12 +254,12 @@ function NumberCatalog({
                   onClick={() => setPicked(n)}
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left ${
                     picked?.id === n.id
-                      ? "border-emerald-500/50 bg-emerald-500/10"
-                      : "border-slate-800 bg-slate-900"
+                      ? "border-[#16C784]/50 bg-[#16C784]/10"
+                      : "border-[#1E293B] bg-[#131C31]"
                   }`}
                 >
                   <p className="font-mono text-sm font-semibold tabular-nums">{n.phone_number}</p>
-                  <span className="text-sm font-bold text-emerald-400">
+                  <span className="text-sm font-bold text-[#16C784]">
                     {naira(Math.round(Number(n.monthly_price_ngn || 0)))}
                   </span>
                 </button>
@@ -269,7 +269,7 @@ function NumberCatalog({
         )}
       </div>
       {picked && (
-        <div className="border-t border-slate-800 bg-slate-900 p-4">
+        <div className="border-t border-[#1E293B] bg-[#131C31] p-4">
           <p className="font-mono text-lg font-bold tabular-nums">{picked.phone_number}</p>
           <div className="mt-3 flex gap-2">
             {PLANS.map((p) => (
@@ -279,20 +279,20 @@ function NumberCatalog({
                 onClick={() => setPlan(p)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
                   plan === p
-                    ? "bg-emerald-500 text-slate-950"
-                    : "border border-slate-700 text-slate-300"
+                    ? "bg-[#16C784] text-slate-950"
+                    : "border border-[#1E293B] text-slate-300"
                 }`}
               >
                 {p}
               </button>
             ))}
           </div>
-          <p className="mt-3 text-2xl font-bold tabular-nums text-emerald-400">{naira(price)}</p>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-[#16C784]">{naira(price)}</p>
           <button
             type="button"
             disabled={rent.isPending}
             onClick={() => rent.mutate()}
-            className="mt-3 w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950 disabled:opacity-60"
+            className="mt-3 w-full rounded-xl bg-[#16C784] py-3 text-sm font-bold text-slate-950 disabled:opacity-60"
           >
             {rent.isPending ? "Processing…" : "Rent this number"}
           </button>
@@ -313,7 +313,7 @@ function HistoryPanel() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
+        <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
       </div>
     );
   }
@@ -338,7 +338,7 @@ function HistoryPanel() {
         return (
         <li
           key={String(r["id"])}
-          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
+          className="flex items-center justify-between rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
         >
           <div>
             <p className="text-sm font-semibold text-white">{phone}</p>
@@ -346,7 +346,7 @@ function HistoryPanel() {
               {formatDate(String(r["created_at"] || ""))}
             </p>
           </div>
-          <span className="text-[11px] font-semibold text-emerald-400">{String(r["status"] || "active")}</span>
+          <span className="text-[11px] font-semibold text-[#16C784]">{String(r["status"] || "active")}</span>
         </li>
         );
       })}
@@ -407,13 +407,13 @@ function KeypadPanel({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-4">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col space-y-3 overflow-y-auto px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {/* Active Caller ID */}
       <div className="relative mb-4">
         <button
           type="button"
           onClick={() => setShowCallerMenu((v) => !v)}
-          className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-3 shadow-md transition hover:border-slate-700"
+          className="flex w-full items-center justify-between rounded-2xl border border-[#1E293B] bg-[#131C31] p-3 shadow-md transition hover:border-[#1E293B]"
         >
           <div className="flex items-center space-x-3 text-left">
             <span className="text-xl">{activeCaller.flag}</span>
@@ -433,14 +433,14 @@ function KeypadPanel({
         </button>
 
         {showCallerMenu && (
-          <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div className="flex items-center justify-between bg-slate-950/50 p-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-[#1E293B] bg-[#131C31] shadow-2xl">
+            <div className="flex items-center justify-between bg-[#0F172A] p-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
               <span>Select Outbound Number</span>
               <button type="button" onClick={() => setShowCallerMenu(false)} className="hover:text-white">
                 ×
               </button>
             </div>
-            <div className="max-h-60 divide-y divide-slate-800/80 overflow-y-auto">
+            <div className="max-h-60 divide-y divide-[#1E293B] overflow-y-auto">
               {callerIds.map((c) => (
                 <button
                   key={c.id}
@@ -449,7 +449,7 @@ function KeypadPanel({
                     setActiveCaller(c);
                     setShowCallerMenu(false);
                   }}
-                  className="flex w-full items-center justify-between p-3 text-left transition hover:bg-slate-800/50"
+                  className="flex w-full items-center justify-between p-3 text-left transition hover:bg-[#0F172A]/60"
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">{c.flag}</span>
@@ -459,7 +459,7 @@ function KeypadPanel({
                         <span
                           className={`ml-1 rounded px-1.5 py-0.5 text-[10px] ${
                             c.badge === "Rented"
-                              ? "bg-emerald-500/20 text-emerald-400"
+                              ? "bg-[#16C784]/20 text-[#16C784]"
                               : "bg-sky-500/20 text-sky-400"
                           }`}
                         >
@@ -470,7 +470,7 @@ function KeypadPanel({
                     </div>
                   </div>
                   {activeCaller.id === c.id && (
-                    <span className="text-sm font-bold text-emerald-500">✓</span>
+                    <span className="text-sm font-bold text-[#16C784]">✓</span>
                   )}
                 </button>
               ))}
@@ -480,12 +480,12 @@ function KeypadPanel({
       </div>
 
       {/* Dialer card */}
-      <div className="rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 shadow-2xl backdrop-blur-sm">
-        <div className="mb-6 flex items-center justify-center space-x-3 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+      <div className="shrink-0 rounded-3xl border border-[#1E293B] bg-[#131C31] p-4 shadow-2xl backdrop-blur-sm sm:p-5">
+        <div className="mb-4 flex items-center justify-center space-x-3 rounded-2xl border border-[#1E293B] bg-[#0F172A]/80 px-4 py-3 shadow-inner">
           <button
             type="button"
             onClick={() => setShowCountry(true)}
-            className="flex items-center space-x-1.5 rounded-xl bg-slate-800 px-2.5 py-1.5 text-sm transition hover:bg-slate-700"
+            className="flex items-center space-x-1.5 rounded-xl bg-[#1E293B] px-2.5 py-1.5 text-sm transition hover:bg-[#1E293B]"
           >
             <span className="text-lg">
               {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+44" ? "🇬🇧" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
@@ -506,13 +506,13 @@ function KeypadPanel({
           </button>
         </div>
 
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-3 gap-2.5 sm:gap-3">
           {KEYS.map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => press(k)}
-              className="flex flex-col items-center justify-center rounded-2xl bg-slate-800/80 py-3.5 shadow-inner transition hover:bg-slate-700 active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl border border-[#1E293B]/50 bg-[#0F172A] py-3 shadow-md transition hover:bg-[#1E293B] active:scale-95"
             >
               <span className="font-mono text-xl font-bold text-white">{k}</span>
               {KEY_LETTERS[k] && (
@@ -524,7 +524,7 @@ function KeypadPanel({
           ))}
         </div>
 
-        <div className="flex items-center justify-around px-4">
+        <div className="flex items-center justify-around px-2">
           <button
             type="button"
             onClick={() =>
@@ -532,7 +532,7 @@ function KeypadPanel({
                 description: "Video sessions attach to your active rented line.",
               })
             }
-            className="rounded-full bg-slate-800 p-3.5 text-slate-300 transition hover:bg-slate-700"
+            className="rounded-full border border-[#1E293B] bg-[#0F172A] p-3.5 text-slate-300 transition hover:bg-[#1E293B]"
             aria-label="Video"
           >
             <Video className="h-5 w-5" />
@@ -540,7 +540,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={call}
-            className="rounded-full bg-emerald-500 p-4 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 active:scale-95"
+            className="rounded-full bg-[#16C784] p-4 text-slate-950 shadow-lg shadow-[#16C784]/30 transition hover:bg-[#12ab70] active:scale-95"
             aria-label="Call"
           >
             <Phone className="h-7 w-7 fill-current" />
@@ -548,7 +548,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={backspace}
-            className="rounded-full bg-slate-800 p-3.5 text-slate-300 transition hover:bg-slate-700"
+            className="rounded-full border border-[#1E293B] bg-[#0F172A] p-3.5 text-slate-300 transition hover:bg-[#1E293B]"
             aria-label="Delete"
           >
             <Delete className="h-5 w-5" />
@@ -574,14 +574,14 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
         <button
           type="button"
           onClick={onBrowse}
-          className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400"
+          className="inline-flex items-center gap-1 rounded-full border border-[#16C784]/30 bg-[#16C784]/10 px-3 py-1.5 text-xs font-semibold text-[#16C784]"
         >
           <Plus className="h-3.5 w-3.5" /> Rent new
         </button>
       </div>
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
         </div>
       ) : rentals.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
@@ -593,7 +593,7 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
           <button
             type="button"
             onClick={onBrowse}
-            className="mt-4 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950"
+            className="mt-4 rounded-xl bg-[#16C784] px-4 py-2.5 text-sm font-bold text-slate-950"
           >
             Browse numbers
           </button>
@@ -606,7 +606,7 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
             return (
             <li
               key={String(r["id"])}
-              className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
+              className="rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
             >
               <p className="font-mono text-sm font-semibold tabular-nums text-white">
                 {phone}
@@ -634,7 +634,7 @@ function SettingsPanel() {
       ].map(([label, value]) => (
         <div
           key={label}
-          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
+          className="flex items-center justify-between rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
         >
           <span className="text-sm text-slate-300">{label}</span>
           <span className="text-sm font-semibold text-white">{value}</span>
@@ -714,16 +714,16 @@ function RentNumberApp() {
 
   if (catalogCountry) {
     return (
-      <div className="flex h-[100dvh] flex-col bg-slate-950">
+      <div className="flex h-[100dvh] flex-col bg-[#090D16]">
         <NumberCatalog country={catalogCountry} onBack={() => setCatalogCountry(null)} />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-slate-950 text-slate-100">
+    <div className="flex h-[100dvh] flex-col bg-[#090D16] text-slate-100">
       {/* Header */}
-      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-slate-900 bg-slate-950/90 px-4 backdrop-blur-md">
+      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-[#1E293B] bg-[#0F172A]/95 px-4 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <Link to="/dashboard" aria-label="Back" className="text-slate-300 hover:text-white">
             <ArrowLeft className="h-5 w-5" />
@@ -738,13 +738,13 @@ function RentNumberApp() {
             type="button"
             onClick={() => setShowGlobe(true)}
             aria-label="Browse countries"
-            className="grid h-9 w-9 place-items-center rounded-full border border-slate-800 text-slate-300"
+            className="grid h-9 w-9 place-items-center rounded-full border border-[#1E293B] text-slate-300"
           >
             <Globe className="h-4 w-4" />
           </button>
           <Link
             to="/fund"
-            className="flex items-center space-x-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/20"
+            className="flex items-center space-x-1.5 rounded-full border border-[#16C784]/30 bg-[#16C784]/10 px-3 py-1.5 text-xs font-semibold text-[#16C784] transition hover:bg-[#16C784]/20"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Add Credit</span>
@@ -753,7 +753,7 @@ function RentNumberApp() {
       </header>
 
       {/* Body */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))]">
         {tab === "history" && <HistoryPanel />}
         {tab === "contacts" && <ContactsPanel />}
         {tab === "keypad" && (
@@ -773,7 +773,7 @@ function RentNumberApp() {
       </div>
 
       {/* Bottom nav — 5 items, Credit moved to header */}
-      <nav className="z-40 shrink-0 border-t border-slate-900 bg-slate-950/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] backdrop-blur-md">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#1E293B] bg-[#0F172A]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
           {TABS.map((t) => {
             const active = tab === t.id;
@@ -784,7 +784,7 @@ function RentNumberApp() {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={`flex w-full flex-col items-center justify-center py-1 transition ${
-                  active ? "text-emerald-400" : "text-slate-400 hover:text-white"
+                  active ? "text-[#16C784]" : "text-slate-400 hover:text-white"
                 }`}
               >
                 <Icon className="mb-1 h-5 w-5" strokeWidth={active ? 2.35 : 1.9} />
