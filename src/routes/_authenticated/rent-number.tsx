@@ -129,22 +129,22 @@ function CountryDirectory({
   }, [countries, q]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#0F172A]/80 backdrop-blur-md sm:items-center sm:justify-center sm:p-4">
-      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-3xl border border-[#1E293B] bg-[#131C31] shadow-2xl sm:max-w-md sm:rounded-3xl">
-        <div className="flex items-center justify-between border-b border-[#1E293B] p-4">
-          <h3 className="text-base font-bold text-white">Select Country</h3>
-          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[#F8FAFC] backdrop-blur-md sm:items-center sm:justify-center sm:p-4">
+      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-3xl border border-[#E5E7EB] bg-white shadow-2xl sm:max-w-md sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] p-4">
+          <h3 className="text-base font-bold text-[#0F172A]">Select Country</h3>
+          <button type="button" onClick={onClose} className="p-1 text-[#64748B] hover:text-[#0F172A]">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="border-b border-[#1E293B]/60 p-4">
+        <div className="border-b border-[#E5E7EB]/60 p-4">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search country or code..."
-              className="w-full rounded-xl border border-[#1E293B] bg-[#090D16] py-2.5 pl-9 pr-4 text-sm text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] py-2.5 pl-9 pr-4 text-sm text-[#0F172A] focus:border-emerald-500 focus:outline-none"
             />
           </div>
         </div>
@@ -154,23 +154,23 @@ function CountryDirectory({
               <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
             </div>
           ) : filtered.length === 0 ? (
-            <p className="px-3 py-8 text-center text-sm text-slate-400">No countries match.</p>
+            <p className="px-3 py-8 text-center text-sm text-[#64748B]">No countries match.</p>
           ) : (
             filtered.map((c) => (
               <button
                 key={c.country_code}
                 type="button"
                 onClick={() => onPick(c)}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-[#0F172A]/60"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-[#F8FAFC]"
               >
                 <span className="text-lg">{flagOf(c.country_code)}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">{c.country_name}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="truncate text-sm font-semibold text-[#0F172A]">{c.country_name}</p>
+                  <p className="text-xs text-[#64748B]">
                     {c.dial_code} · {providerLabel(c.country_code)}
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-500" />
+                <ChevronRight className="h-4 w-4 text-[#64748B]" />
               </button>
             ))
           )}
@@ -224,8 +224,8 @@ function NumberCatalog({
     : 0;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-[#090D16] text-slate-100">
-      <div className="flex items-center gap-2 border-b border-[#1E293B] px-4 py-3">
+    <div className="flex min-h-0 flex-1 flex-col bg-[#F8FAFC] text-[#0F172A]">
+      <div className="flex items-center gap-2 border-b border-[#E5E7EB] px-4 py-3">
         <button type="button" onClick={onBack} className="text-[#16C784]">
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -233,7 +233,7 @@ function NumberCatalog({
           <p className="text-sm font-bold">
             {flagOf(country.country_code)} {country.country_name}
           </p>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-[#64748B]">
             {providerLabel(country.country_code)} · {country.dial_code}
           </p>
         </div>
@@ -244,7 +244,7 @@ function NumberCatalog({
             <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
           </div>
         ) : numbers.length === 0 ? (
-          <p className="py-12 text-center text-sm text-slate-400">No numbers available right now.</p>
+          <p className="py-12 text-center text-sm text-[#64748B]">No numbers available right now.</p>
         ) : (
           <ul className="space-y-2">
             {numbers.map((n) => (
@@ -255,7 +255,7 @@ function NumberCatalog({
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left ${
                     picked?.id === n.id
                       ? "border-[#16C784]/50 bg-[#16C784]/10"
-                      : "border-[#1E293B] bg-[#131C31]"
+                      : "border-[#E5E7EB] bg-white"
                   }`}
                 >
                   <p className="font-mono text-sm font-semibold tabular-nums">{n.phone_number}</p>
@@ -269,7 +269,7 @@ function NumberCatalog({
         )}
       </div>
       {picked && (
-        <div className="border-t border-[#1E293B] bg-[#131C31] p-4">
+        <div className="border-t border-[#E5E7EB] bg-white p-4">
           <p className="font-mono text-lg font-bold tabular-nums">{picked.phone_number}</p>
           <div className="mt-3 flex gap-2">
             {PLANS.map((p) => (
@@ -280,7 +280,7 @@ function NumberCatalog({
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
                   plan === p
                     ? "bg-[#16C784] text-slate-950"
-                    : "border border-[#1E293B] text-slate-300"
+                    : "border border-[#E5E7EB] text-[#0F172A]"
                 }`}
               >
                 {p}
@@ -321,9 +321,9 @@ function HistoryPanel() {
   if (rentals.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-        <Clock className="h-10 w-10 text-slate-600" />
-        <p className="mt-3 text-sm font-semibold text-white">No call history</p>
-        <p className="mt-1 text-[13px] text-slate-400">
+        <Clock className="h-10 w-10 text-[#64748B]" />
+        <p className="mt-3 text-sm font-semibold text-[#0F172A]">No call history</p>
+        <p className="mt-1 text-[13px] text-[#64748B]">
           Outbound calls from your rented lines will appear here.
         </p>
       </div>
@@ -338,11 +338,11 @@ function HistoryPanel() {
         return (
         <li
           key={String(r["id"])}
-          className="flex items-center justify-between rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
+          className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white px-3 py-3"
         >
           <div>
-            <p className="text-sm font-semibold text-white">{phone}</p>
-            <p className="font-mono text-[12px] text-slate-400 tabular-nums">
+            <p className="text-sm font-semibold text-[#0F172A]">{phone}</p>
+            <p className="font-mono text-[12px] text-[#64748B] tabular-nums">
               {formatDate(String(r["created_at"] || ""))}
             </p>
           </div>
@@ -357,9 +357,9 @@ function HistoryPanel() {
 function ContactsPanel() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-      <Users className="h-10 w-10 text-slate-600" />
-      <p className="mt-3 text-sm font-semibold text-white">No contacts yet</p>
-      <p className="mt-1 text-[13px] text-slate-400">
+      <Users className="h-10 w-10 text-[#64748B]" />
+      <p className="mt-3 text-sm font-semibold text-[#0F172A]">No contacts yet</p>
+      <p className="mt-1 text-[13px] text-[#64748B]">
         Contacts you call or message from your rented numbers will show up here.
       </p>
     </div>
@@ -413,34 +413,34 @@ function KeypadPanel({
         <button
           type="button"
           onClick={() => setShowCallerMenu((v) => !v)}
-          className="flex w-full items-center justify-between rounded-2xl border border-[#1E293B] bg-[#131C31] p-3 shadow-md transition hover:border-[#1E293B]"
+          className="flex w-full items-center justify-between rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-md transition hover:border-[#E5E7EB]"
         >
           <div className="flex items-center space-x-3 text-left">
             <span className="text-xl">{activeCaller.flag}</span>
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-[#64748B]">
                 Active Caller ID
               </p>
-              <p className="text-sm font-bold text-white">
+              <p className="text-sm font-bold text-[#0F172A]">
                 {activeCaller.label}{" "}
-                <span className="ml-1 font-mono text-xs font-normal text-slate-400">
+                <span className="ml-1 font-mono text-xs font-normal text-[#64748B]">
                   {activeCaller.number}
                 </span>
               </p>
             </div>
           </div>
-          <ChevronDown className="h-5 w-5 text-slate-400" />
+          <ChevronDown className="h-5 w-5 text-[#64748B]" />
         </button>
 
         {showCallerMenu && (
-          <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-[#1E293B] bg-[#131C31] shadow-2xl">
-            <div className="flex items-center justify-between bg-[#0F172A] p-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl">
+            <div className="flex items-center justify-between bg-[#F8FAFC] p-3 text-xs font-semibold uppercase tracking-wider text-[#64748B]">
               <span>Select Outbound Number</span>
-              <button type="button" onClick={() => setShowCallerMenu(false)} className="hover:text-white">
+              <button type="button" onClick={() => setShowCallerMenu(false)} className="hover:text-[#0F172A]">
                 ×
               </button>
             </div>
-            <div className="max-h-60 divide-y divide-[#1E293B] overflow-y-auto">
+            <div className="max-h-60 divide-y divide-[#E5E7EB] overflow-y-auto">
               {callerIds.map((c) => (
                 <button
                   key={c.id}
@@ -449,12 +449,12 @@ function KeypadPanel({
                     setActiveCaller(c);
                     setShowCallerMenu(false);
                   }}
-                  className="flex w-full items-center justify-between p-3 text-left transition hover:bg-[#0F172A]/60"
+                  className="flex w-full items-center justify-between p-3 text-left transition hover:bg-[#F8FAFC]"
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">{c.flag}</span>
                     <div>
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-bold text-[#0F172A]">
                         {c.label}{" "}
                         <span
                           className={`ml-1 rounded px-1.5 py-0.5 text-[10px] ${
@@ -466,7 +466,7 @@ function KeypadPanel({
                           {c.badge}
                         </span>
                       </p>
-                      <p className="font-mono text-xs text-slate-400">{c.number}</p>
+                      <p className="font-mono text-xs text-[#64748B]">{c.number}</p>
                     </div>
                   </div>
                   {activeCaller.id === c.id && (
@@ -480,26 +480,26 @@ function KeypadPanel({
       </div>
 
       {/* Dialer card */}
-      <div className="shrink-0 rounded-3xl border border-[#1E293B] bg-[#131C31] p-4 shadow-2xl backdrop-blur-sm sm:p-5">
-        <div className="mb-4 flex items-center justify-center space-x-3 rounded-2xl border border-[#1E293B] bg-[#0F172A]/80 px-4 py-3 shadow-inner">
+      <div className="shrink-0 rounded-3xl border border-[#E5E7EB] bg-white p-4 shadow-2xl backdrop-blur-sm sm:p-5">
+        <div className="mb-4 flex items-center justify-center space-x-3 rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 shadow-inner">
           <button
             type="button"
             onClick={() => setShowCountry(true)}
-            className="flex items-center space-x-1.5 rounded-xl bg-[#1E293B] px-2.5 py-1.5 text-sm transition hover:bg-[#1E293B]"
+            className="flex items-center space-x-1.5 rounded-xl border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-sm shadow-xs transition hover:bg-slate-100"
           >
             <span className="text-lg">
               {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+44" ? "🇬🇧" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
             </span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            <ChevronDown className="h-3.5 w-3.5 text-[#64748B]" />
           </button>
-          <div className="flex-1 text-center font-mono text-2xl font-semibold tracking-wider text-white">
+          <div className="flex-1 text-center font-mono text-2xl font-semibold tracking-wider text-[#0F172A]">
             {dialPrefix}
             {digits}
           </div>
           <button
             type="button"
             onClick={backspace}
-            className="p-1 text-slate-400 hover:text-white"
+            className="p-1 text-[#64748B] hover:text-[#0F172A]"
             aria-label="Backspace"
           >
             <Delete className="h-5 w-5" />
@@ -512,11 +512,11 @@ function KeypadPanel({
               key={k}
               type="button"
               onClick={() => press(k)}
-              className="flex flex-col items-center justify-center rounded-2xl border border-[#1E293B]/50 bg-[#0F172A] py-3 shadow-md transition hover:bg-[#1E293B] active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB]/60 bg-[#F8FAFC] py-3 shadow-xs transition hover:bg-slate-100 active:scale-95"
             >
-              <span className="font-mono text-xl font-bold text-white">{k}</span>
+              <span className="font-mono text-xl font-bold text-[#0F172A]">{k}</span>
               {KEY_LETTERS[k] && (
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                <span className="text-[9px] font-semibold uppercase tracking-widest text-[#64748B]">
                   {KEY_LETTERS[k]}
                 </span>
               )}
@@ -532,7 +532,7 @@ function KeypadPanel({
                 description: "Video sessions attach to your active rented line.",
               })
             }
-            className="rounded-full border border-[#1E293B] bg-[#0F172A] p-3.5 text-slate-300 transition hover:bg-[#1E293B]"
+            className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3.5 text-[#0F172A] transition hover:bg-slate-100"
             aria-label="Video"
           >
             <Video className="h-5 w-5" />
@@ -548,7 +548,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={backspace}
-            className="rounded-full border border-[#1E293B] bg-[#0F172A] p-3.5 text-slate-300 transition hover:bg-[#1E293B]"
+            className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3.5 text-[#0F172A] transition hover:bg-slate-100"
             aria-label="Delete"
           >
             <Delete className="h-5 w-5" />
@@ -570,7 +570,7 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-4 py-3">
-        <p className="text-sm font-bold text-white">My numbers</p>
+        <p className="text-sm font-bold text-[#0F172A]">My numbers</p>
         <button
           type="button"
           onClick={onBrowse}
@@ -585,9 +585,9 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
         </div>
       ) : rentals.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <Hash className="h-10 w-10 text-slate-600" />
-          <p className="mt-3 text-sm font-semibold text-white">No rented numbers</p>
-          <p className="mt-1 text-[13px] text-slate-400">
+          <Hash className="h-10 w-10 text-[#64748B]" />
+          <p className="mt-3 text-sm font-semibold text-[#0F172A]">No rented numbers</p>
+          <p className="mt-1 text-[13px] text-[#64748B]">
             Browse countries and rent a USA (SignalWire) or global (DIDWW) line.
           </p>
           <button
@@ -606,12 +606,12 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
             return (
             <li
               key={String(r["id"])}
-              className="rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
+              className="rounded-xl border border-[#E5E7EB] bg-white px-3 py-3"
             >
-              <p className="font-mono text-sm font-semibold tabular-nums text-white">
+              <p className="font-mono text-sm font-semibold tabular-nums text-[#0F172A]">
                 {phone}
               </p>
-              <p className="mt-0.5 text-[12px] text-slate-400">
+              <p className="mt-0.5 text-[12px] text-[#64748B]">
                 {String(r["status"] || "active")} · expires {formatDate(String(r["expires_at"] || ""))}
               </p>
             </li>
@@ -634,10 +634,10 @@ function SettingsPanel() {
       ].map(([label, value]) => (
         <div
           key={label}
-          className="flex items-center justify-between rounded-xl border border-[#1E293B] bg-[#131C31] px-3 py-3"
+          className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white px-3 py-3"
         >
-          <span className="text-sm text-slate-300">{label}</span>
-          <span className="text-sm font-semibold text-white">{value}</span>
+          <span className="text-sm text-[#0F172A]">{label}</span>
+          <span className="text-sm font-semibold text-[#0F172A]">{value}</span>
         </div>
       ))}
     </div>
@@ -714,22 +714,22 @@ function RentNumberApp() {
 
   if (catalogCountry) {
     return (
-      <div className="flex h-[100dvh] flex-col bg-[#090D16]">
+      <div className="flex h-[100dvh] flex-col bg-[#F8FAFC]">
         <NumberCatalog country={catalogCountry} onBack={() => setCatalogCountry(null)} />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-[#090D16] text-slate-100">
+    <div className="flex h-[100dvh] flex-col bg-[#F8FAFC] text-[#0F172A] antialiased">
       {/* Header */}
-      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-[#1E293B] bg-[#0F172A]/95 px-4 backdrop-blur-md">
+      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-[#E5E7EB] bg-white/90 px-4 shadow-sm backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <Link to="/dashboard" aria-label="Back" className="text-slate-300 hover:text-white">
+          <Link to="/dashboard" aria-label="Back" className="text-[#0F172A] hover:text-[#0F172A]">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <VernexMark className="h-7 w-7" />
-          <span className="text-sm font-bold tracking-tight text-white">
+          <span className="text-sm font-bold tracking-tight text-[#0F172A]">
             {title}
           </span>
         </div>
@@ -738,7 +738,7 @@ function RentNumberApp() {
             type="button"
             onClick={() => setShowGlobe(true)}
             aria-label="Browse countries"
-            className="grid h-9 w-9 place-items-center rounded-full border border-[#1E293B] text-slate-300"
+            className="grid h-9 w-9 place-items-center rounded-full border border-[#E5E7EB] text-[#0F172A]"
           >
             <Globe className="h-4 w-4" />
           </button>
@@ -773,7 +773,7 @@ function RentNumberApp() {
       </div>
 
       {/* Bottom nav — 5 items, Credit moved to header */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#1E293B] bg-[#0F172A]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] backdrop-blur-md">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB] bg-white/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
           {TABS.map((t) => {
             const active = tab === t.id;
@@ -784,7 +784,7 @@ function RentNumberApp() {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={`flex w-full flex-col items-center justify-center py-1 transition ${
-                  active ? "text-[#16C784]" : "text-slate-400 hover:text-white"
+                  active ? "text-[#16C784]" : "text-[#64748B] hover:text-[#0F172A]"
                 }`}
               >
                 <Icon className="mb-1 h-5 w-5" strokeWidth={active ? 2.35 : 1.9} />
