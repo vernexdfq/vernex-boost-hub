@@ -12,10 +12,11 @@ import {
   Wallet,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { naira } from "@/lib/pricing";
 import { fetchAccount } from "@/lib/account";
-import { supabase } from "@/integrations/supabase/client";
+import { getWalletFundingDetails } from "@/lib/functions/fund.functions";
 
 export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
@@ -30,74 +31,10 @@ export const Route = createFileRoute("/_authenticated/fund")({
   component: FundPage,
 });
 
-type FundingDetails = {
-  bankName: string;
-  accountNumber: string | null;
-  accountName: string;
-  reference: string;
-  pending: boolean;
-  configured: boolean;
-  permanent?: boolean;
-  message?: string | null;
-};
-
-async function loadFundingDetails(): Promise<FundingDetails> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) {
-    return {
-      bankName: "Wema Bank",
-      accountNumber: null,
-      accountName: "VERNEX / CUSTOMER",
-      reference: "",
-      pending: true,
-      configured: false,
-      message: "Please sign in again to generate your funding account.",
-    };
-  }
-
-  const res = await fetch("/api/wallet/funding", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-  });
-
-  const body = (await res.json().catch(() => ({}))) as FundingDetails & {
-    error?: string;
-  };
-
-  if (!res.ok && !body.accountNumber) {
-    return {
-      bankName: body.bankName || "Wema Bank",
-      accountNumber: null,
-      accountName: body.accountName || "VERNEX / CUSTOMER",
-      reference: body.reference || "",
-      pending: true,
-      configured: Boolean(body.configured),
-      message:
-        body.message ||
-        body.error ||
-        `Could not load funding details (${res.status}). Tap Refresh.`,
-    };
-  }
-
-  return {
-    bankName: body.bankName || "Wema Bank",
-    accountNumber: body.accountNumber ?? null,
-    accountName: body.accountName || "VERNEX / CUSTOMER",
-    reference: body.reference || "",
-    pending: !body.accountNumber,
-    configured: Boolean(body.configured),
-    permanent: body.permanent,
-    message: body.message ?? null,
-  };
-}
-
 function FundPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
+  const fetchFunding = useServerFn(getWalletFundingDetails);
   const [copied, setCopied] = useState<string | null>(null);
 
   const { data: account } = useQuery({
@@ -110,9 +47,14 @@ function FundPage() {
     isLoading,
     isFetching,
     refetch,
+    isError,
+    error,
   } = useQuery({
     queryKey: ["wallet-funding", user.id],
-    queryFn: loadFundingDetails,
+    queryFn: async () => {
+      // Same pattern as dashboard server fns
+      return fetchFunding({ data: undefined as never });
+    },
     staleTime: 15_000,
     retry: 1,
   });
@@ -134,6 +76,13 @@ function FundPage() {
       : "VERNEX / CUSTOMER");
 
   const pending = !accountNumber;
+  const statusMessage =
+    funding?.message ||
+    (isError
+      ? error instanceof Error
+        ? error.message
+        : "Could not load funding details."
+      : null);
 
   async function copy(value: string, key: string) {
     try {
@@ -243,8 +192,8 @@ function FundPage() {
             <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm">
               <p className="font-bold text-amber-700">Account not ready yet</p>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                {funding?.message ||
-                  "We could not generate a virtual account. Tap Generate and try again."}
+                {statusMessage ||
+                  "We could not generate a virtual account yet. Tap Generate and try again."}
               </p>
               <button
                 type="button"
