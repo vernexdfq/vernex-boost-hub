@@ -37,24 +37,47 @@ function FundPage() {
   const fetchFunding = useServerFn(getWalletFundingDetails);
   const [copied, setCopied] = useState<string | null>(null);
 
-  const { data: account } = useQuery({
+  const { data: account, isLoading: accountLoading } = useQuery({
     queryKey: ["account", user.id],
     queryFn: () => fetchAccount(user.id),
   });
 
   const {
     data: funding,
-    isLoading,
+    isLoading: fundingLoading,
     isFetching,
     refetch,
     isError,
+    error,
   } = useQuery({
     queryKey: ["wallet-funding", user.id],
-    queryFn: () => fetchFunding({ data: undefined }),
+    queryFn: async () => {
+      // GET server fn — no body required
+      return fetchFunding();
+    },
     staleTime: 30_000,
+    retry: 1,
   });
 
   const balance = account?.wallet?.balance ?? 0;
+
+  // Prefer live server details; fall back to wallet row already on the client
+  const accountNumber =
+    funding?.accountNumber ?? account?.wallet?.virtual_account_number ?? null;
+  const bankName =
+    funding?.bankName ?? account?.wallet?.virtual_bank_name ?? "Wema Bank";
+  const reference =
+    funding?.reference ??
+    account?.wallet?.virtual_account_reference ??
+    `VNX-${user.id.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+  const accountName = funding?.accountName
+    ? funding.accountName
+    : account?.profile?.full_name
+      ? `VERNEX / ${account.profile.full_name.toUpperCase()}`
+      : "VERNEX / CUSTOMER";
+
+  const pending = !accountNumber;
+  const isLoading = accountLoading || (fundingLoading && !account?.wallet?.virtual_account_number);
 
   async function copy(value: string, key: string) {
     try {
@@ -94,13 +117,25 @@ function FundPage() {
             onClick={() => copy(value, copyKey)}
             className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-bold text-primary"
           >
-            {copied === copyKey ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied === copyKey ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
             Copy
           </button>
         )}
       </div>
     );
   }
+
+  const errorText =
+    funding?.message ||
+    (isError
+      ? error instanceof Error
+        ? error.message
+        : "Could not load funding details."
+      : null);
 
   return (
     <AppShell>
@@ -126,7 +161,6 @@ function FundPage() {
       </header>
 
       <div className="space-y-4 px-5 pt-5 pb-6">
-        {/* Balance */}
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
           <div className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-600">
@@ -143,7 +177,6 @@ function FundPage() {
           </div>
         </div>
 
-        {/* Virtual account */}
         <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
           <div className="mb-1 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-primary" />
@@ -158,20 +191,12 @@ function FundPage() {
             <div className="flex justify-center py-10">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
-          ) : isError ? (
-            <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-center text-sm">
-              Could not load funding details.{" "}
-              <button type="button" onClick={() => refetch()} className="font-bold text-primary">
-                Retry
-              </button>
-            </div>
-          ) : funding?.pending ? (
+          ) : pending ? (
             <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm">
               <p className="font-bold text-amber-700">Account is being generated</p>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                {funding.configured
-                  ? "Your permanent virtual account is being created with Flutterwave. Tap refresh in a few seconds."
-                  : "Flutterwave is not fully configured on the server yet. Contact support if this persists."}
+                {errorText ||
+                  "Your permanent virtual account is being created with Flutterwave. Tap refresh in a few seconds."}
               </p>
               <button
                 type="button"
@@ -183,15 +208,10 @@ function FundPage() {
             </div>
           ) : (
             <div className="mt-3">
-              <Row label="Bank" value={funding?.bankName ?? "—"} />
-              <Row
-                label="Account number"
-                value={funding?.accountNumber ?? "—"}
-                mono
-                copyKey="acct"
-              />
-              <Row label="Account name" value={funding?.accountName ?? "—"} copyKey="name" />
-              <Row label="Reference" value={funding?.reference ?? "—"} mono copyKey="ref" />
+              <Row label="Bank" value={bankName} />
+              <Row label="Account number" value={accountNumber ?? "—"} mono copyKey="acct" />
+              <Row label="Account name" value={accountName} copyKey="name" />
+              <Row label="Reference" value={reference} mono copyKey="ref" />
             </div>
           )}
         </section>
