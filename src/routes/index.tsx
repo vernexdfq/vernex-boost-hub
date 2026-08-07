@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowRight,
   Phone,
@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
 import { VernexMark } from "@/components/brand";
 
 export const Route = createFileRoute("/")({
@@ -35,16 +34,8 @@ function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session) navigate({ to: "/dashboard", replace: true });
-    });
-    return () => {
-      active = false;
-    };
-  }, [navigate]);
-
+  // Always show the public landing page. Users must explicitly sign in
+  // with phone + PIN (no permanent auto-login redirect).
   const enter = () => {
     navigate({ to: "/auth" });
   };
