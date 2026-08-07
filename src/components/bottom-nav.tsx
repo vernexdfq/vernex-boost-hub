@@ -33,13 +33,15 @@ export function BottomNav() {
             <li key={item.to} className="flex">
               <Link
                 to={item.to}
-                className="group flex flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[10px] font-medium tracking-tight text-muted-foreground transition-colors"
+                className="tap-fast group flex flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[10px] font-medium tracking-tight text-muted-foreground transition-colors"
               >
                 <Icon
-                  className={`tap-fast `h-[22px] w-[22px] transition-colors ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}
+                  className={`h-[22px] w-[22px] transition-colors ${
+                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  }`}
                   strokeWidth={active ? 2.4 : 2}
                 />
-                <span className={`tap-fast active ? "text-primary" : ""}>{item.label}</span>
+                <span className={active ? "text-primary" : ""}>{item.label}</span>
               </Link>
             </li>
           );
