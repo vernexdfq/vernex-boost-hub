@@ -12,7 +12,7 @@ import {
   Check,
   Star,
 } from "lucide-react";
-import { VernexMark } from "@/components/brand";
+import { VernexMark, VernexLogo } from "@/components/brand";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -120,9 +120,7 @@ function LiveCard({
       <header className="sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded bg-emerald-500 font-mono text-xs font-bold text-slate-950">
-              Vx
-            </span>
+            <VernexMark className="h-8 w-8" />
             <span className="text-xl font-bold tracking-tight text-white">
               Vernex<span className="text-emerald-500">.com.ng</span>
             </span>
@@ -175,6 +173,27 @@ function LiveCard({
 
       {/* Hero */}
       <section className="mx-auto max-w-4xl px-4 py-16 text-center">
+        {/* Brand emblem + motto */}
+        <div className="mb-8 flex flex-col items-center justify-center">
+          <div className="flex w-full max-w-lg flex-col items-center rounded-2xl border border-slate-800/80 bg-slate-900/80 p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-center space-x-3">
+              <VernexMark className="h-16 w-16 drop-shadow-md" />
+              <div className="text-left">
+                <h2 className="text-2xl font-extrabold tracking-tight text-white">
+                  Vernex<span className="text-emerald-400">.com.ng</span>
+                </h2>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              <span className="text-slate-300">Connect</span>
+              <span className="text-emerald-500">|</span>
+              <span className="text-emerald-400">Verify</span>
+              <span className="text-emerald-500">|</span>
+              <span className="text-slate-300">Grow</span>
+            </div>
+          </div>
+        </div>
+
         <div className="mb-6 inline-flex items-center space-x-2 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-3.5 py-1.5 text-xs text-emerald-400">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
           <span>Canada - OTP Ready</span>
