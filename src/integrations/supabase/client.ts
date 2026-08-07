@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Normalize URL – strip trailing /rest/v1 or slashes if someone pasted the REST endpoint by mistake
 function normalizeSupabaseUrl(raw: string | undefined): string {
   if (!raw) return '';
   let url = raw.trim();
@@ -45,42 +44,40 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 /**
- * Session storage (not localStorage):
- * - Login lasts only for the current browser tab/window session
- * - Closing the browser requires phone + PIN again (Primex-style)
- * - Refreshing the page within the same session keeps the user signed in
+ * SECURITY: No persistent login.
+ * - Sessions are memory-only (not written to localStorage or sessionStorage)
+ * - Closing the tab / refreshing the page requires phone + PIN again
+ * - Prevents other people from opening someone else's account on a shared phone
  */
-const AUTH_STORAGE_KEY = 'vernex-auth-v2';
-
-function getAuthStorage(): Storage | undefined {
-  if (typeof window === 'undefined') return undefined;
-
-  // One-time cleanup of old permanent localStorage sessions
+function wipeStoredAuth() {
+  if (typeof window === 'undefined') return;
   try {
-    const migrated = sessionStorage.getItem('vernex-auth-migrated');
-    if (!migrated) {
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i += 1) {
-        const k = localStorage.key(i);
+    const storages = [window.localStorage, window.sessionStorage];
+    for (const store of storages) {
+      const keys: string[] = [];
+      for (let i = 0; i < store.length; i += 1) {
+        const k = store.key(i);
         if (
           k &&
           (k.includes('supabase') ||
             k.includes('sb-') ||
             k.startsWith('vernex-auth') ||
-            k.includes('auth-token'))
+            k.includes('auth-token') ||
+            k.includes('access_token') ||
+            k.includes('refresh_token'))
         ) {
-          keysToRemove.push(k);
+          keys.push(k);
         }
       }
-      keysToRemove.forEach((k) => localStorage.removeItem(k));
-      sessionStorage.setItem('vernex-auth-migrated', '1');
+      keys.forEach((k) => store.removeItem(k));
     }
   } catch {
-    // ignore storage errors (private mode, etc.)
+    // private mode / blocked storage
   }
-
-  return sessionStorage;
 }
+
+// Clear any leftover permanent sessions as soon as the module loads
+wipeStoredAuth();
 
 function createSupabaseClient() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -92,11 +89,10 @@ function createSupabaseClient() {
       SUPABASE_ANON_KEY || 'placeholder',
       {
         auth: {
-          storage: getAuthStorage(),
-          storageKey: AUTH_STORAGE_KEY,
           persistSession: false,
           autoRefreshToken: false,
           detectSessionInUrl: false,
+          storage: undefined,
         },
       },
     );
@@ -107,12 +103,11 @@ function createSupabaseClient() {
       fetch: createSupabaseFetch(SUPABASE_ANON_KEY),
     },
     auth: {
-      storage: getAuthStorage(),
-      storageKey: AUTH_STORAGE_KEY,
-      // Persist only in sessionStorage — cleared when the browser session ends
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
+      // Memory-only session — never written to disk
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: undefined,
     },
   });
 }
