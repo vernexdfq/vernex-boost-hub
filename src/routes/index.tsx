@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Phone,
   Rocket,
@@ -132,8 +132,21 @@ function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [marqueePaused, setMarqueePaused] = useState(false);
+  const [going, setGoing] = useState(false);
 
-  const enter = () => navigate({ to: "/auth" });
+  // Warm auth route module so first tap navigates immediately
+  useEffect(() => {
+    void import("@/routes/auth").catch(() => undefined);
+  }, []);
+
+  const enter = () => {
+    if (going) return;
+    setGoing(true);
+    // Navigate on the next frame so the press state paints first
+    requestAnimationFrame(() => {
+      void navigate({ to: "/auth" });
+    });
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
@@ -147,13 +160,13 @@ function Landing() {
             </span>
           </Link>
           <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              onClick={enter}
+            <Link
+              to="/auth"
+              preload="intent"
               className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:block"
             >
               Sign In
-            </button>
+            </Link>
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
@@ -177,16 +190,14 @@ function Landing() {
                   {l.label}
                 </a>
               ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  enter();
-                }}
-                className="mb-2 mt-3 w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950"
+              <Link
+                to="/auth"
+                preload="intent"
+                onClick={() => setMenuOpen(false)}
+                className="tap-fast mb-2 mt-3 flex w-full items-center justify-center rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 active:bg-emerald-600"
               >
                 Get a Number Now →
-              </button>
+              </Link>
             </nav>
           </div>
         )}
@@ -227,13 +238,13 @@ function Landing() {
         </p>
 
         <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <button
-            type="button"
-            onClick={enter}
-            className="w-full rounded-xl bg-emerald-500 px-8 py-3.5 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 sm:w-auto"
+          <Link
+            to="/auth"
+            preload="intent"
+            className="tap-fast inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-8 py-3.5 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-600 active:bg-emerald-700 sm:w-auto"
           >
             Get a Number Now →
-          </button>
+          </Link>
         </div>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -435,13 +446,13 @@ function Landing() {
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={enter}
-          className="mt-4 w-full rounded-xl border border-dashed border-slate-700 py-3 text-[13px] font-semibold text-emerald-400"
+        <Link
+          to="/auth"
+          preload="intent"
+          className="tap-fast mt-4 flex w-full items-center justify-center rounded-xl border border-dashed border-slate-700 py-3 text-[13px] font-semibold text-emerald-400 active:bg-slate-900"
         >
           +29 more →
-        </button>
+        </Link>
       </section>
 
       {/* Pricing */}
@@ -477,13 +488,13 @@ function Landing() {
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              onClick={enter}
-              className="mt-5 w-full rounded-lg bg-emerald-500 py-3.5 text-sm font-bold text-slate-950"
+            <Link
+              to="/auth"
+              preload="intent"
+              className="tap-fast mt-5 flex w-full items-center justify-center rounded-lg bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 active:bg-emerald-600"
             >
               Get a Virtual Number
-            </button>
+            </Link>
           </article>
 
           <article className="relative rounded-2xl border border-emerald-500/40 bg-slate-900 p-5">
@@ -508,13 +519,13 @@ function Landing() {
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              onClick={enter}
-              className="mt-5 w-full rounded-lg border border-slate-700 bg-slate-950 py-3.5 text-sm font-bold text-white"
+            <Link
+              to="/auth"
+              preload="intent"
+              className="tap-fast mt-5 flex w-full items-center justify-center rounded-lg border border-slate-700 bg-slate-950 py-3.5 text-sm font-bold text-white active:bg-slate-900"
             >
               Rent a Number
-            </button>
+            </Link>
           </article>
         </div>
       </section>
@@ -618,13 +629,13 @@ function Landing() {
           Join thousands of Nigerians using Vernex to work, verify, and grow — without limits.
         </p>
         <div className="mx-auto mt-6 flex max-w-sm flex-col gap-3">
-          <button
-            type="button"
-            onClick={enter}
-            className="rounded-lg bg-slate-950 py-3.5 text-sm font-bold text-white"
+          <Link
+            to="/auth"
+            preload="intent"
+            className="tap-fast flex items-center justify-center rounded-lg bg-slate-950 py-3.5 text-sm font-bold text-white active:opacity-90"
           >
             Create Free Account →
-          </button>
+          </Link>
           <a
             href="#download"
             className="rounded-lg border border-slate-950/20 py-3.5 text-sm font-semibold text-slate-950"
