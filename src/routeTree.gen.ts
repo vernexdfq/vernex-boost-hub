@@ -9,59 +9,84 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
-import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
-import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedNumberOrdersRouteImport } from './routes/_authenticated/number-orders'
-import { Route as AuthenticatedLogHistoryRouteImport } from './routes/_authenticated/log-history'
-import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
-import { Route as AuthenticatedFundRouteImport } from './routes/_authenticated/fund'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedBuyAccountsRouteImport } from './routes/_authenticated/buy-accounts'
-import { Route as AuthenticatedBoostOrdersRouteImport } from './routes/_authenticated/boost-orders'
-import { Route as AuthenticatedBoostRouteImport } from './routes/_authenticated/boost'
-import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAffiliateRouteImport } from './routes/_authenticated/affiliate'
+import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedBoostRouteImport } from './routes/_authenticated/boost'
+import { Route as AuthenticatedBoostOrdersRouteImport } from './routes/_authenticated/boost-orders'
+import { Route as AuthenticatedBuyAccountsRouteImport } from './routes/_authenticated/buy-accounts'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFundRouteImport } from './routes/_authenticated/fund'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedLogHistoryRouteImport } from './routes/_authenticated/log-history'
+import { Route as AuthenticatedNumberOrdersRouteImport } from './routes/_authenticated/number-orders'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
+import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
+import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
 import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
-import { Route as ApiPublicWebhooksFlutterwaveRouteImport } from './routes/api/public/webhooks/flutterwave'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedVirtualNumbersRoute =
-  AuthenticatedVirtualNumbersRouteImport.update({
-    id: '/virtual-numbers',
-    path: '/virtual-numbers',
+const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBoostRoute = AuthenticatedBoostRouteImport.update({
+  id: '/boost',
+  path: '/boost',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBoostOrdersRoute =
+  AuthenticatedBoostOrdersRouteImport.update({
+    id: '/boost-orders',
+    path: '/boost-orders',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedRewardRoute = AuthenticatedRewardRouteImport.update({
-  id: '/reward',
-  path: '/reward',
+const AuthenticatedBuyAccountsRoute =
+  AuthenticatedBuyAccountsRouteImport.update({
+    id: '/buy-accounts',
+    path: '/buy-accounts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRentNumberRoute = AuthenticatedRentNumberRouteImport.update({
-  id: '/rent-number',
-  path: '/rent-number',
+const AuthenticatedFundRoute = AuthenticatedFundRouteImport.update({
+  id: '/fund',
+  path: '/fund',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLogHistoryRoute = AuthenticatedLogHistoryRouteImport.update({
+  id: '/log-history',
+  path: '/log-history',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNumberOrdersRoute =
@@ -70,64 +95,32 @@ const AuthenticatedNumberOrdersRoute =
     path: '/number-orders',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedLogHistoryRoute = AuthenticatedLogHistoryRouteImport.update({
-  id: '/log-history',
-  path: '/log-history',
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
+const AuthenticatedRentNumberRoute = AuthenticatedRentNumberRouteImport.update({
+  id: '/rent-number',
+  path: '/rent-number',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedFundRoute = AuthenticatedFundRouteImport.update({
-  id: '/fund',
-  path: '/fund',
+const AuthenticatedRewardRoute = AuthenticatedRewardRouteImport.update({
+  id: '/reward',
+  path: '/reward',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBuyAccountsRoute =
-  AuthenticatedBuyAccountsRouteImport.update({
-    id: '/buy-accounts',
-    path: '/buy-accounts',
+const AuthenticatedVirtualNumbersRoute =
+  AuthenticatedVirtualNumbersRouteImport.update({
+    id: '/virtual-numbers',
+    path: '/virtual-numbers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBoostOrdersRoute =
-  AuthenticatedBoostOrdersRouteImport.update({
-    id: '/boost-orders',
-    path: '/boost-orders',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoostRoute = AuthenticatedBoostRouteImport.update({
-  id: '/boost',
-  path: '/boost',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
-  id: '/affiliate',
-  path: '/affiliate',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedAdminPricingRoute =
   AuthenticatedAdminPricingRouteImport.update({
     id: '/admin/pricing',
     path: '/admin/pricing',
     getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const ApiPublicWebhooksFlutterwaveRoute =
-  ApiPublicWebhooksFlutterwaveRouteImport.update({
-    id: '/api/public/webhooks/flutterwave',
-    path: '/api/public/webhooks/flutterwave',
-    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -148,7 +141,6 @@ export interface FileRoutesByFullPath {
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
-  '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -168,7 +160,6 @@ export interface FileRoutesByTo {
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
-  '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -190,7 +181,6 @@ export interface FileRoutesById {
   '/_authenticated/reward': typeof AuthenticatedRewardRoute
   '/_authenticated/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
-  '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -212,7 +202,6 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin/pricing'
-    | '/api/public/webhooks/flutterwave'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,7 +221,6 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin/pricing'
-    | '/api/public/webhooks/flutterwave'
   id:
     | '__root__'
     | '/'
@@ -253,23 +241,21 @@ export interface FileRouteTypes {
     | '/_authenticated/reward'
     | '/_authenticated/virtual-numbers'
     | '/_authenticated/admin/pricing'
-    | '/api/public/webhooks/flutterwave'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ApiPublicWebhooksFlutterwaveRoute: typeof ApiPublicWebhooksFlutterwaveRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -279,95 +265,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/virtual-numbers': {
-      id: '/_authenticated/virtual-numbers'
-      path: '/virtual-numbers'
-      fullPath: '/virtual-numbers'
-      preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reward': {
-      id: '/_authenticated/reward'
-      path: '/reward'
-      fullPath: '/reward'
-      preLoaderRoute: typeof AuthenticatedRewardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/rent-number': {
-      id: '/_authenticated/rent-number'
-      path: '/rent-number'
-      fullPath: '/rent-number'
-      preLoaderRoute: typeof AuthenticatedRentNumberRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/number-orders': {
-      id: '/_authenticated/number-orders'
-      path: '/number-orders'
-      fullPath: '/number-orders'
-      preLoaderRoute: typeof AuthenticatedNumberOrdersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/log-history': {
-      id: '/_authenticated/log-history'
-      path: '/log-history'
-      fullPath: '/log-history'
-      preLoaderRoute: typeof AuthenticatedLogHistoryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/history': {
-      id: '/_authenticated/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/fund': {
-      id: '/_authenticated/fund'
-      path: '/fund'
-      fullPath: '/fund'
-      preLoaderRoute: typeof AuthenticatedFundRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/buy-accounts': {
-      id: '/_authenticated/buy-accounts'
-      path: '/buy-accounts'
-      fullPath: '/buy-accounts'
-      preLoaderRoute: typeof AuthenticatedBuyAccountsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boost-orders': {
-      id: '/_authenticated/boost-orders'
-      path: '/boost-orders'
-      fullPath: '/boost-orders'
-      preLoaderRoute: typeof AuthenticatedBoostOrdersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boost': {
-      id: '/_authenticated/boost'
-      path: '/boost'
-      fullPath: '/boost'
-      preLoaderRoute: typeof AuthenticatedBoostRouteImport
+    '/_authenticated/affiliate': {
+      id: '/_authenticated/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/alerts': {
@@ -377,11 +286,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/affiliate': {
-      id: '/_authenticated/affiliate'
-      path: '/affiliate'
-      fullPath: '/affiliate'
-      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
+    '/_authenticated/boost': {
+      id: '/_authenticated/boost'
+      path: '/boost'
+      fullPath: '/boost'
+      preLoaderRoute: typeof AuthenticatedBoostRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/boost-orders': {
+      id: '/_authenticated/boost-orders'
+      path: '/boost-orders'
+      fullPath: '/boost-orders'
+      preLoaderRoute: typeof AuthenticatedBoostOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buy-accounts': {
+      id: '/_authenticated/buy-accounts'
+      path: '/buy-accounts'
+      fullPath: '/buy-accounts'
+      preLoaderRoute: typeof AuthenticatedBuyAccountsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fund': {
+      id: '/_authenticated/fund'
+      path: '/fund'
+      fullPath: '/fund'
+      preLoaderRoute: typeof AuthenticatedFundRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/log-history': {
+      id: '/_authenticated/log-history'
+      path: '/log-history'
+      fullPath: '/log-history'
+      preLoaderRoute: typeof AuthenticatedLogHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/number-orders': {
+      id: '/_authenticated/number-orders'
+      path: '/number-orders'
+      fullPath: '/number-orders'
+      preLoaderRoute: typeof AuthenticatedNumberOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rent-number': {
+      id: '/_authenticated/rent-number'
+      path: '/rent-number'
+      fullPath: '/rent-number'
+      preLoaderRoute: typeof AuthenticatedRentNumberRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reward': {
+      id: '/_authenticated/reward'
+      path: '/reward'
+      fullPath: '/reward'
+      preLoaderRoute: typeof AuthenticatedRewardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/virtual-numbers': {
+      id: '/_authenticated/virtual-numbers'
+      path: '/virtual-numbers'
+      fullPath: '/virtual-numbers'
+      preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/pricing': {
@@ -390,13 +376,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/pricing'
       preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/api/public/webhooks/flutterwave': {
-      id: '/api/public/webhooks/flutterwave'
-      path: '/api/public/webhooks/flutterwave'
-      fullPath: '/api/public/webhooks/flutterwave'
-      preLoaderRoute: typeof ApiPublicWebhooksFlutterwaveRouteImport
-      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -444,7 +423,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ApiPublicWebhooksFlutterwaveRoute: ApiPublicWebhooksFlutterwaveRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
