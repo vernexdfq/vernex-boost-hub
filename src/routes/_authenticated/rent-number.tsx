@@ -122,7 +122,7 @@ function CountryDirectory({
     if (!term) return countries;
     return countries.filter(
       (c) =>
-        c.name.toLowerCase().includes(term) ||
+        c.country_name.toLowerCase().includes(term) ||
         c.country_code.toLowerCase().includes(term) ||
         c.dial_code.includes(term),
     );
@@ -165,9 +165,9 @@ function CountryDirectory({
               >
                 <span className="text-lg">{flagOf(c.country_code)}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">{c.name}</p>
+                  <p className="truncate text-sm font-semibold text-white">{c.country_name}</p>
                   <p className="text-xs text-slate-400">
-                    {c.dial_code} · {providerLabel(c.country_code, c.provider)}
+                    {c.dial_code} · {providerLabel(c.country_code)}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-500" />
@@ -196,7 +196,7 @@ function NumberCatalog({
 
   const { data: numbers = [], isLoading } = useQuery({
     queryKey: ["rental-numbers", country.country_code],
-    queryFn: () => listFn({ data: { country_code: country.country_code } }),
+    queryFn: () => listFn({ data: { countryCode: country.country_code } }),
   });
 
   const rent = useMutation({
@@ -204,8 +204,7 @@ function NumberCatalog({
       if (!picked) throw new Error("Pick a number");
       return rentFn({
         data: {
-          number_id: picked.id,
-          country_code: country.country_code,
+          rentalNumberId: picked.id,
           plan,
         },
       });
@@ -221,7 +220,7 @@ function NumberCatalog({
   });
 
   const price = picked
-    ? Math.ceil(Number(picked.price_ngn || picked.monthly_price_ngn || 0) * PLAN_MULT[plan])
+    ? Math.ceil(Number(picked.monthly_price_ngn || 0) * PLAN_MULT[plan])
     : 0;
 
   return (
@@ -232,7 +231,7 @@ function NumberCatalog({
         </button>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold">
-            {flagOf(country.country_code)} {country.name}
+            {flagOf(country.country_code)} {country.country_name}
           </p>
           <p className="text-[11px] text-slate-400">
             {providerLabel(country.country_code)} · {country.dial_code}
@@ -261,7 +260,7 @@ function NumberCatalog({
                 >
                   <p className="font-mono text-sm font-semibold tabular-nums">{n.phone_number}</p>
                   <span className="text-sm font-bold text-emerald-400">
-                    {naira(Math.round(Number(n.price_ngn || n.monthly_price_ngn || 0)))}
+                    {naira(Math.round(Number(n.monthly_price_ngn || 0)))}
                   </span>
                 </button>
               </li>
@@ -333,20 +332,24 @@ function HistoryPanel() {
 
   return (
     <ul className="space-y-2 overflow-y-auto px-4 py-4">
-      {rentals.map((r) => (
+      {(rentals as Array<Record<string, unknown>>).map((r) => {
+        const nested = (r["rental_numbers"] as Record<string, unknown> | null) || {};
+        const phone = String(nested["phone_number"] || r["phone_number"] || "—");
+        return (
         <li
-          key={r.id}
+          key={String(r["id"])}
           className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
         >
           <div>
-            <p className="text-sm font-semibold text-white">{r.phone_number || r.number}</p>
+            <p className="text-sm font-semibold text-white">{phone}</p>
             <p className="font-mono text-[12px] text-slate-400 tabular-nums">
-              {formatDate(r.created_at || r.starts_at || "")}
+              {formatDate(String(r["created_at"] || ""))}
             </p>
           </div>
-          <span className="text-[11px] font-semibold text-emerald-400">{r.status || "active"}</span>
+          <span className="text-[11px] font-semibold text-emerald-400">{String(r["status"] || "active")}</span>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
@@ -597,19 +600,23 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
         </div>
       ) : (
         <ul className="space-y-2 overflow-y-auto px-4 pb-4">
-          {rentals.map((r) => (
+          {(rentals as Array<Record<string, unknown>>).map((r) => {
+            const nested = (r["rental_numbers"] as Record<string, unknown> | null) || {};
+            const phone = String(nested["phone_number"] || r["phone_number"] || "—");
+            return (
             <li
-              key={r.id}
+              key={String(r["id"])}
               className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
             >
               <p className="font-mono text-sm font-semibold tabular-nums text-white">
-                {r.phone_number || r.number}
+                {phone}
               </p>
               <p className="mt-0.5 text-[12px] text-slate-400">
-                {r.status || "active"} · expires {formatDate(r.ends_at || r.expires_at || "")}
+                {String(r["status"] || "active")} · expires {formatDate(String(r["expires_at"] || ""))}
               </p>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>
@@ -659,13 +666,18 @@ function RentNumberApp() {
   });
 
   const callerIds: CallerId[] = useMemo(() => {
-    const fromRentals: CallerId[] = rentals.map((r, i) => ({
-      id: r.id || `r-${i}`,
-      flag: flagOf((r.country_code as string) || "US"),
-      label: r.label || r.friendly_name || "Rented line",
-      number: r.phone_number || r.number || "",
-      badge: "Rented" as const,
-    }));
+    const fromRentals: CallerId[] = (rentals as Array<Record<string, unknown>>).map((r, i) => {
+      const nested = (r["rental_numbers"] as Record<string, unknown> | null) || {};
+      const phone = String(nested["phone_number"] || r["phone_number"] || "");
+      const cc = String(nested["country_code"] || "US");
+      return {
+        id: String(r["id"] || `r-${i}`),
+        flag: flagOf(cc),
+        label: String(nested["country_name"] || "Rented line"),
+        number: phone,
+        badge: "Rented" as const,
+      };
+    });
     return [
       ...fromRentals,
       {
