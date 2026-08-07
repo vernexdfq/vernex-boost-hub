@@ -506,17 +506,17 @@ function KeypadPanel({
           </button>
         </div>
 
-        <div className="mb-4 grid grid-cols-3 gap-2.5 sm:gap-3">
+        <div className="mb-3 mx-auto grid w-full max-w-[280px] grid-cols-3 gap-2">
           {KEYS.map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => press(k)}
-              className="flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB]/60 bg-[#F8FAFC] py-3 shadow-xs transition hover:bg-slate-100 active:scale-95"
+              className="flex h-12 flex-col items-center justify-center rounded-full border border-[#E5E7EB]/60 bg-[#F8FAFC] shadow-xs transition hover:bg-slate-100 active:scale-95"
             >
-              <span className="font-mono text-xl font-bold text-[#0F172A]">{k}</span>
+              <span className="font-mono text-[17px] font-semibold leading-none text-[#0F172A]">{k}</span>
               {KEY_LETTERS[k] && (
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-[#64748B]">
+                <span className="mt-0.5 text-[8px] font-semibold uppercase tracking-widest text-[#64748B]">
                   {KEY_LETTERS[k]}
                 </span>
               )}
