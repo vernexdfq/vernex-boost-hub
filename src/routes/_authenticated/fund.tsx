@@ -12,11 +12,10 @@ import {
   Wallet,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { naira } from "@/lib/pricing";
 import { fetchAccount } from "@/lib/account";
-import { getWalletFundingDetails } from "@/lib/functions/fund.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
@@ -24,44 +23,102 @@ export const Route = createFileRoute("/_authenticated/fund")({
       { title: "Fund Wallet — Vernex" },
       {
         name: "description",
-        content: "Fund your Vernex wallet via bank transfer to your permanent virtual account.",
+        content: "Fund your Vernex wallet via bank transfer to your virtual account.",
       },
     ],
   }),
   component: FundPage,
 });
 
+type FundingDetails = {
+  bankName: string;
+  accountNumber: string | null;
+  accountName: string;
+  reference: string;
+  pending: boolean;
+  configured: boolean;
+  permanent?: boolean;
+  message?: string | null;
+};
+
+async function loadFundingDetails(): Promise<FundingDetails> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) {
+    return {
+      bankName: "Wema Bank",
+      accountNumber: null,
+      accountName: "VERNEX / CUSTOMER",
+      reference: "",
+      pending: true,
+      configured: false,
+      message: "Please sign in again to generate your funding account.",
+    };
+  }
+
+  const res = await fetch("/api/wallet/funding", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  const body = (await res.json().catch(() => ({}))) as FundingDetails & {
+    error?: string;
+  };
+
+  if (!res.ok && !body.accountNumber) {
+    return {
+      bankName: body.bankName || "Wema Bank",
+      accountNumber: null,
+      accountName: body.accountName || "VERNEX / CUSTOMER",
+      reference: body.reference || "",
+      pending: true,
+      configured: Boolean(body.configured),
+      message:
+        body.message ||
+        body.error ||
+        `Could not load funding details (${res.status}). Tap Refresh.`,
+    };
+  }
+
+  return {
+    bankName: body.bankName || "Wema Bank",
+    accountNumber: body.accountNumber ?? null,
+    accountName: body.accountName || "VERNEX / CUSTOMER",
+    reference: body.reference || "",
+    pending: !body.accountNumber,
+    configured: Boolean(body.configured),
+    permanent: body.permanent,
+    message: body.message ?? null,
+  };
+}
+
 function FundPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
-  const fetchFunding = useServerFn(getWalletFundingDetails);
   const [copied, setCopied] = useState<string | null>(null);
 
-  const { data: account, isLoading: accountLoading } = useQuery({
+  const { data: account } = useQuery({
     queryKey: ["account", user.id],
     queryFn: () => fetchAccount(user.id),
   });
 
   const {
     data: funding,
-    isLoading: fundingLoading,
+    isLoading,
     isFetching,
     refetch,
-    isError,
-    error,
   } = useQuery({
     queryKey: ["wallet-funding", user.id],
-    queryFn: async () => {
-      // GET server fn — no body required
-      return fetchFunding();
-    },
-    staleTime: 30_000,
+    queryFn: loadFundingDetails,
+    staleTime: 15_000,
     retry: 1,
   });
 
   const balance = account?.wallet?.balance ?? 0;
 
-  // Prefer live server details; fall back to wallet row already on the client
   const accountNumber =
     funding?.accountNumber ?? account?.wallet?.virtual_account_number ?? null;
   const bankName =
@@ -70,14 +127,13 @@ function FundPage() {
     funding?.reference ??
     account?.wallet?.virtual_account_reference ??
     `VNX-${user.id.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
-  const accountName = funding?.accountName
-    ? funding.accountName
-    : account?.profile?.full_name
+  const accountName =
+    funding?.accountName ||
+    (account?.profile?.full_name
       ? `VERNEX / ${account.profile.full_name.toUpperCase()}`
-      : "VERNEX / CUSTOMER";
+      : "VERNEX / CUSTOMER");
 
   const pending = !accountNumber;
-  const isLoading = accountLoading || (fundingLoading && !account?.wallet?.virtual_account_number);
 
   async function copy(value: string, key: string) {
     try {
@@ -128,14 +184,6 @@ function FundPage() {
       </div>
     );
   }
-
-  const errorText =
-    funding?.message ||
-    (isError
-      ? error instanceof Error
-        ? error.message
-        : "Could not load funding details."
-      : null);
 
   return (
     <AppShell>
@@ -193,10 +241,10 @@ function FundPage() {
             </div>
           ) : pending ? (
             <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm">
-              <p className="font-bold text-amber-700">Account is being generated</p>
+              <p className="font-bold text-amber-700">Account not ready yet</p>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                {errorText ||
-                  "Your permanent virtual account is being created with Flutterwave. Tap refresh in a few seconds."}
+                {funding?.message ||
+                  "We could not generate a virtual account. Tap Generate and try again."}
               </p>
               <button
                 type="button"
@@ -212,6 +260,9 @@ function FundPage() {
               <Row label="Account number" value={accountNumber ?? "—"} mono copyKey="acct" />
               <Row label="Account name" value={accountName} copyKey="name" />
               <Row label="Reference" value={reference} mono copyKey="ref" />
+              {funding?.message && (
+                <p className="mt-3 text-[12px] text-amber-700">{funding.message}</p>
+              )}
             </div>
           )}
         </section>
@@ -224,7 +275,7 @@ function FundPage() {
               <ul className="mt-2 space-y-1.5">
                 <li>· Copy the account number above into your bank app</li>
                 <li>· Send any amount in NGN (minimum ₦100 recommended)</li>
-                <li>· Wallet balance updates automatically after Flutterwave confirms</li>
+                <li>· Wallet balance updates after Flutterwave confirms the transfer</li>
                 <li>· Keep the reference if you need support on a delayed credit</li>
               </ul>
             </div>
