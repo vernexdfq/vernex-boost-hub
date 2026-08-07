@@ -229,8 +229,8 @@ function Landing() {
         </div>
       </section>
 
-      {/* Live marquee */}
-      <section className="border-y border-slate-800/60 bg-slate-900/50 py-8 overflow-hidden">
+      {/* Live marquee — continuously scrolling number cards */}
+      <section className="overflow-hidden border-y border-slate-800/60 bg-slate-900/50 py-8">
         <div className="mx-auto mb-4 flex max-w-7xl items-center justify-between px-4 text-xs font-semibold uppercase tracking-widest text-slate-400">
           <span>Live System Feed</span>
           <span className="flex items-center text-emerald-400">
@@ -239,20 +239,20 @@ function Landing() {
           </span>
         </div>
 
-        <div
-          className="relative w-full overflow-hidden"
-          onMouseEnter={() => setMarqueePaused(true)}
-          onMouseLeave={() => setMarqueePaused(false)}
-        >
+        <div className="relative w-full overflow-hidden">
           <div
-            className={`animate-marquee space-x-4 py-2 ${marqueePaused ? "[animation-play-state:paused]" : ""}`}
+            className={`vernex-marquee-track py-2${marqueePaused ? " is-paused" : ""}`}
+            onMouseEnter={() => setMarqueePaused(true)}
+            onMouseLeave={() => setMarqueePaused(false)}
+            onTouchStart={() => setMarqueePaused(true)}
+            onTouchEnd={() => setMarqueePaused(false)}
           >
-            <div className="flex shrink-0 space-x-4">
+            <div className="vernex-marquee-group">
               {LIVE_FEED.map((row) => (
                 <LiveCard key={`a-${row.number}`} {...row} />
               ))}
             </div>
-            <div className="flex shrink-0 space-x-4" aria-hidden>
+            <div className="vernex-marquee-group" aria-hidden>
               {LIVE_FEED.map((row) => (
                 <LiveCard key={`b-${row.number}`} {...row} />
               ))}
