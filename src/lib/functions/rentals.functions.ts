@@ -31,10 +31,20 @@ export type RentalCountry = {
 const RENTAL_SELECT =
   "id, phone_number, country_code, country_name, dial_code, carrier, region_name, area_code, number_type, provider, monthly_price_ngn, expires_at, is_available";
 
+function resolveProvider(countryCode: string, existing?: string): string {
+  const code = (countryCode || "").toUpperCase();
+  // USA numbers → SignalWire; all other countries → DIDWW
+  if (code === "US" || code === "USA") return "signalwire";
+  if (existing && String(existing).trim()) return String(existing).toLowerCase();
+  return "didww";
+}
+
 function normalize(row: Record<string, unknown>): RentalNumber {
+  const country = String(row["country_code"] ?? "");
   return {
     ...(row as unknown as RentalNumber),
-    monthly_price_ngn: Number(row['monthly_price_ngn']),
+    monthly_price_ngn: Number(row["monthly_price_ngn"]),
+    provider: resolveProvider(country, row["provider"] as string | undefined),
   };
 }
 
