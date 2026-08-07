@@ -5,7 +5,6 @@ import type { Database } from './types';
 function normalizeSupabaseUrl(raw: string | undefined): string {
   if (!raw) return '';
   let url = raw.trim();
-  // Remove common mistakes: /rest/v1, /auth/v1, trailing slash
   url = url.replace(/\/(rest|auth|storage|functions)\/v1\/?$/i, '');
   url = url.replace(/\/+$/, '');
   return url;
@@ -36,7 +35,6 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
       new Headers(init.headers).forEach((value, key) => headers.set(key, value));
     }
 
-    // New Supabase API keys are opaque strings, not bearer JWTs.
     if (isNewSupabaseApiKey(supabaseKey) && headers.get('Authorization') === `Bearer ${supabaseKey}`) {
       headers.delete('Authorization');
     }
@@ -46,21 +44,59 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+/**
+ * Session storage (not localStorage):
+ * - Login lasts only for the current browser tab/window session
+ * - Closing the browser requires phone + PIN again (Primex-style)
+ * - Refreshing the page within the same session keeps the user signed in
+ */
+const AUTH_STORAGE_KEY = 'vernex-auth-v2';
+
+function getAuthStorage(): Storage | undefined {
+  if (typeof window === 'undefined') return undefined;
+
+  // One-time cleanup of old permanent localStorage sessions
+  try {
+    const migrated = sessionStorage.getItem('vernex-auth-migrated');
+    if (!migrated) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const k = localStorage.key(i);
+        if (
+          k &&
+          (k.includes('supabase') ||
+            k.includes('sb-') ||
+            k.startsWith('vernex-auth') ||
+            k.includes('auth-token'))
+        ) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+      sessionStorage.setItem('vernex-auth-migrated', '1');
+    }
+  } catch {
+    // ignore storage errors (private mode, etc.)
+  }
+
+  return sessionStorage;
+}
+
 function createSupabaseClient() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error(
       '[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Cloudflare Pages environment variables.',
     );
-    // Return a client with placeholder values so the app shell still renders;
-    // auth calls will fail gracefully instead of crashing the whole page.
     return createClient<Database>(
       SUPABASE_URL || 'https://placeholder.supabase.co',
       SUPABASE_ANON_KEY || 'placeholder',
       {
         auth: {
-          storage: typeof window !== 'undefined' ? localStorage : undefined,
+          storage: getAuthStorage(),
+          storageKey: AUTH_STORAGE_KEY,
           persistSession: false,
           autoRefreshToken: false,
+          detectSessionInUrl: false,
         },
       },
     );
@@ -71,9 +107,12 @@ function createSupabaseClient() {
       fetch: createSupabaseFetch(SUPABASE_ANON_KEY),
     },
     auth: {
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: getAuthStorage(),
+      storageKey: AUTH_STORAGE_KEY,
+      // Persist only in sessionStorage — cleared when the browser session ends
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
     },
   });
 }
