@@ -88,12 +88,13 @@ function AuthPage() {
   const [screen, setScreen] = useState<Screen>("signin");
   const [busy, setBusy] = useState(false);
 
+  // Only redirect AFTER a successful login in this page session.
+  // Do NOT restore / skip login from any stored session (shared-phone safety).
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: "/dashboard", replace: true });
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+        navigate({ to: "/dashboard", replace: true });
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
