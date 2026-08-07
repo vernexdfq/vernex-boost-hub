@@ -44,16 +44,41 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 /**
- * SECURITY: No persistent login.
- * - Sessions are memory-only (not written to localStorage or sessionStorage)
- * - Closing the tab / refreshing the page requires phone + PIN again
- * - Prevents other people from opening someone else's account on a shared phone
+ * In-memory auth storage only.
+ * - Login is kept while the user navigates inside the open tab
+ * - Refresh / close tab / new visit = must enter phone + PIN again
+ * - Nothing is written to localStorage or sessionStorage (shared-phone safe)
  */
-function wipeStoredAuth() {
-  if (typeof window === 'undefined') return;
+function createMemoryStorage(): Storage {
+  let store: Record<string, string> = {};
+  return {
+    get length() {
+      return Object.keys(store).length;
+    },
+    clear() {
+      store = {};
+    },
+    getItem(key: string) {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    key(index: number) {
+      return Object.keys(store)[index] ?? null;
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    setItem(key: string, value: string) {
+      store[key] = String(value);
+    },
+  };
+}
+
+const memoryStorage = createMemoryStorage();
+
+// One-time cleanup of any old disk-based sessions so accounts cannot stay open
+if (typeof window !== 'undefined') {
   try {
-    const storages = [window.localStorage, window.sessionStorage];
-    for (const store of storages) {
+    for (const store of [window.localStorage, window.sessionStorage]) {
       const keys: string[] = [];
       for (let i = 0; i < store.length; i += 1) {
         const k = store.key(i);
@@ -62,9 +87,7 @@ function wipeStoredAuth() {
           (k.includes('supabase') ||
             k.includes('sb-') ||
             k.startsWith('vernex-auth') ||
-            k.includes('auth-token') ||
-            k.includes('access_token') ||
-            k.includes('refresh_token'))
+            k.includes('auth-token'))
         ) {
           keys.push(k);
         }
@@ -72,14 +95,19 @@ function wipeStoredAuth() {
       keys.forEach((k) => store.removeItem(k));
     }
   } catch {
-    // private mode / blocked storage
+    // ignore
   }
 }
 
-// Clear any leftover permanent sessions as soon as the module loads
-wipeStoredAuth();
-
 function createSupabaseClient() {
+  const authOptions = {
+    storage: memoryStorage,
+    storageKey: 'vernex-auth-memory',
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+  } as const;
+
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error(
       '[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Cloudflare Pages environment variables.',
@@ -87,14 +115,7 @@ function createSupabaseClient() {
     return createClient<Database>(
       SUPABASE_URL || 'https://placeholder.supabase.co',
       SUPABASE_ANON_KEY || 'placeholder',
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false,
-          storage: undefined,
-        },
-      },
+      { auth: { ...authOptions, autoRefreshToken: false } },
     );
   }
 
@@ -102,13 +123,7 @@ function createSupabaseClient() {
     global: {
       fetch: createSupabaseFetch(SUPABASE_ANON_KEY),
     },
-    auth: {
-      // Memory-only session — never written to disk
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      storage: undefined,
-    },
+    auth: authOptions,
   });
 }
 
