@@ -125,16 +125,24 @@
 }
 
 
-/* Landing live-feed marquee */
+/* Landing live-feed marquee — continuous horizontal scroll */
 @keyframes vernex-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
-@utility animate-marquee {
+.vernex-marquee-track {
   display: flex;
   width: max-content;
-  animation: vernex-marquee 28s linear infinite;
+  gap: 1rem;
+  animation: vernex-marquee 30s linear infinite;
+  will-change: transform;
 }
-@utility animate-marquee-paused {
+.vernex-marquee-track:hover,
+.vernex-marquee-track.is-paused {
   animation-play-state: paused;
+}
+.vernex-marquee-track > .vernex-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
 }
