@@ -123,3 +123,18 @@
   background-image: radial-gradient(oklch(1 0 0 / 0.08) 1px, transparent 1px);
   background-size: 14px 14px;
 }
+
+
+/* Landing live-feed marquee */
+@keyframes vernex-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@utility animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: vernex-marquee 28s linear infinite;
+}
+@utility animate-marquee-paused {
+  animation-play-state: paused;
+}
