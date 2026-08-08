@@ -4,12 +4,13 @@ import { toast } from "sonner";
 import {
   Copy,
   Check,
-  Building2,
-  ShieldCheck,
   Loader2,
   ChevronLeft,
   RefreshCw,
-  Wallet,
+  Building2,
+  Hash,
+  User,
+  ShieldCheck,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -31,11 +32,14 @@ export const Route = createFileRoute("/_authenticated/fund")({
   component: FundPage,
 });
 
+type ProviderTab = "primary" | "secondary";
+
 function FundPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const fetchFunding = useServerFn(getWalletFundingDetails);
   const [copied, setCopied] = useState<string | null>(null);
+  const [provider, setProvider] = useState<ProviderTab>("primary");
 
   const { data: account } = useQuery({
     queryKey: ["account", user.id],
@@ -51,10 +55,7 @@ function FundPage() {
     error,
   } = useQuery({
     queryKey: ["wallet-funding", user.id],
-    queryFn: async () => {
-      // Same pattern as dashboard server fns
-      return fetchFunding({ data: undefined as never });
-    },
+    queryFn: async () => fetchFunding({ data: undefined as never }),
     staleTime: 15_000,
     retry: 1,
   });
@@ -84,6 +85,14 @@ function FundPage() {
         : "Could not load funding details."
       : null);
 
+  // UI tabs mirror the reference (Paga / Palmpay). Values always come from Flutterwave VA.
+  const primaryLabel = bankName?.toLowerCase().includes("paga")
+    ? "Paga"
+    : bankName?.toLowerCase().includes("palm")
+      ? "Palmpay"
+      : bankName?.split(" ")[0] || "Bank";
+  const secondaryLabel = primaryLabel === "Paga" ? "Palmpay" : "Paga";
+
   async function copy(value: string, key: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -95,141 +104,243 @@ function FundPage() {
     }
   }
 
-  function Row({
-    label,
+  async function handleRefresh() {
+    await refetch();
+    await queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+    toast.success("Funding details refreshed");
+  }
+
+  function CopyBtn({
     value,
-    mono,
     copyKey,
   }: {
-    label: string;
     value: string;
-    mono?: boolean;
-    copyKey?: string;
+    copyKey: string;
   }) {
+    const done = copied === copyKey;
     return (
-      <div className="flex items-center justify-between gap-3 border-b border-border py-3 last:border-0">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {label}
-          </p>
-          <p className={`mt-0.5 text-sm font-bold ${mono ? "font-mono tabular-nums" : ""}`}>
-            {value}
-          </p>
-        </div>
-        {copyKey && (
-          <button
-            type="button"
-            onClick={() => copy(value, copyKey)}
-            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-bold text-primary"
-          >
-            {copied === copyKey ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-            Copy
-          </button>
-        )}
-      </div>
+      <button
+        type="button"
+        onClick={() => copy(value, copyKey)}
+        className="flex items-center space-x-1 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 transition-all hover:bg-indigo-100 active:scale-[0.98]"
+      >
+        {done ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        <span>{done ? "Copied" : "Copy"}</span>
+      </button>
     );
   }
 
   return (
-    <AppShell>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
-        <Link to="/dashboard" aria-label="Back" className="text-primary">
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
-        <div className="min-w-0 flex-1 text-center">
-          <h1 className="text-[15px] font-bold">Fund Wallet</h1>
-          <p className="text-[11px] text-muted-foreground">Bank transfer · instant credit</p>
+    <AppShell title="Fund Wallet" hideHeader>
+      <div className="mx-auto max-w-md space-y-6 px-4 pb-6 pt-2 sm:px-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Link
+              to="/dashboard"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition active:scale-95"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
+            </Link>
+            <h1 className="text-lg font-black text-slate-900">Fund Wallet</h1>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleRefresh()}
+            disabled={isFetching}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition active:scale-95 disabled:opacity-50"
+            aria-label="Refresh"
+          >
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            refetch();
-            queryClient.invalidateQueries({ queryKey: ["account", user.id] });
-          }}
-          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-surface"
-          aria-label="Refresh"
-        >
-          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-        </button>
-      </header>
 
-      <div className="space-y-4 px-5 pt-5 pb-6">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-indigo-500/12 text-indigo-400">
-              <Wallet className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Available balance
-              </p>
-              <p className="text-2xl font-black tabular-nums text-indigo-400">
-                {naira(Math.round(balance))}
-              </p>
-            </div>
+        {/* Wallet balance card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-tr from-slate-900 to-indigo-950 p-6 text-white shadow-xl">
+          <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-indigo-600/30 blur-2xl" />
+          <div className="mb-2 flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-300">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+              />
+            </svg>
+            <span>Wallet Balance</span>
+          </div>
+          <div className="mb-2 text-3xl font-black sm:text-4xl">{naira(balance)}</div>
+          <div className="inline-flex items-center space-x-1.5 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-3 py-1 text-xs text-emerald-400">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <span>Available for transactions</span>
           </div>
         </div>
 
-        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-          <div className="mb-1 flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-black">Your funding account</h2>
+        {/* Section title + fee notice */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 text-sm font-bold text-indigo-600">
+            <Building2 className="h-5 w-5" />
+            <span>Fund via Bank Transfer</span>
           </div>
-          <p className="text-[12px] text-muted-foreground">
-            Transfer any amount from your bank app to this account. Your wallet is credited
-            automatically.
-          </p>
+          <div className="flex items-start space-x-3 rounded-2xl border border-amber-200/80 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800 sm:text-sm">
+            <span className="text-lg">⚠️</span>
+            <span>A fee of ₦50 will be deducted from your deposit.</span>
+          </div>
+        </div>
 
+        {/* Provider tabs (visual — account details from Flutterwave) */}
+        <div className="flex space-x-3">
+          <button
+            type="button"
+            onClick={() => setProvider("primary")}
+            className={`flex items-center space-x-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+              provider === "primary"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                provider === "primary" ? "bg-white" : "bg-indigo-600"
+              }`}
+            />
+            <span>{primaryLabel}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setProvider("secondary")}
+            className={`flex items-center space-x-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+              provider === "secondary"
+                ? "bg-indigo-600 text-white shadow-md"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                provider === "secondary" ? "bg-white" : "bg-indigo-600"
+              }`}
+            />
+            <span>{secondaryLabel}</span>
+          </button>
+        </div>
+
+        {/* Account details card */}
+        <div className="space-y-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-lg">
           {isLoading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
             </div>
           ) : pending ? (
-            <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm">
-              <p className="font-bold text-amber-700">Account not ready yet</p>
-              <p className="mt-1 text-[13px] text-muted-foreground">
+            <div className="space-y-3 text-center">
+              <p className="text-sm font-bold text-slate-900">Account not ready yet</p>
+              <p className="text-xs leading-relaxed text-slate-500">
                 {statusMessage ||
                   "We could not generate a virtual account yet. Tap Generate and try again."}
               </p>
               <button
                 type="button"
-                onClick={() => refetch()}
-                className="mt-3 inline-flex items-center gap-2 rounded-lg brand-gradient px-3 py-2 text-[12px] font-bold text-white"
+                onClick={() => void handleRefresh()}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700 active:scale-[0.98]"
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Generate / Refresh
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+                Generate / Refresh
               </button>
             </div>
           ) : (
-            <div className="mt-3">
-              <Row label="Bank" value={bankName} />
-              <Row label="Account number" value={accountNumber ?? "—"} mono copyKey="acct" />
-              <Row label="Account name" value={accountName} copyKey="name" />
-              <Row label="Reference" value={reference} mono copyKey="ref" />
-              {funding?.message && (
-                <p className="mt-3 text-[12px] text-amber-700">{funding.message}</p>
-              )}
-            </div>
-          )}
-        </section>
+            <>
+              {/* Bank */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                    <Building2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Bank Name
+                    </div>
+                    <div className="text-base font-black text-slate-900">{bankName}</div>
+                  </div>
+                </div>
+                <CopyBtn value={bankName} copyKey="bank" />
+              </div>
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
-          <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
-            <div className="text-[13px] leading-relaxed text-muted-foreground">
-              <p className="font-bold text-foreground">How funding works</p>
-              <ul className="mt-2 space-y-1.5">
-                <li>· Copy the account number above into your bank app</li>
-                <li>· Send any amount in NGN (minimum ₦100 recommended)</li>
-                <li>· Wallet balance updates after Flutterwave confirms the transfer</li>
-                <li>· Keep the reference if you need support on a delayed credit</li>
-              </ul>
-            </div>
+              {/* Account number */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                    <Hash className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Account Number
+                    </div>
+                    <div className="text-lg font-black tracking-wider text-slate-900">
+                      {accountNumber}
+                    </div>
+                  </div>
+                </div>
+                <CopyBtn value={accountNumber ?? ""} copyKey="acct" />
+              </div>
+
+              {/* Account name */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Account Name
+                    </div>
+                    <div className="text-base font-black text-slate-900">{accountName}</div>
+                  </div>
+                </div>
+                <CopyBtn value={accountName} copyKey="name" />
+              </div>
+
+              {reference && (
+                <div className="rounded-xl bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
+                  <span className="font-bold text-slate-600">Ref:</span> {reference}
+                </div>
+              )}
+
+              {funding?.message && (
+                <p className="text-xs text-amber-700">{funding.message}</p>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* How to fund */}
+        <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-lg">
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
+            How to fund your wallet
+          </h3>
+          <div className="space-y-3 text-xs text-slate-600 sm:text-sm">
+            {[
+              "Select a bank and generate your virtual account (one-time).",
+              "Copy the account number and open your banking app.",
+              "Transfer any amount to the account details shown above.",
+              "Your wallet is credited automatically within seconds.",
+            ].map((step, i) => (
+              <div key={step} className="flex items-start space-x-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                  {i + 1}
+                </span>
+                <p className="pt-0.5">{step}</p>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+
+        {/* Secure badge */}
+        <div className="flex items-start space-x-3 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900">
+          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
+          <div>
+            <span className="font-bold text-slate-900">Instant & Secure:</span> Transfers are
+            processed automatically. Your balance updates within seconds of a successful transfer.
+          </div>
+        </div>
       </div>
     </AppShell>
   );
