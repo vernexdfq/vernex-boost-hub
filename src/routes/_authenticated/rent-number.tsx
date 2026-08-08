@@ -479,52 +479,61 @@ function KeypadPanel({
         )}
       </div>
 
-      {/* Dialer card */}
-      <div className="shrink-0 rounded-3xl border border-[#E5E7EB] bg-white p-4 shadow-2xl backdrop-blur-sm sm:p-5">
-        <div className="mb-4 flex items-center justify-center space-x-3 rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 shadow-inner">
+      {/* Dialer card — Call.com style */}
+      <div className="mx-auto w-full max-w-[340px] shrink-0 rounded-[28px] border border-[#E5E7EB] bg-white px-5 pb-6 pt-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
+        {/* Number display */}
+        <div className="mb-5 flex items-center gap-2 rounded-2xl border border-[#E8ECF1] bg-[#F8FAFC] px-3 py-3.5">
           <button
             type="button"
             onClick={() => setShowCountry(true)}
-            className="flex items-center space-x-1.5 rounded-xl border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-sm shadow-xs transition hover:bg-slate-100"
+            className="flex shrink-0 items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white px-2.5 py-2 shadow-sm transition active:scale-[0.98]"
+            aria-label="Select country"
           >
-            <span className="text-lg">
-              {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+44" ? "🇬🇧" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
+            <span className="text-lg leading-none">
+              {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
             </span>
-            <ChevronDown className="h-3.5 w-3.5 text-[#64748B]" />
+            <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8]" />
           </button>
-          <div className="flex-1 text-center font-mono text-2xl font-semibold tracking-wider text-[#0F172A]">
+          <div className="min-w-0 flex-1 truncate text-center font-mono text-[26px] font-semibold leading-none tracking-[0.04em] text-[#0F172A]">
             {dialPrefix}
-            {digits}
+            {digits || <span className="text-[#CBD5E1]">{""}</span>}
+            {!digits && <span className="text-[#CBD5E1]">• • •</span>}
           </div>
           <button
             type="button"
             onClick={backspace}
-            className="p-1 text-[#64748B] hover:text-[#0F172A]"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[#94A3B8] transition hover:bg-white hover:text-[#0F172A] active:scale-95"
             aria-label="Backspace"
           >
             <Delete className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="mb-3 mx-auto grid w-full max-w-[280px] grid-cols-3 gap-2">
+        {/* Keypad grid */}
+        <div className="mx-auto mb-6 grid max-w-[280px] grid-cols-3 gap-x-4 gap-y-3">
           {KEYS.map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => press(k)}
-              className="flex h-12 flex-col items-center justify-center rounded-full border border-[#E5E7EB]/60 bg-[#F8FAFC] shadow-xs transition hover:bg-slate-100 active:scale-95"
+              className="tap-fast mx-auto flex h-[64px] w-[64px] flex-col items-center justify-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:bg-[#F1F5F9] active:scale-95 active:bg-[#E8EEF5]"
             >
-              <span className="font-mono text-[17px] font-semibold leading-none text-[#0F172A]">{k}</span>
-              {KEY_LETTERS[k] && (
-                <span className="mt-0.5 text-[8px] font-semibold uppercase tracking-widest text-[#64748B]">
+              <span className="font-mono text-[22px] font-semibold leading-none text-[#0F172A]">
+                {k}
+              </span>
+              {KEY_LETTERS[k] ? (
+                <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
                   {KEY_LETTERS[k]}
                 </span>
+              ) : (
+                <span className="mt-1 h-[9px]" />
               )}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center justify-around px-2">
+        {/* Call actions */}
+        <div className="mx-auto flex max-w-[280px] items-center justify-between px-2">
           <button
             type="button"
             onClick={() =>
@@ -532,7 +541,7 @@ function KeypadPanel({
                 description: "Video sessions attach to your active rented line.",
               })
             }
-            className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3.5 text-[#0F172A] transition hover:bg-slate-100"
+            className="tap-fast grid h-14 w-14 place-items-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] text-[#0F172A] transition hover:bg-[#F1F5F9] active:scale-95"
             aria-label="Video"
           >
             <Video className="h-5 w-5" />
@@ -540,7 +549,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={call}
-            className="rounded-full bg-[#16C784] p-4 text-slate-950 shadow-lg shadow-[#16C784]/30 transition hover:bg-[#12ab70] active:scale-95"
+            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#16C784] text-white shadow-[0_10px_28px_rgba(22,199,132,0.35)] transition hover:bg-[#12ab70] active:scale-95"
             aria-label="Call"
           >
             <Phone className="h-7 w-7 fill-current" />
@@ -548,7 +557,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={backspace}
-            className="rounded-full border border-[#E5E7EB] bg-[#F8FAFC] p-3.5 text-[#0F172A] transition hover:bg-slate-100"
+            className="tap-fast grid h-14 w-14 place-items-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] text-[#0F172A] transition hover:bg-[#F1F5F9] active:scale-95"
             aria-label="Delete"
           >
             <Delete className="h-5 w-5" />
