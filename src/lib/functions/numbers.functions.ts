@@ -73,11 +73,9 @@ export const listNumberProducts = createServerFn({ method: "GET" })
 
     // Live provider catalog (primary)
     try {
+      // Only one slot per request — never fan-out to all providers (Worker CPU limit)
       if (slotId) {
         const live = await listLiveProductsForSlot(slotId);
-        if (live.length) return live.map(fromLive);
-      } else {
-        const live = await listLiveProductsAllSlots();
         if (live.length) return live.map(fromLive);
       }
     } catch (err) {

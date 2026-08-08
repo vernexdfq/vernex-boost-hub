@@ -105,8 +105,8 @@ function builtInCatalog(): AccountProduct[] {
 }
 
 async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
-  // Session-based AccsMarket login (email/password in Cloudflare)
-  if (isAccsMarketConfigured()) {
+  // AccsMarket session sync is opt-in (ACCSMARKET_LIVE=1) — login scraping is too heavy for every page view
+  if (isAccsMarketConfigured() && process.env.ACCSMARKET_LIVE === "1") {
     try {
       const inv = await accsMarketFetchInventory();
       if (inv.ok && inv.products.length > 0) {

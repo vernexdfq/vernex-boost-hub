@@ -237,7 +237,6 @@ function VirtualNumbers() {
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SERVER_SLOTS.map((slot) => {
             const active = slot.id === serverId;
-            const count = products?.filter((p) => slot.match(p)).length ?? 0;
             return (
               <button
                 key={slot.id}
@@ -252,13 +251,9 @@ function VirtualNumbers() {
                 <span className="text-lg">{slot.flag}</span>
                 <span className="min-w-0 flex-1 leading-tight">
                   {slot.label}
-                  {!productsLoading && (
-                    <span
-                      className={`mt-0.5 block text-[10px] font-semibold ${
-                        active ? "text-white/80" : "text-slate-400"
-                      }`}
-                    >
-                      {count} services
+                  {active && !productsLoading && (
+                    <span className="mt-0.5 block text-[10px] font-semibold text-white/80">
+                      {products?.length ?? 0} services
                     </span>
                   )}
                 </span>

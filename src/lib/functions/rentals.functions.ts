@@ -87,8 +87,8 @@ export const listRentalCountries = createServerFn({ method: "GET" })
       map.set(row.country_code, entry);
     }
 
+    // USA card only — live number search happens when user opens the country
     if (isSignalWireConfigured()) {
-      const live = await searchSignalWireAvailable({ limit: 25 });
       const price = rentalPriceNgnFromUsd(defaultRentalUsd("US"));
       const entry = map.get("US") ?? {
         country_code: "US",
@@ -96,15 +96,10 @@ export const listRentalCountries = createServerFn({ method: "GET" })
         dial_code: "+1",
         carriers: ["SignalWire"] as string[],
         regions: [] as string[],
-        available: 0,
+        available: 25,
         from_price_ngn: price,
       };
-      if (live.ok) {
-        entry.available = Math.max(entry.available, live.numbers.length);
-        for (const n of live.numbers) {
-          if (n.region && !entry.regions.includes(n.region)) entry.regions.push(n.region);
-        }
-      }
+      entry.available = Math.max(entry.available, 1);
       entry.from_price_ngn = Math.min(entry.from_price_ngn || price, price);
       if (!entry.carriers.includes("SignalWire")) entry.carriers.push("SignalWire");
       map.set("US", entry);

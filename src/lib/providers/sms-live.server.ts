@@ -1,9 +1,5 @@
 /**
- * Live SMS OTP providers for Virtual Numbers slots.
- * Protocols:
- *  - 5sim REST
- *  - SMS-Activate compatible (Grizzly, DogeSMS, SMSBuyz)
- *  - TextVerified simple API
+ * Live SMS OTP providers — cached, timed-out, capped for Cloudflare Workers.
  */
 
 import {
@@ -14,6 +10,7 @@ import {
   type SmsProviderId,
   type SmsSlotId,
 } from "@/lib/sms-servers";
+import { cached, fetchWithTimeout } from "@/lib/cache.server";
 
 export type LiveSmsProduct = {
   id: string;
@@ -28,6 +25,10 @@ export type LiveSmsProduct = {
   stock_count: number;
 };
 
+const MAX_PRODUCTS = 60;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const FETCH_MS = 3500;
+
 const SERVICE_NAMES: Record<string, string> = {
   wa: "WhatsApp",
   tg: "Telegram",
@@ -38,13 +39,6 @@ const SERVICE_NAMES: Record<string, string> = {
   nf: "Netflix",
   ds: "Discord",
   oi: "OpenAI",
-  mm: "Microsoft",
-  am: "Amazon",
-  tk: "TikTok",
-  lf: "TikTok",
-  wx: "Apple",
-  ya: "Yahoo",
-  ma: "Microsoft Outlook",
   whatsapp: "WhatsApp",
   telegram: "Telegram",
   google: "Google",
@@ -65,13 +59,11 @@ function prettyService(key: string): string {
   return SERVICE_NAMES[k] || key.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** SMS-Activate style base URLs */
 function activateBase(provider: SmsProviderId): string {
   switch (provider) {
     case "grizzly":
       return (
         process.env.GRIZZLY_API_URL?.trim() ||
-        process.env.GRIZZLY_SMS_API_URL?.trim() ||
         "https://api.grizzlysms.com/stubs/handler_api.php"
       );
     case "dogesms":
@@ -89,14 +81,43 @@ function activateBase(provider: SmsProviderId): string {
   }
 }
 
+function prioritize(products: LiveSmsProduct[]): LiveSmsProduct[] {
+  const priority = [
+    "whatsapp",
+    "wa",
+    "telegram",
+    "tg",
+    "google",
+    "go",
+    "facebook",
+    "fb",
+    "instagram",
+    "ig",
+  ];
+  products.sort((a, b) => {
+    const ai = priority.indexOf(a.service_key.toLowerCase());
+    const bi = priority.indexOf(b.service_key.toLowerCase());
+    const ap = ai === -1 ? 999 : ai;
+    const bp = bi === -1 ? 999 : bi;
+    if (ap !== bp) return ap - bp;
+    return a.service_name.localeCompare(b.service_name);
+  });
+  return products.slice(0, MAX_PRODUCTS);
+}
+
 async function fetchActivatePrices(
   provider: SmsProviderId,
   apiKey: string,
   countryFilter: "usa" | "all",
 ): Promise<LiveSmsProduct[]> {
   const base = activateBase(provider);
-  const url = `${base}?api_key=${encodeURIComponent(apiKey)}&action=getPrices`;
-  const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+  // Prefer country-scoped prices when USA-only (country 12 is common USA id)
+  const url =
+    countryFilter === "usa"
+      ? `${base}?api_key=${encodeURIComponent(apiKey)}&action=getPrices&country=12`
+      : `${base}?api_key=${encodeURIComponent(apiKey)}&action=getPrices`;
+
+  const res = await fetchWithTimeout(url, { headers: { Accept: "application/json" } }, FETCH_MS);
   const text = await res.text();
   let json: unknown;
   try {
@@ -104,40 +125,57 @@ async function fetchActivatePrices(
   } catch {
     return [];
   }
-  // Shape: { "0": { "wa": { "cost": 0.2, "count": 100 }, ... }, "1": {...} }
-  // country 0 often Russia; USA is commonly 12 or "usa"
   if (!json || typeof json !== "object") return [];
-  const out: LiveSmsProduct[] = [];
-  const root = json as Record<string, Record<string, { cost?: number; count?: number; price?: number }>>;
 
-  for (const [countryId, services] of Object.entries(root)) {
-    if (!services || typeof services !== "object") continue;
-    const isUs =
-      countryId === "12" ||
-      countryId === "1" ||
-      /usa|united/i.test(countryId);
-    if (countryFilter === "usa" && !isUs) continue;
+  const out: LiveSmsProduct[] = [];
+  const root = json as Record<
+    string,
+    Record<string, { cost?: number; count?: number; price?: number }> | { cost?: number; count?: number }
+  >;
+
+  // Some APIs return flat { wa: { cost, count } } when country is set
+  const entries: Array<[string, Record<string, { cost?: number; count?: number; price?: number }>]> = [];
+  const sample = Object.values(root)[0];
+  if (sample && typeof sample === "object" && ("cost" in sample || "count" in sample || "price" in sample)) {
+    entries.push([countryFilter === "usa" ? "12" : "0", root as Record<string, { cost?: number; count?: number; price?: number }>]);
+  } else {
+    for (const [countryId, services] of Object.entries(root)) {
+      if (services && typeof services === "object") {
+        entries.push([countryId, services as Record<string, { cost?: number; count?: number; price?: number }>]);
+      }
+    }
+  }
+
+  let parsed = 0;
+  for (const [countryId, services] of entries) {
+    if (parsed >= MAX_PRODUCTS) break;
+    const isUs = countryId === "12" || countryId === "1" || /usa|united/i.test(countryId);
+    if (countryFilter === "usa" && !isUs && countryId !== "12") {
+      // when country=12 was requested, treat all as US
+      if (countryFilter === "usa" && !String(countryId).match(/^\d+$/)) continue;
+    }
     if (countryFilter === "all" && isUs) continue;
 
     for (const [svc, info] of Object.entries(services)) {
-      const cost = Number(info?.cost ?? info?.price ?? 0);
-      const count = Number(info?.count ?? 0);
-      if (!Number.isFinite(cost) || cost <= 0) continue;
-      if (count <= 0) continue;
-      const countryCode = isUs ? "US" : countryId.length <= 3 ? countryId.toUpperCase() : "INTL";
-      const countryName = isUs ? "United States" : `Country ${countryId}`;
+      if (parsed >= MAX_PRODUCTS) break;
+      if (!info || typeof info !== "object") continue;
+      const cost = Number((info as { cost?: number; price?: number }).cost ?? (info as { price?: number }).price ?? 0);
+      const count = Number((info as { count?: number }).count ?? 0);
+      if (!Number.isFinite(cost) || cost <= 0 || count <= 0) continue;
+      const treatUs = countryFilter === "usa" || isUs;
       out.push({
         id: `live-${provider}-${countryId}-${svc}`,
         service_key: svc,
         service_name: prettyService(svc),
-        country_code: countryCode,
-        country_name: countryName,
-        server_id: "", // filled by caller
+        country_code: treatUs ? "US" : String(countryId).slice(0, 3).toUpperCase(),
+        country_name: treatUs ? "United States" : `Country ${countryId}`,
+        server_id: "",
         provider,
         provider_cost_usd: cost,
         selling_price_ngn: smsSellPriceNgn(cost),
-        stock_count: count > 9999 ? 9999 : count,
+        stock_count: Math.min(count, 9999),
       });
+      parsed++;
     }
   }
   return out;
@@ -147,18 +185,22 @@ async function fetchFiveSimPrices(
   apiKey: string,
   countryFilter: "usa" | "all",
 ): Promise<LiveSmsProduct[]> {
-  // Guest prices are public; with key we can also hit authenticated endpoints
+  // Always scope: full global prices JSON is huge and blows Worker CPU/memory
   const url =
     countryFilter === "usa"
       ? "https://5sim.net/v1/guest/prices?country=usa"
-      : "https://5sim.net/v1/guest/prices";
-  const res = await fetch(url, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      : "https://5sim.net/v1/guest/prices?country=england"; // small sample for non-US tab; per-country is safer
+
+  const res = await fetchWithTimeout(
+    url,
+    {
+      headers: {
+        Accept: "application/json",
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      },
     },
-  });
+    FETCH_MS,
+  );
   if (!res.ok) return [];
   const json = (await res.json().catch(() => null)) as Record<
     string,
@@ -167,14 +209,16 @@ async function fetchFiveSimPrices(
   if (!json) return [];
 
   const out: LiveSmsProduct[] = [];
-  // Shape: { "usa": { "whatsapp": { "virtual51": { cost, count } } } }
+  let parsed = 0;
   for (const [country, products] of Object.entries(json)) {
+    if (parsed >= MAX_PRODUCTS) break;
     const isUs = /usa|united/i.test(country);
     if (countryFilter === "usa" && !isUs) continue;
     if (countryFilter === "all" && isUs) continue;
     if (!products || typeof products !== "object") continue;
 
     for (const [product, operators] of Object.entries(products)) {
+      if (parsed >= MAX_PRODUCTS) break;
       if (!operators || typeof operators !== "object") continue;
       let bestCost = Infinity;
       let totalCount = 0;
@@ -182,7 +226,7 @@ async function fetchFiveSimPrices(
         const cost = Number(op?.cost ?? 0);
         const count = Number(op?.count ?? 0);
         if (count > 0 && cost > 0 && cost < bestCost) bestCost = cost;
-        totalCount += count > 0 ? count : 0;
+        if (count > 0) totalCount += count;
       }
       if (!Number.isFinite(bestCost) || bestCost === Infinity || totalCount <= 0) continue;
       out.push({
@@ -197,37 +241,29 @@ async function fetchFiveSimPrices(
         selling_price_ngn: smsSellPriceNgn(bestCost),
         stock_count: Math.min(totalCount, 9999),
       });
+      parsed++;
     }
   }
   return out;
 }
 
-async function fetchTextVerifiedServices(
-  apiKey: string,
-  countryFilter: "usa" | "all",
-): Promise<LiveSmsProduct[]> {
-  // TextVerified is primarily USA-focused
-  if (countryFilter === "all") {
-    // Still show USA-centric services under all-countries slots when mapped
-  }
+async function fetchTextVerifiedServices(apiKey: string): Promise<LiveSmsProduct[]> {
   const base =
     process.env.TEXTVERIFIED_API_URL?.trim() ||
-    process.env.TEXT_VERIFIED_API_URL?.trim() ||
     "https://www.textverified.com/api";
-
   try {
-    const res = await fetch(`${base.replace(/\/+$/, "")}/pub/v2/services`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: apiKey,
-        "X-API-KEY": apiKey,
+    const res = await fetchWithTimeout(
+      `${base.replace(/\/+$/, "")}/pub/v2/services`,
+      {
+        headers: {
+          Accept: "application/json",
+          Authorization: apiKey,
+          "X-API-KEY": apiKey,
+        },
       },
-    });
-    if (!res.ok) {
-      // Fallback static popular list with unknown price marker from balance endpoint not available
-      return [];
-    }
+      FETCH_MS,
+    );
+    if (!res.ok) return [];
     const json = (await res.json().catch(() => null)) as unknown;
     const list = Array.isArray(json)
       ? json
@@ -238,12 +274,13 @@ async function fetchTextVerifiedServices(
           : [];
 
     const out: LiveSmsProduct[] = [];
-    for (const row of list) {
+    for (const row of list.slice(0, MAX_PRODUCTS)) {
       if (!row || typeof row !== "object") continue;
       const r = row as Record<string, unknown>;
       const name = String(r.name ?? r.service_name ?? r.service ?? "").trim();
       if (!name) continue;
-      const cost = Number(r.price ?? r.cost ?? r.rate ?? 0.35);
+      const costRaw = Number(r.price ?? r.cost ?? r.rate ?? 0.35);
+      const cost = costRaw > 10 ? costRaw / 100 : costRaw;
       const stock = Number(r.stock ?? r.quantity ?? 50);
       const key = String(r.id ?? r.service_id ?? name).toLowerCase().replace(/\s+/g, "_");
       out.push({
@@ -254,8 +291,8 @@ async function fetchTextVerifiedServices(
         country_name: "United States",
         server_id: "",
         provider: "textverified",
-        provider_cost_usd: cost > 10 ? cost / 100 : cost, // cents vs dollars heuristic
-        selling_price_ngn: smsSellPriceNgn(cost > 10 ? cost / 100 : cost),
+        provider_cost_usd: cost,
+        selling_price_ngn: smsSellPriceNgn(cost),
         stock_count: stock > 0 ? stock : 50,
       });
     }
@@ -266,62 +303,48 @@ async function fetchTextVerifiedServices(
 }
 
 export async function listLiveProductsForSlot(slotId: SmsSlotId): Promise<LiveSmsProduct[]> {
-  const meta = getSlotMeta(slotId);
-  if (!meta) return [];
-  const apiKey = readSlotApiKey(meta);
-  if (!apiKey) {
-    console.warn(`[sms] No API key configured for slot ${slotId}`);
-    return [];
-  }
+  return cached(`sms-slot:${slotId}`, CACHE_TTL, async () => {
+    const meta = getSlotMeta(slotId);
+    if (!meta) return [];
+    const apiKey = readSlotApiKey(meta);
+    if (!apiKey) return [];
 
-  const filter = meta.group === "usa" ? "usa" : "all";
-  let products: LiveSmsProduct[] = [];
+    const filter = meta.group === "usa" ? "usa" : "all";
+    let products: LiveSmsProduct[] = [];
 
-  try {
-    switch (meta.provider) {
-      case "fivesim":
-        products = await fetchFiveSimPrices(apiKey, filter);
-        break;
-      case "grizzly":
-      case "dogesms":
-      case "smsbuyz":
-        products = await fetchActivatePrices(meta.provider, apiKey, filter);
-        break;
-      case "textverified":
-        products = await fetchTextVerifiedServices(apiKey, filter);
-        break;
+    try {
+      switch (meta.provider) {
+        case "fivesim":
+          products = await fetchFiveSimPrices(apiKey, filter);
+          break;
+        case "grizzly":
+        case "dogesms":
+        case "smsbuyz":
+          products = await fetchActivatePrices(meta.provider, apiKey, filter);
+          break;
+        case "textverified":
+          products = await fetchTextVerifiedServices(apiKey);
+          break;
+      }
+    } catch (err) {
+      console.error(`[sms] listLiveProductsForSlot ${slotId}`, err);
+      return [];
     }
-  } catch (err) {
-    console.error(`[sms] listLiveProductsForSlot ${slotId}`, err);
-    return [];
-  }
 
-  // Prefer popular services first
-  const priority = ["whatsapp", "wa", "telegram", "tg", "google", "go", "facebook", "fb", "instagram", "ig"];
-  products.sort((a, b) => {
-    const ai = priority.indexOf(a.service_key.toLowerCase());
-    const bi = priority.indexOf(b.service_key.toLowerCase());
-    const ap = ai === -1 ? 999 : ai;
-    const bp = bi === -1 ? 999 : bi;
-    if (ap !== bp) return ap - bp;
-    return a.service_name.localeCompare(b.service_name);
+    return prioritize(
+      products.map((p) => ({
+        ...p,
+        server_id: slotId,
+        country_code: meta.group === "usa" ? "US" : p.country_code,
+        country_name: meta.group === "usa" ? "United States" : p.country_name,
+      })),
+    );
   });
-
-  return products.map((p) => ({
-    ...p,
-    server_id: slotId,
-    country_code: meta.group === "usa" ? "US" : p.country_code,
-    country_name: meta.group === "usa" ? "United States" : p.country_name,
-  }));
 }
 
+/** Never fan-out to all providers in one request — Worker CPU limit. */
 export async function listLiveProductsAllSlots(): Promise<LiveSmsProduct[]> {
-  const all: LiveSmsProduct[] = [];
-  for (const slot of SMS_SERVER_SLOTS) {
-    const part = await listLiveProductsForSlot(slot.id);
-    all.push(...part);
-  }
-  return all;
+  return listLiveProductsForSlot("US-S1");
 }
 
 export type BuyNumberResult =
@@ -337,10 +360,6 @@ export async function buyLiveNumber(input: {
   const apiKey = readSlotApiKey(meta);
   if (!apiKey) return { ok: false, message: `API key not configured for ${meta.label}` };
 
-  // Parse live product id
-  // live-fivesim-{country}-{product}
-  // live-grizzly|{dogesms|smsbuyz}-{countryId}-{svc}
-  // live-textverified-{key}
   const id = input.productId;
 
   try {
@@ -349,13 +368,16 @@ export async function buyLiveNumber(input: {
       const [country, ...prodParts] = rest.split("-");
       const product = prodParts.join("-");
       const buyUrl = `https://5sim.net/v1/user/buy/activation/${encodeURIComponent(country)}/any/${encodeURIComponent(product)}`;
-      const res = await fetch(buyUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: "application/json",
+      const res = await fetchWithTimeout(
+        buyUrl,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            Accept: "application/json",
+          },
         },
-      });
+        8000,
+      );
       const body = (await res.json().catch(() => ({}))) as {
         phone?: string;
         id?: number | string;
@@ -386,9 +408,8 @@ export async function buyLiveNumber(input: {
       const [countryId, service] = rest.split("-");
       const base = activateBase(meta.provider);
       const url = `${base}?api_key=${encodeURIComponent(apiKey)}&action=getNumber&service=${encodeURIComponent(service)}&country=${encodeURIComponent(countryId)}`;
-      const res = await fetch(url, { method: "GET" });
+      const res = await fetchWithTimeout(url, {}, 8000);
       const text = await res.text();
-      // ACCESS_NUMBER:id:phone
       if (text.startsWith("ACCESS_NUMBER:")) {
         const parts = text.trim().split(":");
         return {
@@ -406,16 +427,20 @@ export async function buyLiveNumber(input: {
         process.env.TEXTVERIFIED_API_URL?.trim() ||
         "https://www.textverified.com/api";
       const service = id.replace("live-textverified-", "");
-      const res = await fetch(`${base.replace(/\/+$/, "")}/pub/v2/verifications`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: apiKey,
-          "X-API-KEY": apiKey,
+      const res = await fetchWithTimeout(
+        `${base.replace(/\/+$/, "")}/pub/v2/verifications`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: apiKey,
+            "X-API-KEY": apiKey,
+          },
+          body: JSON.stringify({ service }),
         },
-        body: JSON.stringify({ service }),
-      });
+        8000,
+      );
       const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
       const phone = String(body.number ?? body.phone ?? body.phoneNumber ?? "");
       const orderId = String(body.id ?? body.verification_id ?? "");
@@ -444,13 +469,4 @@ export async function buyLiveNumber(input: {
 
 export function isLiveProductId(id: string): boolean {
   return id.startsWith("live-");
-}
-
-export function parseLiveSlotFromProducts(
-  products: LiveSmsProduct[],
-  productId: string,
-): SmsSlotId | null {
-  const p = products.find((x) => x.id === productId);
-  if (p?.server_id && getSlotMeta(p.server_id)) return p.server_id as SmsSlotId;
-  return null;
 }
