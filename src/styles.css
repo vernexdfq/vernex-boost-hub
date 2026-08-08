@@ -168,3 +168,21 @@ input[type="button"] {
   transform: scale(0.97);
   opacity: 0.92;
 }
+
+
+/* Landing float / glow animations */
+@keyframes vernex-float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+@keyframes vernex-float-fast {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-1deg); }
+}
+@keyframes vernex-pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+.animate-float-slow { animation: vernex-float-slow 6s ease-in-out infinite; }
+.animate-float-fast { animation: vernex-float-fast 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: vernex-pulse-glow 5s ease-in-out infinite; }
