@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type WalletFundingDetails = {
@@ -16,10 +17,18 @@ export type WalletFundingDetails = {
  * Returns (and auto-provisions) the user's Flutterwave virtual account.
  * Always returns a structured object — never throws to the UI.
  */
+const fundingInputSchema = z
+  .object({
+    force: z.boolean().optional(),
+  })
+  .optional();
+
 export const getWalletFundingDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<WalletFundingDetails> => {
+  .inputValidator((data) => fundingInputSchema.parse(data ?? {}))
+  .handler(async ({ data, context }): Promise<WalletFundingDetails> => {
     try {
+      const force = Boolean(data?.force);
       const { supabase, userId } = context;
 
       let configured = false;
@@ -54,7 +63,7 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       let message: string | null = null;
       let permanent = Boolean(accountNumber);
 
-      if (!accountNumber && configured) {
+      if ((!accountNumber || force) && configured) {
         try {
           const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
           const provisioned = await provisionVirtualAccount({
@@ -64,6 +73,7 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
               `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
             fullName: profile?.full_name ?? "Vernex Customer",
             phone: profile?.phone ?? null,
+            force,
           });
           if (provisioned) {
             accountNumber = provisioned.accountNumber;

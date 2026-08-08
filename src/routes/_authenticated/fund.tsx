@@ -105,9 +105,15 @@ function FundPage() {
   }
 
   async function handleRefresh() {
-    await refetch();
-    await queryClient.invalidateQueries({ queryKey: ["account", user.id] });
-    toast.success("Funding details refreshed");
+    try {
+      await fetchFunding({ data: { force: true } });
+      await queryClient.invalidateQueries({ queryKey: ["wallet-funding", user.id] });
+      await queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+      await refetch();
+      toast.success("Permanent account refreshed");
+    } catch {
+      toast.error("Could not refresh funding details");
+    }
   }
 
   function CopyBtn({
