@@ -26,8 +26,10 @@ export const Route = createFileRoute("/")({
 
 const NAV = [
   { label: "Virtual Numbers", href: "#features" },
+  { label: "Global Coverage", href: "#coverage" },
+  { label: "Toolkit", href: "#toolkit" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Testimonials", href: "#reviews" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 const COUNTRIES: [string, string][] = [
@@ -43,6 +45,48 @@ const COUNTRIES: [string, string][] = [
   ["🇲🇽", "Mexico"],
   ["🇺🇸", "United States"],
   ["🇬🇧", "United Kingdom"],
+];
+
+const FEATURES = [
+  {
+    icon: "📞",
+    title: "Virtual Numbers",
+    desc: "Instant OTP numbers for WhatsApp, TikTok, Instagram, Google and 300+ services.",
+  },
+  {
+    icon: "🔑",
+    title: "Rent a Line",
+    desc: "Keep a dedicated USA or global number for hours or days — exclusive to you.",
+  },
+  {
+    icon: "🚀",
+    title: "SMM Boost",
+    desc: "Grow followers, likes, and views with tracked delivery from your Vernex wallet.",
+  },
+  {
+    icon: "📋",
+    title: "Buy Accounts",
+    desc: "Aged and verified social accounts delivered instantly after wallet payment.",
+  },
+];
+
+const FAQS = [
+  {
+    q: "What's the difference between Virtual Number and Rent?",
+    a: "Virtual Numbers are temporary lines for OTP verification (about 20 minutes). Rent gives you a dedicated number for hours or days that stays exclusively yours.",
+  },
+  {
+    q: "Which platforms can I verify with Vernex?",
+    a: "You can verify WhatsApp, Telegram, Google, Instagram, Twitter/X, TikTok, and over 300+ other online platforms seamlessly.",
+  },
+  {
+    q: "Can I get a refund if the number doesn't work?",
+    a: "Yes! If an OTP code is not delivered within the time window, our system automatically refunds your balance.",
+  },
+  {
+    q: "How do I fund my wallet?",
+    a: "Simply log in, click on fund wallet, and make a bank transfer to your unique virtual account number for instant crediting.",
+  },
 ];
 
 function Landing() {
@@ -65,7 +109,7 @@ function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F4F5FC] font-sans text-[#0F172A] antialiased selection:bg-indigo-500 selection:text-white">
       {/* Ambient Background Glows */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-7xl -translate-x-1/2 bg-gradient-to-b from-[#E0E7FF]/60 via-[#F4F5FC]/30 to-transparent" />
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-full max-w-7xl -translate-x-1/2 bg-gradient-to-b from-[#E0E7FF]/60 via-[#F4F5FC]/30 to-transparent" />
       <div className="animate-pulse-glow pointer-events-none absolute right-10 top-20 -z-10 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
       <div
         className="animate-pulse-glow pointer-events-none absolute left-10 top-40 -z-10 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl"
@@ -239,12 +283,12 @@ function Landing() {
         </div>
       </section>
 
-      {/* Countries */}
-      <section id="pricing" className="relative overflow-hidden px-6 py-24">
+      {/* Global Coverage */}
+      <section id="coverage" className="relative overflow-hidden px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-xl text-center">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-600">
-              Global coverage
+              GLOBAL COVERAGE
             </h2>
             <h3 className="text-3xl font-black text-slate-900 sm:text-4xl">
               Unlock numbers from any country instantly.
@@ -252,12 +296,14 @@ function Landing() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {COUNTRIES.map(([flag, name]) => (
+            {COUNTRIES.map(([flag, name], i) => (
               <button
                 key={name}
                 type="button"
                 onClick={enter}
-                className="tap-fast group flex cursor-pointer items-center space-x-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-xl"
+                className={`tap-fast group flex cursor-pointer items-center space-x-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-xl ${
+                  i % 2 === 0 ? "animate-float-slow" : "animate-float-fast"
+                }`}
               >
                 <span className="text-2xl">{flag}</span>
                 <span className="text-sm font-bold text-slate-800 group-hover:text-indigo-600">
@@ -269,12 +315,122 @@ function Landing() {
         </div>
       </section>
 
-      {/* Footer strip */}
-      <section id="reviews" className="border-t border-slate-200/60 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-slate-500">
-          © {new Date().getFullYear()} Vernex.com.ng · Your second number, anywhere in the world.
-        </p>
+      {/* Everything in One Toolkit */}
+      <section id="toolkit" className="border-y border-slate-200/60 bg-white px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-16 max-w-xl text-center">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-600">
+              FEATURES
+            </h2>
+            <h3 className="text-3xl font-black text-slate-900 sm:text-4xl">
+              Everything in one toolkit
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-[#F4F5FC] p-8 transition-all hover:border-indigo-300"
+              >
+                <div>
+                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-xl text-white shadow-lg shadow-indigo-600/20">
+                    {f.icon}
+                  </div>
+                  <h4 className="mb-3 text-lg font-black text-slate-900">{f.title}</h4>
+                  <p className="text-sm leading-relaxed text-slate-600">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
+
+      {/* Pricing / Wallet Funding */}
+      <section id="pricing" className="relative px-6 py-24">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl bg-slate-900 p-8 text-white shadow-2xl sm:p-12">
+          <div className="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-indigo-600/20 blur-3xl" />
+
+          <div className="relative mx-auto mb-12 max-w-lg text-center">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-400">
+              FLEXIBLE FUNDING
+            </h2>
+            <h3 className="mb-4 text-3xl font-black sm:text-4xl">Start with any amount</h3>
+            <p className="text-sm text-slate-400">
+              Fund your Naira wallet, then buy OTPs, rent numbers, or boost accounts — pay only for
+              what you use.
+            </p>
+          </div>
+
+          <div className="relative mx-auto mb-10 grid max-w-xl grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+            {[
+              "Instant bank-transfer funding",
+              "OTP numbers from ₦200+",
+              "5% referral commission",
+              "24/7 automated delivery",
+            ].map((item) => (
+              <div
+                key={item}
+                className="flex items-center space-x-3 rounded-xl border border-slate-700/50 bg-slate-800/80 p-4"
+              >
+                <span className="font-bold text-emerald-400">✓</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="relative text-center">
+            <button
+              type="button"
+              onClick={enter}
+              disabled={going}
+              className="tap-fast inline-flex transform items-center justify-center rounded-2xl bg-indigo-600 px-8 py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-indigo-500"
+            >
+              Create free account
+              <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="border-t border-slate-200/60 bg-white px-6 py-24">
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-600">
+              SUPPORT
+            </h2>
+            <h3 className="text-3xl font-black text-slate-900">Frequently Asked Questions</h3>
+          </div>
+
+          <div className="space-y-4">
+            {FAQS.map((faq) => (
+              <div
+                key={faq.q}
+                className="rounded-2xl border border-slate-200 bg-[#F4F5FC] p-6"
+              >
+                <h4 className="mb-2 font-bold text-slate-900">{faq.q}</h4>
+                <p className="text-sm text-slate-600">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-800 bg-slate-900 px-6 py-12 text-slate-400">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white">
+              V
+            </div>
+            <span className="font-bold text-white">Vernex.com.ng</span>
+          </div>
+          <div className="text-sm">
+            © {new Date().getFullYear()} Vernex.com.ng — Virtual numbers &amp; digital growth tools.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
