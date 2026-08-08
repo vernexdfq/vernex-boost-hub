@@ -146,7 +146,7 @@ function LogHistory() {
                     <p className="truncate text-sm font-bold">{o.product_name}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {o.platform} · {timeAgo(o.created_at)} ·{" "}
-                      <span className="font-semibold capitalize text-emerald-600">
+                      <span className="font-semibold capitalize text-indigo-400">
                         {o.status}
                       </span>
                     </p>

@@ -54,7 +54,7 @@ function BoostOrders() {
                     <p className="truncate text-sm font-bold">{svc}</p>
                     <p className="truncate text-[11px] text-muted-foreground">{o.target_url}</p>
                   </div>
-                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${completed ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}`}>
+                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${completed ? "bg-indigo-500/10 text-indigo-400" : "bg-amber-500/10 text-amber-600"}`}>
                     {completed ? "Completed" : "In progress"}
                   </span>
                 </div>

@@ -50,7 +50,7 @@ function HistoryPage() {
               const Icon = pos ? ArrowDownLeft : ArrowUpRight;
               return (
                 <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${pos ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-600"}`}>
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${pos ? "bg-indigo-500/10 text-indigo-400" : "bg-slate-100 text-slate-600"}`}>
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>
                   <div className="min-w-0 flex-1">

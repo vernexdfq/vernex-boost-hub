@@ -23,7 +23,7 @@ type OrderStatus = "pending" | "active" | "received" | "expired" | "cancelled" |
 const badge = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-500", label: "Pending" },
   active: { c: "border-amber-400/30 bg-amber-400/10 text-amber-500", label: "Active" },
-  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-emerald-500", label: "Received" },
+  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Received" },
   expired: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Expired" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   refunded: { c: "border-slate-400/30 bg-slate-400/10 text-slate-500", label: "Refunded" },
@@ -77,7 +77,7 @@ function NumberOrders() {
                   <span>₦{Number(o.amount_paid).toLocaleString("en-NG")}</span>
                 </div>
                 {o.otp_code && status === "received" && (
-                  <p className="mt-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-center text-sm font-black tracking-[0.3em] text-emerald-600 tabular-nums">{o.otp_code}</p>
+                  <p className="mt-2 rounded-lg bg-indigo-500/10 px-3 py-2 text-center text-sm font-black tracking-[0.3em] text-indigo-400 tabular-nums">{o.otp_code}</p>
                 )}
               </li>
             );

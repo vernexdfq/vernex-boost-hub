@@ -53,7 +53,7 @@ type OrderStatus = "pending" | "active" | "received" | "expired" | "cancelled" |
 const badge = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Waiting" },
   active: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Waiting" },
-  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-emerald-600", label: "Received" },
+  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Received" },
   expired: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Expired" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   refunded: { c: "border-slate-400/30 bg-slate-400/10 text-slate-500", label: "Refunded" },
@@ -286,7 +286,7 @@ function VirtualNumbers() {
         <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold tracking-tight">
           Virtual Numbers
         </h1>
-        <span className="shrink-0 rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-emerald-600">
+        <span className="shrink-0 rounded-full bg-indigo-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-indigo-400">
           {naira(Math.round(balance))}
         </span>
         <Link
@@ -376,7 +376,7 @@ function VirtualNumbers() {
               disabled={services.length === 0}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background px-3 py-3 text-left transition hover:border-primary/30 disabled:opacity-60"
             >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/12 text-emerald-600">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-500/12 text-indigo-400">
                 <Smartphone className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1 truncate text-[15px] font-bold">
@@ -420,7 +420,7 @@ function VirtualNumbers() {
                             }}
                             className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition ${
                               active
-                                ? "bg-emerald-500/10 font-bold text-emerald-700"
+                                ? "bg-indigo-500/10 font-bold text-indigo-300"
                                 : "hover:bg-muted/50"
                             }`}
                           >
@@ -443,7 +443,7 @@ function VirtualNumbers() {
             {selected ? (
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[26px] font-black leading-none tabular-nums text-emerald-600">
+                  <p className="text-[26px] font-black leading-none tabular-nums text-indigo-400">
                     {naira(selected.selling_price_ngn)}
                   </p>
                   <p className="mt-1.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
@@ -454,7 +454,7 @@ function VirtualNumbers() {
                 <span
                   className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold ${
                     selected.stock_count > 0
-                      ? "bg-emerald-400/15 text-emerald-600"
+                      ? "bg-emerald-400/15 text-indigo-400"
                       : "bg-destructive/10 text-destructive"
                   }`}
                 >
@@ -555,17 +555,17 @@ function VirtualNumbers() {
                   {o.otp_code && (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
                           OTP
                         </p>
-                        <p className="font-mono text-lg font-black tracking-[0.2em] text-emerald-700">
+                        <p className="font-mono text-lg font-black tracking-[0.2em] text-indigo-300">
                           {o.otp_code}
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => copy(o.otp_code!.replace(/\s/g, ""), `otp-${o.id}`, "OTP")}
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-[11px] font-bold text-white"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-2 text-[11px] font-bold text-white"
                       >
                         {copied === `otp-${o.id}` ? (
                           <Check className="h-3 w-3" />

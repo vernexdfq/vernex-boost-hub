@@ -56,9 +56,9 @@ const tagTint: Record<string, string> = {
   YT: "bg-red-100 text-red-700",
   RD: "bg-orange-100 text-orange-700",
   TH: "bg-zinc-200 text-zinc-800",
-  SP: "bg-emerald-100 text-emerald-700",
+  SP: "bg-indigo-500/15 text-indigo-300",
   NF: "bg-rose-100 text-rose-700",
-  AI: "bg-emerald-100 text-emerald-800",
+  AI: "bg-indigo-500/15 text-emerald-800",
   PX: "bg-cyan-100 text-cyan-700",
   WA: "bg-green-100 text-green-700",
   AM: "bg-orange-100 text-orange-600",
@@ -183,7 +183,7 @@ function BuyAccounts() {
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold">Buy Logs</h1>
-        <span className="shrink-0 rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-emerald-600">
+        <span className="shrink-0 rounded-full bg-indigo-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-indigo-400">
           {naira(Math.round(balance))}
         </span>
         <Link
@@ -210,14 +210,14 @@ function BuyAccounts() {
 
         {/* Wallet card */}
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-600">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-indigo-500/12 text-indigo-400">
             <Wallet className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Available balance
             </p>
-            <p className="text-xl font-black tabular-nums text-emerald-600">
+            <p className="text-xl font-black tabular-nums text-indigo-400">
               {naira(Math.round(balance))}
             </p>
           </div>
@@ -295,7 +295,7 @@ function BuyAccounts() {
                   setOpenCat(null);
                 }}
                 className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                  !subcategory ? "bg-emerald-500/15 text-emerald-700" : "text-muted-foreground"
+                  !subcategory ? "bg-indigo-500/15 text-indigo-300" : "text-muted-foreground"
                 }`}
               >
                 All {openCat}
@@ -310,7 +310,7 @@ function BuyAccounts() {
                   }}
                   className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
                     subcategory === s
-                      ? "bg-emerald-500/15 text-emerald-700"
+                      ? "bg-indigo-500/15 text-indigo-300"
                       : "text-muted-foreground hover:bg-muted/50"
                   }`}
                 >
@@ -325,7 +325,7 @@ function BuyAccounts() {
         {(subcategory || category !== "All") && (
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
             <span className="text-muted-foreground">Showing:</span>
-            <span className="rounded-full bg-emerald-500/12 px-2.5 py-0.5 font-bold text-emerald-700">
+            <span className="rounded-full bg-indigo-500/12 px-2.5 py-0.5 font-bold text-indigo-300">
               {category}
               {subcategory ? ` · ${subcategory}` : ""}
             </span>
@@ -380,7 +380,7 @@ function BuyAccounts() {
                 <div className="flex items-center justify-between gap-2">
                   <span
                     className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-black ${
-                      tagTint[p.tag] ?? "bg-emerald-100 text-emerald-700"
+                      tagTint[p.tag] ?? "bg-indigo-500/15 text-indigo-300"
                     }`}
                   >
                     {p.tag}
@@ -395,7 +395,7 @@ function BuyAccounts() {
                   {p.country ? ` · ${p.country}` : ""}
                 </p>
                 {p.instant && (
-                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-indigo-500/12 px-2 py-0.5 text-[10px] font-bold text-indigo-300">
                     <Zap className="h-3 w-3" /> Instant
                   </span>
                 )}
@@ -429,7 +429,7 @@ function BuyAccounts() {
               <div className="flex items-start gap-3">
                 <span
                   className={`grid h-12 w-12 place-items-center rounded-2xl text-sm font-black ${
-                    tagTint[selected.tag] ?? "bg-emerald-100 text-emerald-700"
+                    tagTint[selected.tag] ?? "bg-indigo-500/15 text-indigo-300"
                   }`}
                 >
                   {selected.tag}
@@ -489,12 +489,12 @@ function BuyAccounts() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Total
                   </p>
-                  <p className="text-xl font-black tabular-nums text-emerald-600">
+                  <p className="text-xl font-black tabular-nums text-indigo-400">
                     {naira(total)}
                   </p>
                 </div>
                 {selected.instant ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/12 px-2.5 py-1 text-[11px] font-bold text-indigo-300">
                     <Zap className="h-3.5 w-3.5" /> Instant delivery
                   </span>
                 ) : (

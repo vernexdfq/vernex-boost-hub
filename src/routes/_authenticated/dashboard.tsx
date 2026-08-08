@@ -40,11 +40,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const quickActions = [
-  { label: "Virtual\nNumber", icon: Phone, tint: "bg-emerald-50 text-emerald-600", to: "/virtual-numbers" },
+  { label: "Virtual\nNumber", icon: Phone, tint: "bg-indigo-500/10 text-indigo-400", to: "/virtual-numbers" },
   { label: "Boost\nAccount", icon: Rocket, tint: "bg-violet-50 text-violet-600", to: "/boost" },
   { label: "Buy\nLogs", icon: Store, tint: "bg-amber-50 text-amber-600", to: "/buy-accounts" },
   { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-blue-50 text-blue-600", to: "/rent-number" },
-  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-emerald-50 text-emerald-600", to: "/affiliate" },
+  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-indigo-500/10 text-indigo-400", to: "/affiliate" },
   { label: "Number\nOrders", icon: BarChart3, tint: "bg-indigo-50 text-indigo-600", to: "/number-orders" },
   { label: "Boost\nOrders", icon: Star, tint: "bg-violet-50 text-violet-600", to: "/boost-orders" },
   { label: "Log\nHistory", icon: Clock, tint: "bg-slate-100 text-slate-700", to: "/log-history" },
@@ -129,7 +129,7 @@ function Dashboard() {
       subtitle: `${t.payment_method ?? "Wallet"} • ${t.status}`,
       amount: isCredit ? t.amount : -t.amount,
       icon: isCredit ? ArrowDownLeft : ArrowUpRight,
-      tint: isCredit ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-600",
+      tint: isCredit ? "bg-indigo-500/10 text-indigo-400" : "bg-slate-100 text-slate-600",
     };
   });
 

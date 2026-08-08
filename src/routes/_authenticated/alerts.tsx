@@ -21,8 +21,8 @@ export const Route = createFileRoute("/_authenticated/alerts")({
 
 const iconMap: Record<string, { icon: React.ElementType; tint: string }> = {
   welcome: { icon: Sparkles, tint: "text-primary" },
-  credit: { icon: CheckCircle2, tint: "text-emerald-500" },
-  order: { icon: CheckCircle2, tint: "text-emerald-500" },
+  credit: { icon: CheckCircle2, tint: "text-indigo-400" },
+  order: { icon: CheckCircle2, tint: "text-indigo-400" },
   kyc: { icon: AlertTriangle, tint: "text-amber-500" },
   feature: { icon: Sparkles, tint: "text-primary" },
   general: { icon: Bell, tint: "text-slate-500" },

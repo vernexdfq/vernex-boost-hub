@@ -69,7 +69,7 @@ const statusBadge: Record<string, { c: string; label: string }> = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Pending" },
   processing: { c: "border-sky-400/30 bg-sky-400/10 text-sky-600", label: "Processing" },
   in_progress: { c: "border-sky-400/30 bg-sky-400/10 text-sky-600", label: "Processing" },
-  completed: { c: "border-emerald-400/30 bg-emerald-400/10 text-emerald-600", label: "Completed" },
+  completed: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Completed" },
   partial: { c: "border-violet-400/30 bg-violet-400/10 text-violet-600", label: "Partial" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   canceled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
@@ -331,7 +331,7 @@ function BoostPage() {
           <h1 className="truncate text-[15px] font-bold tracking-tight">Boost Account</h1>
           <p className="truncate text-[11px] text-muted-foreground">SMM delivery in minutes</p>
         </div>
-        <span className="shrink-0 rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-emerald-600">
+        <span className="shrink-0 rounded-full bg-indigo-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-indigo-400">
           {naira(Math.round(balance))}
         </span>
         <Link
@@ -398,7 +398,7 @@ function BoostPage() {
                           }}
                           className={`flex w-full px-4 py-2.5 text-left text-sm transition ${
                             platform === p
-                              ? "bg-emerald-500/10 font-bold text-emerald-700"
+                              ? "bg-indigo-500/10 font-bold text-indigo-300"
                               : "hover:bg-muted/50"
                           }`}
                         >
@@ -525,7 +525,7 @@ function BoostPage() {
                             }}
                             className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition ${
                               productId === s.id
-                                ? "bg-emerald-500/10 font-bold text-emerald-700"
+                                ? "bg-indigo-500/10 font-bold text-indigo-300"
                                 : "hover:bg-muted/50"
                             }`}
                           >
@@ -605,7 +605,7 @@ function BoostPage() {
             </div>
             <div className="flex justify-between gap-3 border-t border-border pt-2">
               <dt className="font-bold">Total</dt>
-              <dd className="text-lg font-black tabular-nums text-emerald-600">
+              <dd className="text-lg font-black tabular-nums text-indigo-400">
                 {naira(total)}
               </dd>
             </div>

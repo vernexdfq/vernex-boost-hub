@@ -160,14 +160,14 @@ function FundPage() {
       <div className="space-y-4 px-5 pt-5 pb-6">
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
           <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500/12 text-emerald-600">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-indigo-500/12 text-indigo-400">
               <Wallet className="h-5 w-5" />
             </span>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Available balance
               </p>
-              <p className="text-2xl font-black tabular-nums text-emerald-600">
+              <p className="text-2xl font-black tabular-nums text-indigo-400">
                 {naira(Math.round(balance))}
               </p>
             </div>
@@ -218,7 +218,7 @@ function FundPage() {
 
         <section className="rounded-2xl border border-border bg-surface p-4">
           <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
             <div className="text-[13px] leading-relaxed text-muted-foreground">
               <p className="font-bold text-foreground">How funding works</p>
               <ul className="mt-2 space-y-1.5">

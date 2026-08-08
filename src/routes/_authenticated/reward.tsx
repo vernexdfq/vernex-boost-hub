@@ -122,7 +122,7 @@ function Reward() {
           <h1 className="text-[15px] font-bold">Rewards</h1>
           <p className="text-[11px] text-muted-foreground">Refer &amp; earn</p>
         </div>
-        <div className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[12px] font-bold tabular-nums text-emerald-700">
+        <div className="rounded-full border border-indigo-500/25 bg-indigo-500/10 px-3 py-1.5 text-[12px] font-bold tabular-nums text-indigo-300">
           {naira(Math.round(walletBalance))}
         </div>
       </header>
@@ -133,7 +133,7 @@ function Reward() {
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Wallet balance
           </p>
-          <p className="mt-0.5 text-2xl font-black tabular-nums text-emerald-600">
+          <p className="mt-0.5 text-2xl font-black tabular-nums text-indigo-400">
             {naira(walletBalance)}
           </p>
         </div>
@@ -188,7 +188,7 @@ function Reward() {
               label: "Total earned",
               value: naira(totalEarned),
               icon: Coins,
-              tone: "text-emerald-600",
+              tone: "text-indigo-400",
             },
             {
               label: "Pending",

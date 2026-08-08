@@ -144,14 +144,14 @@ function CountryDirectory({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search country or code..."
-              className="w-full rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] py-2.5 pl-9 pr-4 text-sm text-[#0F172A] focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] py-2.5 pl-9 pr-4 text-sm text-[#0F172A] focus:border-indigo-500 focus:outline-none"
             />
           </div>
         </div>
         <div className="space-y-1 overflow-y-auto p-2">
           {loading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[#6366F1]" />
             </div>
           ) : filtered.length === 0 ? (
             <p className="px-3 py-8 text-center text-sm text-[#64748B]">No countries match.</p>
@@ -226,7 +226,7 @@ function NumberCatalog({
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-[#F8FAFC] text-[#0F172A]">
       <div className="flex items-center gap-2 border-b border-[#E5E7EB] px-4 py-3">
-        <button type="button" onClick={onBack} className="text-[#16C784]">
+        <button type="button" onClick={onBack} className="text-[#6366F1]">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
@@ -241,7 +241,7 @@ function NumberCatalog({
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#6366F1]" />
           </div>
         ) : numbers.length === 0 ? (
           <p className="py-12 text-center text-sm text-[#64748B]">No numbers available right now.</p>
@@ -254,12 +254,12 @@ function NumberCatalog({
                   onClick={() => setPicked(n)}
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left ${
                     picked?.id === n.id
-                      ? "border-[#16C784]/50 bg-[#16C784]/10"
+                      ? "border-[#6366F1]/50 bg-[#6366F1]/10"
                       : "border-[#E5E7EB] bg-white"
                   }`}
                 >
                   <p className="font-mono text-sm font-semibold tabular-nums">{n.phone_number}</p>
-                  <span className="text-sm font-bold text-[#16C784]">
+                  <span className="text-sm font-bold text-[#6366F1]">
                     {naira(Math.round(Number(n.monthly_price_ngn || 0)))}
                   </span>
                 </button>
@@ -279,7 +279,7 @@ function NumberCatalog({
                 onClick={() => setPlan(p)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
                   plan === p
-                    ? "bg-[#16C784] text-slate-950"
+                    ? "bg-[#6366F1] text-slate-950"
                     : "border border-[#E5E7EB] text-[#0F172A]"
                 }`}
               >
@@ -287,12 +287,12 @@ function NumberCatalog({
               </button>
             ))}
           </div>
-          <p className="mt-3 text-2xl font-bold tabular-nums text-[#16C784]">{naira(price)}</p>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-[#6366F1]">{naira(price)}</p>
           <button
             type="button"
             disabled={rent.isPending}
             onClick={() => rent.mutate()}
-            className="mt-3 w-full rounded-xl bg-[#16C784] py-3 text-sm font-bold text-slate-950 disabled:opacity-60"
+            className="mt-3 w-full rounded-xl bg-[#6366F1] py-3 text-sm font-bold text-slate-950 disabled:opacity-60"
           >
             {rent.isPending ? "Processing…" : "Rent this number"}
           </button>
@@ -313,7 +313,7 @@ function HistoryPanel() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
+        <Loader2 className="h-5 w-5 animate-spin text-[#6366F1]" />
       </div>
     );
   }
@@ -346,7 +346,7 @@ function HistoryPanel() {
               {formatDate(String(r["created_at"] || ""))}
             </p>
           </div>
-          <span className="text-[11px] font-semibold text-[#16C784]">{String(r["status"] || "active")}</span>
+          <span className="text-[11px] font-semibold text-[#6366F1]">{String(r["status"] || "active")}</span>
         </li>
         );
       })}
@@ -459,7 +459,7 @@ function KeypadPanel({
                         <span
                           className={`ml-1 rounded px-1.5 py-0.5 text-[10px] ${
                             c.badge === "Rented"
-                              ? "bg-[#16C784]/20 text-[#16C784]"
+                              ? "bg-[#6366F1]/20 text-[#6366F1]"
                               : "bg-sky-500/20 text-sky-400"
                           }`}
                         >
@@ -470,7 +470,7 @@ function KeypadPanel({
                     </div>
                   </div>
                   {activeCaller.id === c.id && (
-                    <span className="text-sm font-bold text-[#16C784]">✓</span>
+                    <span className="text-sm font-bold text-[#6366F1]">✓</span>
                   )}
                 </button>
               ))}
@@ -549,7 +549,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={call}
-            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#16C784] text-white shadow-[0_10px_28px_rgba(22,199,132,0.35)] transition hover:bg-[#12ab70] active:scale-95"
+            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#6366F1] text-white shadow-[0_10px_28px_rgba(22,199,132,0.35)] transition hover:bg-[#4F46E5] active:scale-95"
             aria-label="Call"
           >
             <Phone className="h-7 w-7 fill-current" />
@@ -583,14 +583,14 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
         <button
           type="button"
           onClick={onBrowse}
-          className="inline-flex items-center gap-1 rounded-full border border-[#16C784]/30 bg-[#16C784]/10 px-3 py-1.5 text-xs font-semibold text-[#16C784]"
+          className="inline-flex items-center gap-1 rounded-full border border-[#6366F1]/30 bg-[#6366F1]/10 px-3 py-1.5 text-xs font-semibold text-[#6366F1]"
         >
           <Plus className="h-3.5 w-3.5" /> Rent new
         </button>
       </div>
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-[#16C784]" />
+          <Loader2 className="h-5 w-5 animate-spin text-[#6366F1]" />
         </div>
       ) : rentals.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
@@ -602,7 +602,7 @@ function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
           <button
             type="button"
             onClick={onBrowse}
-            className="mt-4 rounded-xl bg-[#16C784] px-4 py-2.5 text-sm font-bold text-slate-950"
+            className="mt-4 rounded-xl bg-[#6366F1] px-4 py-2.5 text-sm font-bold text-slate-950"
           >
             Browse numbers
           </button>
@@ -753,7 +753,7 @@ function RentNumberApp() {
           </button>
           <Link
             to="/fund"
-            className="flex items-center space-x-1.5 rounded-full border border-[#16C784]/30 bg-[#16C784]/10 px-3 py-1.5 text-xs font-semibold text-[#16C784] transition hover:bg-[#16C784]/20"
+            className="flex items-center space-x-1.5 rounded-full border border-[#6366F1]/30 bg-[#6366F1]/10 px-3 py-1.5 text-xs font-semibold text-[#6366F1] transition hover:bg-[#6366F1]/20"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Add Credit</span>
@@ -793,7 +793,7 @@ function RentNumberApp() {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={`flex w-full flex-col items-center justify-center py-1 transition ${
-                  active ? "text-[#16C784]" : "text-[#64748B] hover:text-[#0F172A]"
+                  active ? "text-[#6366F1]" : "text-[#64748B] hover:text-[#0F172A]"
                 }`}
               >
                 <Icon className="mb-1 h-5 w-5" strokeWidth={active ? 2.35 : 1.9} />
