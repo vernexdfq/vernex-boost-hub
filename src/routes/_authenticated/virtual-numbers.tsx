@@ -24,6 +24,11 @@ import {
   listNumberOrders,
   type NumberProduct,
 } from "@/lib/functions/numbers.functions";
+import {
+  SMS_SERVER_SLOTS,
+  resolveSmsSlotId,
+  type SmsSlotId,
+} from "@/lib/sms-servers";
 
 export const Route = createFileRoute("/_authenticated/virtual-numbers")({
   head: () => ({
@@ -51,124 +56,11 @@ const badge = {
   refunded: { c: "border-slate-400/30 bg-slate-400/10 text-slate-500", label: "Refunded" },
 } as const;
 
-/**
- * Fixed server slots shown on the Virtual Numbers page.
- * Map each slot to a provider via Cloudflare env later, e.g.:
- *   VITE_SMS_US_S1_PROVIDER / server-side SMS_US_S1_API_KEY
- * Product rows match a slot when server_id / country match the patterns below.
- */
-const SERVER_SLOTS = [
-  {
-    id: "US-S1",
-    label: "USA (S1)",
-    flag: "🇺🇸",
-    group: "usa" as const,
-    match: (p: NumberProduct) => matchesUsSlot(p, 1),
-  },
-  {
-    id: "US-S2",
-    label: "USA (S2)",
-    flag: "🇺🇸",
-    group: "usa" as const,
-    match: (p: NumberProduct) => matchesUsSlot(p, 2),
-  },
-  {
-    id: "US-S3",
-    label: "USA (S3)",
-    flag: "🇺🇸",
-    group: "usa" as const,
-    match: (p: NumberProduct) => matchesUsSlot(p, 3),
-  },
-  {
-    id: "US-S4",
-    label: "USA (S4)",
-    flag: "🇺🇸",
-    group: "usa" as const,
-    match: (p: NumberProduct) => matchesUsSlot(p, 4),
-  },
-  {
-    id: "ALL-S1",
-    label: "All Countries (S1)",
-    flag: "🌐",
-    group: "all" as const,
-    match: (p: NumberProduct) => matchesAllSlot(p, 1),
-  },
-  {
-    id: "ALL-S2",
-    label: "All Countries (S2)",
-    flag: "🌐",
-    group: "all" as const,
-    match: (p: NumberProduct) => matchesAllSlot(p, 2),
-  },
-  {
-    id: "ALL-S3",
-    label: "All Countries (S3)",
-    flag: "🌐",
-    group: "all" as const,
-    match: (p: NumberProduct) => matchesAllSlot(p, 3),
-  },
-  {
-    id: "ALL-S4",
-    label: "All Countries (S4)",
-    flag: "🌐",
-    group: "all" as const,
-    match: (p: NumberProduct) => matchesAllSlot(p, 4),
-  },
-  {
-    id: "ALL-S5",
-    label: "All Countries (S5)",
-    flag: "🌐",
-    group: "all" as const,
-    match: (p: NumberProduct) => matchesAllSlot(p, 5),
-  },
-] as const;
-
-function slotNumber(serverId: string): number | null {
-  const m = String(serverId)
-    .toUpperCase()
-    .match(/(?:^|[^A-Z0-9])S(?:ERVER)?[-_ ]?(\d+)/);
-  if (m) return Number(m[1]);
-  const m2 = String(serverId).toUpperCase().match(/(\d+)/);
-  return m2 ? Number(m2[1]) : null;
-}
-
-function isUsProduct(p: NumberProduct): boolean {
-  return (
-    p.country_code === "US" ||
-    /united states|usa/i.test(p.country_name) ||
-    /^usa/i.test(p.server_id) ||
-    /us[-_]?s\d/i.test(p.server_id)
-  );
-}
-
-function isAllProduct(p: NumberProduct): boolean {
-  if (isUsProduct(p)) return false;
-  return (
-    /all|global|world/i.test(p.country_name) ||
-    /all|global|world/i.test(p.server_id) ||
-    p.country_code === "ALL" ||
-    p.country_code === "XX"
-  );
-}
-
-function matchesUsSlot(p: NumberProduct, slot: number): boolean {
-  if (!isUsProduct(p)) return false;
-  const n = slotNumber(p.server_id);
-  if (n != null) return n === slot;
-  // Fallback: unnumbered USA products attach to S1
-  return slot === 1;
-}
-
-function matchesAllSlot(p: NumberProduct, slot: number): boolean {
-  if (!isAllProduct(p) && isUsProduct(p)) return false;
-  // Non-US country-specific products also appear under All Countries by server slot
-  if (isUsProduct(p)) return false;
-  const n = slotNumber(p.server_id);
-  if (n != null) return n === slot;
-  // Unnumbered global / other-country → S1
-  if (isAllProduct(p) || p.country_code !== "US") return slot === 1;
-  return false;
-}
+const SERVER_SLOTS = SMS_SERVER_SLOTS.map((s) => ({
+  ...s,
+  match: (p: NumberProduct) =>
+    resolveSmsSlotId(p.country_code, p.country_name, p.server_id) === s.id,
+}));
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -191,7 +83,7 @@ function VirtualNumbers() {
   const fetchOrders = useServerFn(listNumberOrders);
   const orderNumber = useServerFn(createNumberOrder);
 
-  const [serverId, setServerId] = useState<string>("US-S1");
+  const [serverId, setServerId] = useState<SmsSlotId>("US-S1");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState("");
