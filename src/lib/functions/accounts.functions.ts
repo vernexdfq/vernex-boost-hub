@@ -1,6 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  accsMarketFetchInventory,
+  isAccsMarketConfigured,
+} from "@/lib/providers/accsmarket.server";
 
 export type AccountProduct = {
   id: string;
@@ -101,6 +105,36 @@ function builtInCatalog(): AccountProduct[] {
 }
 
 async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
+  // Session-based AccsMarket login (email/password in Cloudflare)
+  if (isAccsMarketConfigured()) {
+    try {
+      const inv = await accsMarketFetchInventory();
+      if (inv.ok && inv.products.length > 0) {
+        const rate = Number(process.env.USD_TO_NGN_RATE || 1600);
+        const markup = Number(process.env.MARKUP_PERCENTAGE || 1.5);
+        const fixed = Number(process.env.FIXED_NGN_MARKUP || 200);
+        return inv.products.map((p, i) => ({
+          id: `am-${String(p.externalId || i)}`,
+          platform: p.category,
+          category: p.category,
+          subcategory: p.subcategory,
+          name: p.name,
+          description: p.description || p.name,
+          age_label: "Live",
+          price_ngn: Math.ceil(Number(p.priceUsd || 0) * rate * markup + fixed),
+          stock: Number(p.stock || 0),
+          instant: true,
+          country: "Mixed",
+          features: ["AccsMarket", "Live stock"],
+          tag: String(p.category || "AM").slice(0, 2).toUpperCase(),
+        }));
+      }
+    } catch (err) {
+      console.error("[accsmarket] session inventory failed", err);
+    }
+  }
+
+
   const apiUrl = process.env.ACCS_MARKET_API_URL?.trim();
   const apiKey = process.env.ACCS_MARKET_API_KEY?.trim();
   if (!apiUrl || !apiKey) return null;

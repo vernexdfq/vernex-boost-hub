@@ -1,6 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  searchSignalWireAvailable,
+  isSignalWireConfigured,
+} from "@/lib/providers/signalwire.server";
+import {
+  listDidwwCountries,
+  searchDidwwAvailable,
+  isDidwwConfigured,
+} from "@/lib/providers/didww.server";
+import { defaultRentalUsd, rentalPriceNgnFromUsd } from "@/lib/rental-pricing";
 
 export type RentalNumber = {
   id: string;
@@ -33,7 +43,6 @@ const RENTAL_SELECT =
 
 function resolveProvider(countryCode: string, existing?: string): string {
   const code = (countryCode || "").toUpperCase();
-  // USA numbers → SignalWire; all other countries → DIDWW
   if (code === "US" || code === "USA") return "signalwire";
   if (existing && String(existing).trim()) return String(existing).toLowerCase();
   return "didww";
@@ -51,14 +60,13 @@ function normalize(row: Record<string, unknown>): RentalNumber {
 export const listRentalCountries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<RentalCountry[]> => {
-    const { data, error } = await context.supabase
+    const map = new Map<string, RentalCountry>();
+
+    const { data } = await context.supabase
       .from("rental_numbers")
       .select(RENTAL_SELECT)
       .eq("is_available", true);
 
-    if (error) throw new Error(`Failed to load countries: ${error.message}`);
-
-    const map = new Map<string, RentalCountry>();
     for (const raw of data ?? []) {
       const row = normalize(raw as Record<string, unknown>);
       const entry = map.get(row.country_code) ?? {
@@ -72,50 +80,170 @@ export const listRentalCountries = createServerFn({ method: "GET" })
       };
       entry.available += 1;
       entry.from_price_ngn = Math.min(entry.from_price_ngn, row.monthly_price_ngn);
-      if (!entry.carriers.includes(row.carrier)) entry.carriers.push(row.carrier);
-      if (row.region_name && !entry.regions.includes(row.region_name)) entry.regions.push(row.region_name);
+      if (row.carrier && !entry.carriers.includes(row.carrier)) entry.carriers.push(row.carrier);
+      if (row.region_name && !entry.regions.includes(row.region_name)) {
+        entry.regions.push(row.region_name);
+      }
       map.set(row.country_code, entry);
     }
 
-    return [...map.values()]
-      .map((c) => ({ ...c, carriers: c.carriers.sort(), regions: c.regions.sort() }))
-      .sort((a, b) => a.country_name.localeCompare(b.country_name));
+    if (isSignalWireConfigured()) {
+      const live = await searchSignalWireAvailable({ limit: 25 });
+      const price = rentalPriceNgnFromUsd(defaultRentalUsd("US"));
+      const entry = map.get("US") ?? {
+        country_code: "US",
+        country_name: "United States",
+        dial_code: "+1",
+        carriers: ["SignalWire"] as string[],
+        regions: [] as string[],
+        available: 0,
+        from_price_ngn: price,
+      };
+      if (live.ok) {
+        entry.available = Math.max(entry.available, live.numbers.length);
+        for (const n of live.numbers) {
+          if (n.region && !entry.regions.includes(n.region)) entry.regions.push(n.region);
+        }
+      }
+      entry.from_price_ngn = Math.min(entry.from_price_ngn || price, price);
+      if (!entry.carriers.includes("SignalWire")) entry.carriers.push("SignalWire");
+      map.set("US", entry);
+    }
+
+    if (isDidwwConfigured()) {
+      const live = await listDidwwCountries();
+      if (live.ok) {
+        for (const c of live.countries.slice(0, 80)) {
+          if (c.iso === "US") continue;
+          const price = rentalPriceNgnFromUsd(defaultRentalUsd(c.iso));
+          const existing = map.get(c.iso);
+          if (existing) {
+            if (!existing.carriers.includes("DIDWW")) existing.carriers.push("DIDWW");
+            existing.from_price_ngn = Math.min(existing.from_price_ngn, price);
+            continue;
+          }
+          map.set(c.iso, {
+            country_code: c.iso,
+            country_name: c.name,
+            dial_code: c.prefix ? `+${c.prefix}` : "",
+            carriers: ["DIDWW"],
+            regions: [],
+            available: 1,
+            from_price_ngn: price,
+          });
+        }
+      }
+    }
+
+    return Array.from(map.values()).sort((a, b) => {
+      if (a.country_code === "US") return -1;
+      if (b.country_code === "US") return 1;
+      return a.country_name.localeCompare(b.country_name);
+    });
   });
 
 const listNumbersSchema = z.object({
-  countryCode: z.string().min(2).max(2),
+  countryCode: z.string().min(1).max(8),
   carrier: z.string().optional(),
   numberType: z.enum(["mobile", "business"]).optional(),
-  search: z.string().max(60).optional(),
+  search: z.string().max(40).optional(),
 });
 
 export const listRentalNumbers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => listNumbersSchema.parse(data))
   .handler(async ({ data, context }): Promise<RentalNumber[]> => {
+    const code = data.countryCode.toUpperCase();
+    const out: RentalNumber[] = [];
+    const term = data.search?.trim()?.toLowerCase() || "";
+
     let query = context.supabase
       .from("rental_numbers")
       .select(RENTAL_SELECT)
       .eq("is_available", true)
-      .eq("country_code", data.countryCode);
+      .eq("country_code", code);
 
     if (data.carrier) query = query.eq("carrier", data.carrier);
     if (data.numberType) query = query.eq("number_type", data.numberType);
 
-    const term = data.search?.trim();
-    if (term) {
-      query = query.or(
-        `area_code.ilike.%${term}%,region_name.ilike.%${term}%,phone_number.ilike.%${term}%`,
-      );
-    }
-
-    const { data: rows, error } = await query
+    const { data: rows } = await query
       .order("region_name", { ascending: true })
       .order("monthly_price_ngn", { ascending: true })
       .limit(100);
 
-    if (error) throw new Error(`Failed to load numbers: ${error.message}`);
-    return (rows ?? []).map((r) => normalize(r as Record<string, unknown>));
+    for (const r of rows ?? []) {
+      const row = normalize(r as Record<string, unknown>);
+      if (term) {
+        const hay = `${row.phone_number} ${row.area_code ?? ""} ${row.region_name ?? ""}`.toLowerCase();
+        if (!hay.includes(term)) continue;
+      }
+      out.push(row);
+    }
+
+    if (code === "US" || code === "USA") {
+      if (isSignalWireConfigured()) {
+        const area = term && /^\d{3}$/.test(term) ? term : null;
+        const live = await searchSignalWireAvailable({ areaCode: area, limit: 30 });
+        if (live.ok) {
+          const price = rentalPriceNgnFromUsd(defaultRentalUsd("US"));
+          for (const n of live.numbers) {
+            if (
+              term &&
+              !area &&
+              !n.phoneNumber.toLowerCase().includes(term) &&
+              !(n.region || "").toLowerCase().includes(term)
+            ) {
+              continue;
+            }
+            const digits = n.phoneNumber.replace(/\D/g, "");
+            const id = `live-sw-${digits}`;
+            if (out.some((x) => x.phone_number === n.phoneNumber)) continue;
+            out.push({
+              id,
+              phone_number: n.phoneNumber,
+              country_code: "US",
+              country_name: "United States",
+              dial_code: "+1",
+              carrier: "SignalWire",
+              region_name: n.region || n.rateCenter || null,
+              area_code: digits.slice(1, 4) || null,
+              number_type: "mobile",
+              provider: "signalwire",
+              monthly_price_ngn: price,
+              expires_at: new Date(Date.now() + 30 * 864e5).toISOString(),
+              is_available: true,
+            });
+          }
+        }
+      }
+    } else if (isDidwwConfigured()) {
+      const live = await searchDidwwAvailable({ countryIso: code, limit: 30 });
+      if (live.ok) {
+        const price = rentalPriceNgnFromUsd(defaultRentalUsd(code));
+        for (const n of live.numbers) {
+          if (term && !n.number.toLowerCase().includes(term)) continue;
+          const id = `live-didww-${n.countryIso}-${n.id}`;
+          if (out.some((x) => x.phone_number === n.number)) continue;
+          out.push({
+            id,
+            phone_number: n.number,
+            country_code: n.countryIso,
+            country_name: n.countryName,
+            dial_code: "",
+            carrier: "DIDWW",
+            region_name: null,
+            area_code: null,
+            number_type: "mobile",
+            provider: "didww",
+            monthly_price_ngn: price,
+            expires_at: new Date(Date.now() + 30 * 864e5).toISOString(),
+            is_available: true,
+          });
+        }
+      }
+    }
+
+    return out.slice(0, 100);
   });
 
 export const listMyRentals = createServerFn({ method: "GET" })
@@ -135,7 +263,7 @@ export const listMyRentals = createServerFn({ method: "GET" })
   });
 
 const createRentalSchema = z.object({
-  rentalNumberId: z.string().uuid(),
+  rentalNumberId: z.string().min(1),
   plan: z.enum(["1 Week", "1 Month", "1 Year"]),
 });
 
@@ -162,25 +290,73 @@ export const createRental = createServerFn({ method: "POST" })
       resolveRentalProvider,
     } = await import("@/lib/providers/rental-router.server");
 
-    const { data: number, error: numberError } = await supabaseAdmin
-      .from("rental_numbers")
-      .select(
-        "id, phone_number, country_code, country_name, area_code, monthly_price_ngn, is_available, provider",
-      )
-      .eq("id", data.rentalNumberId)
-      .maybeSingle();
+    type NumRow = {
+      id: string;
+      phone_number: string;
+      country_code: string;
+      country_name: string;
+      area_code: string | null;
+      monthly_price_ngn: number;
+      is_available: boolean;
+      provider?: string;
+      availableDidId?: string | null;
+      isLive?: boolean;
+    };
 
-    if (numberError || !number) {
-      return {
-        ok: false as const,
-        error: "Number not found",
+    let number: NumRow | null = null;
+
+    if (data.rentalNumberId.startsWith("live-sw-")) {
+      const digits = data.rentalNumberId.replace("live-sw-", "");
+      const e164 = digits.startsWith("+") ? digits : `+${digits}`;
+      number = {
+        id: data.rentalNumberId,
+        phone_number: e164,
+        country_code: "US",
+        country_name: "United States",
+        area_code: digits.replace(/\D/g, "").slice(1, 4) || null,
+        monthly_price_ngn: rentalPriceNgnFromUsd(defaultRentalUsd("US")),
+        is_available: true,
+        provider: "signalwire",
+        isLive: true,
       };
+    } else if (data.rentalNumberId.startsWith("live-didww-")) {
+      // live-didww-{ISO}-{availableDidId}
+      const rest = data.rentalNumberId.slice("live-didww-".length);
+      const dash = rest.indexOf("-");
+      const iso = dash > 0 ? rest.slice(0, dash) : rest;
+      const availableDidId = dash > 0 ? rest.slice(dash + 1) : "";
+      number = {
+        id: data.rentalNumberId,
+        phone_number: "",
+        country_code: iso.toUpperCase(),
+        country_name: iso.toUpperCase(),
+        area_code: null,
+        monthly_price_ngn: rentalPriceNgnFromUsd(defaultRentalUsd(iso)),
+        is_available: true,
+        provider: "didww",
+        availableDidId,
+        isLive: true,
+      };
+    } else {
+      const { data: row, error: numberError } = await supabaseAdmin
+        .from("rental_numbers")
+        .select(
+          "id, phone_number, country_code, country_name, area_code, monthly_price_ngn, is_available, provider",
+        )
+        .eq("id", data.rentalNumberId)
+        .maybeSingle();
+
+      if (numberError || !row) {
+        return { ok: false as const, error: "Number not found" };
+      }
+      if (!row.is_available) {
+        return { ok: false as const, error: "This number has just been taken" };
+      }
+      number = { ...row, isLive: false };
     }
-    if (!number.is_available) {
-      return {
-        ok: false as const,
-        error: "This number has just been taken",
-      };
+
+    if (!number) {
+      return { ok: false as const, error: "Number not found" };
     }
 
     const countryCode = String(number.country_code || "").toUpperCase();
@@ -203,11 +379,11 @@ export const createRental = createServerFn({ method: "POST" })
       return { ok: false as const, error: "Insufficient wallet balance" };
     }
 
-    // Route USA → SignalWire, all other countries → DIDWW
     const provisioned = await provisionRentalNumber({
       countryCode,
-      phoneNumber: number.phone_number,
-      areaCode: (number as { area_code?: string | null }).area_code ?? null,
+      phoneNumber: number.phone_number || null,
+      areaCode: number.area_code ?? null,
+      availableDidId: number.availableDidId ?? null,
     });
 
     if (!provisioned.ok) {
@@ -238,6 +414,7 @@ export const createRental = createServerFn({ method: "POST" })
           provider,
           provider_ref: provisioned.providerRef,
           country_code: countryCode,
+          live: Boolean(number.isLive),
         },
       });
     } catch (err) {
@@ -247,11 +424,50 @@ export const createRental = createServerFn({ method: "POST" })
 
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
+    // Ensure a rental_numbers row exists for FK (live purchases upsert)
+    let rentalNumberId = number.id;
+    if (number.isLive) {
+      const { data: upserted, error: upErr } = await supabaseAdmin
+        .from("rental_numbers")
+        .insert({
+          phone_number: phoneNumber,
+          country_code: countryCode,
+          country_name: number.country_name || countryCode,
+          dial_code: countryCode === "US" ? "+1" : "",
+          carrier: provider === "signalwire" ? "SignalWire" : "DIDWW",
+          region_name: null,
+          area_code: number.area_code,
+          number_type: "mobile",
+          provider,
+          monthly_price_ngn: number.monthly_price_ngn,
+          is_available: false,
+          expires_at: expiresAt,
+        })
+        .select("id")
+        .single();
+
+      if (upErr || !upserted) {
+        // Continue without FK if insert shape differs — store on rental metadata path
+        console.error("[rental] live upsert failed", upErr?.message);
+      } else {
+        rentalNumberId = upserted.id;
+      }
+    } else {
+      await supabaseAdmin
+        .from("rental_numbers")
+        .update({
+          is_available: false,
+          provider,
+          phone_number: phoneNumber,
+        })
+        .eq("id", number.id);
+    }
+
     const { data: rental, error: rentalError } = await supabaseAdmin
       .from("rentals")
       .insert({
         user_id: userId,
-        rental_number_id: number.id,
+        rental_number_id: rentalNumberId,
         plan: data.plan,
         amount_paid: amount,
         renews_at: expiresAt,
@@ -269,19 +485,10 @@ export const createRental = createServerFn({ method: "POST" })
       };
     }
 
-    await supabaseAdmin
-      .from("rental_numbers")
-      .update({
-        is_available: false,
-        provider,
-        phone_number: phoneNumber,
-      })
-      .eq("id", number.id);
-
     await supabaseAdmin.from("notifications").insert({
       user_id: userId,
       title: "Number rented",
-      body: `${phoneNumber} (${number.country_name}) is active on your account for ${data.plan}.`,
+      body: `${phoneNumber} (${number.country_name || countryCode}) is active on your account for ${data.plan}.`,
       type: "rental",
     });
 

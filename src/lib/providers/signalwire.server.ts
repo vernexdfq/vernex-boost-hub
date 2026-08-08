@@ -21,6 +21,15 @@ export type ProviderProvisionResult =
       status?: number;
     };
 
+export type SignalWireAvailableNumber = {
+  phoneNumber: string;
+  friendlyName?: string;
+  region?: string;
+  rateCenter?: string;
+  lata?: string;
+  isoCountry: "US";
+};
+
 function spaceHost(): string | null {
   const raw =
     process.env["SIGNALWIRE_SPACE_URL"]?.trim() ||
@@ -45,15 +54,83 @@ export function isSignalWireConfigured(): boolean {
 function basicAuthHeader(): string {
   const id = projectId()!;
   const token = apiToken()!;
-  const encoded = Buffer.from(`${id}:${token}`).toString("base64");
-  return `Basic ${encoded}`;
+  return `Basic ${Buffer.from(`${id}:${token}`).toString("base64")}`;
 }
 
-/**
- * Purchase / attach a US local number on SignalWire.
- * Prefers an explicit E.164 when the inventory row already has a number;
- * otherwise searches available US numbers and buys the first match.
- */
+function apiBase(): string | null {
+  const host = spaceHost();
+  const id = projectId();
+  if (!host || !id) return null;
+  return `https://${host}/api/laml/2010-04-01/Accounts/${id}`;
+}
+
+/** Live search of available USA local numbers on SignalWire */
+export async function searchSignalWireAvailable(input?: {
+  areaCode?: string | null;
+  limit?: number;
+}): Promise<
+  | { ok: true; numbers: SignalWireAvailableNumber[] }
+  | { ok: false; message: string; status?: number }
+> {
+  if (!isSignalWireConfigured()) {
+    return {
+      ok: false,
+      message: "SignalWire is not configured. Set SIGNALWIRE_PROJECT_ID, SIGNALWIRE_SPACE_URL, and SIGNALWIRE_API_TOKEN.",
+    };
+  }
+  const base = apiBase()!;
+  const limit = Math.min(Math.max(input?.limit ?? 25, 1), 50);
+  const params = new URLSearchParams({
+    Country: "US",
+    Type: "local",
+    PageSize: String(limit),
+  });
+  if (input?.areaCode) params.set("AreaCode", String(input.areaCode));
+
+  try {
+    const res = await fetch(`${base}/AvailablePhoneNumbers/US/Local.json?${params}`, {
+      method: "GET",
+      headers: {
+        Authorization: basicAuthHeader(),
+        Accept: "application/json",
+      },
+    });
+    const body = (await res.json().catch(() => ({}))) as {
+      available_phone_numbers?: Array<{
+        phone_number?: string;
+        friendly_name?: string;
+        region?: string;
+        rate_center?: string;
+        lata?: string;
+      }>;
+      message?: string;
+    };
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        message: body.message || `SignalWire search failed (HTTP ${res.status})`,
+      };
+    }
+    const numbers: SignalWireAvailableNumber[] = (body.available_phone_numbers ?? [])
+      .map((n) => ({
+        phoneNumber: String(n.phone_number || ""),
+        friendlyName: n.friendly_name,
+        region: n.region,
+        rateCenter: n.rate_center,
+        lata: n.lata,
+        isoCountry: "US" as const,
+      }))
+      .filter((n) => n.phoneNumber);
+    return { ok: true, numbers };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "SignalWire network error",
+    };
+  }
+}
+
 export async function provisionSignalWireNumber(input: {
   phoneNumber?: string | null;
   areaCode?: string | null;
@@ -67,44 +144,20 @@ export async function provisionSignalWireNumber(input: {
     };
   }
 
-  const host = spaceHost()!;
-  const pid = projectId()!;
-  const base = `https://${host}/api/laml/2010-04-01/Accounts/${encodeURIComponent(pid)}`;
+  const base = apiBase()!;
 
   try {
     let phone = (input.phoneNumber || "").trim();
 
-    // If no fixed inventory number, search available US locals
     if (!phone) {
-      const params = new URLSearchParams({
-        Country: "US",
-        Type: "local",
-        PageSize: "1",
+      const search = await searchSignalWireAvailable({
+        areaCode: input.areaCode,
+        limit: 1,
       });
-      if (input.areaCode) params.set("AreaCode", String(input.areaCode));
-
-      const searchRes = await fetch(`${base}/AvailablePhoneNumbers/US/Local.json?${params}`, {
-        method: "GET",
-        headers: {
-          Authorization: basicAuthHeader(),
-          Accept: "application/json",
-        },
-      });
-      const searchBody = (await searchRes.json().catch(() => ({}))) as {
-        available_phone_numbers?: Array<{ phone_number?: string }>;
-        message?: string;
-      };
-      if (!searchRes.ok) {
-        return {
-          ok: false,
-          provider: "signalwire",
-          status: searchRes.status,
-          message:
-            searchBody.message ||
-            `SignalWire available-number search failed (HTTP ${searchRes.status})`,
-        };
+      if (!search.ok) {
+        return { ok: false, provider: "signalwire", message: search.message, status: search.status };
       }
-      phone = searchBody.available_phone_numbers?.[0]?.phone_number || "";
+      phone = search.numbers[0]?.phoneNumber || "";
       if (!phone) {
         return {
           ok: false,
@@ -114,7 +167,6 @@ export async function provisionSignalWireNumber(input: {
       }
     }
 
-    // Purchase / incoming phone number
     const form = new URLSearchParams();
     form.set("PhoneNumber", phone);
 

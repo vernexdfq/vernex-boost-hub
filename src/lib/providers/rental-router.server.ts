@@ -48,6 +48,7 @@ export async function provisionRentalNumber(input: {
   countryCode: string;
   phoneNumber?: string | null;
   areaCode?: string | null;
+  availableDidId?: string | null;
 }): Promise<RentalProvisionResult> {
   const provider = resolveRentalProvider(input.countryCode);
 
@@ -75,6 +76,7 @@ export async function provisionRentalNumber(input: {
   const result: DidwwProvisionResult = await provisionDidwwNumber({
     countryCode: input.countryCode,
     phoneNumber: input.phoneNumber,
+    availableDidId: input.availableDidId,
   });
   if (!result.ok) {
     return {
