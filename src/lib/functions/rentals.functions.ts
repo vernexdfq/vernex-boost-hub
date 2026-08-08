@@ -157,15 +157,34 @@ export const createRental = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const {
+      provisionRentalNumber,
+      resolveRentalProvider,
+    } = await import("@/lib/providers/rental-router.server");
 
     const { data: number, error: numberError } = await supabaseAdmin
       .from("rental_numbers")
-      .select("id, phone_number, country_name, monthly_price_ngn, is_available")
+      .select(
+        "id, phone_number, country_code, country_name, area_code, monthly_price_ngn, is_available, provider",
+      )
       .eq("id", data.rentalNumberId)
       .maybeSingle();
 
-    if (numberError || !number) throw new Error("Number not found");
-    if (!number.is_available) throw new Error("This number has just been taken");
+    if (numberError || !number) {
+      return {
+        ok: false as const,
+        error: "Number not found",
+      };
+    }
+    if (!number.is_available) {
+      return {
+        ok: false as const,
+        error: "This number has just been taken",
+      };
+    }
+
+    const countryCode = String(number.country_code || "").toUpperCase();
+    const provider = resolveRentalProvider(countryCode);
 
     const multiplier = PLAN_MULTIPLIER[data.plan] ?? 1;
     const days = PLAN_DAYS[data.plan] ?? 30;
@@ -177,21 +196,54 @@ export const createRental = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (walletError || !wallet) throw new Error("Wallet not found");
-    if (Number(wallet.balance) < amount) throw new Error("Insufficient wallet balance");
+    if (walletError || !wallet) {
+      return { ok: false as const, error: "Wallet not found" };
+    }
+    if (Number(wallet.balance) < amount) {
+      return { ok: false as const, error: "Insufficient wallet balance" };
+    }
+
+    // Route USA → SignalWire, all other countries → DIDWW
+    const provisioned = await provisionRentalNumber({
+      countryCode,
+      phoneNumber: number.phone_number,
+      areaCode: (number as { area_code?: string | null }).area_code ?? null,
+    });
+
+    if (!provisioned.ok) {
+      console.error("[rental] provider failed", provider, provisioned.message);
+      return {
+        ok: false as const,
+        error: provisioned.message,
+        provider,
+        status: provisioned.status ?? null,
+      };
+    }
 
     const reference = `VNX-RNT-${Date.now().toString(36).toUpperCase()}`;
+    const phoneNumber = provisioned.phoneNumber || number.phone_number;
 
-    await supabaseAdmin.rpc("record_wallet_transaction", {
-      _user_id: userId,
-      _type: "debit",
-      _amount: amount,
-      _fee: 0,
-      _description: `Number rental — ${number.phone_number} (${data.plan})`,
-      _reference: reference,
-      _payment_method: "wallet",
-      _metadata: { rental_number_id: number.id, plan: data.plan },
-    });
+    try {
+      await supabaseAdmin.rpc("record_wallet_transaction", {
+        _user_id: userId,
+        _type: "debit",
+        _amount: amount,
+        _fee: 0,
+        _description: `Number rental — ${phoneNumber} (${data.plan}) via ${provider}`,
+        _reference: reference,
+        _payment_method: "wallet",
+        _metadata: {
+          rental_number_id: number.id,
+          plan: data.plan,
+          provider,
+          provider_ref: provisioned.providerRef,
+          country_code: countryCode,
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Wallet debit failed";
+      return { ok: false as const, error: message, provider };
+    }
 
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -209,19 +261,35 @@ export const createRental = createServerFn({ method: "POST" })
       .select("id, plan, amount_paid, status, renews_at, expires_at, created_at")
       .single();
 
-    if (rentalError) throw new Error(`Rental failed: ${rentalError.message}`);
+    if (rentalError) {
+      return {
+        ok: false as const,
+        error: `Rental failed: ${rentalError.message}`,
+        provider,
+      };
+    }
 
     await supabaseAdmin
       .from("rental_numbers")
-      .update({ is_available: false })
+      .update({
+        is_available: false,
+        provider,
+        phone_number: phoneNumber,
+      })
       .eq("id", number.id);
 
     await supabaseAdmin.from("notifications").insert({
       user_id: userId,
       title: "Number rented",
-      body: `${number.phone_number} (${number.country_name}) is active on your account for ${data.plan}.`,
+      body: `${phoneNumber} (${number.country_name}) is active on your account for ${data.plan}.`,
       type: "rental",
     });
 
-    return rental;
+    return {
+      ok: true as const,
+      provider,
+      phoneNumber,
+      providerRef: provisioned.providerRef,
+      rental,
+    };
   });
