@@ -1,20 +1,18 @@
 /**
- * Virtual Numbers — fixed server slots (UI + Cloudflare mapping).
+ * Virtual Numbers — fixed server slots → Cloudflare API keys
  *
- * Add secrets in Cloudflare Pages → Settings → Environment variables:
+ * 🇺🇸 USA:
+ *   US-S1 → FIVESIM_API_KEY
+ *   US-S2 → DOGESMS_API_KEY
+ *   US-S3 → GRIZZLY_API_KEY  (also GRIZZLY_SMS_API_KEY)
+ *   US-S4 → TEXTVERIFIED_API_KEY  (also TEXT_VERIFIED_API_KEY)
  *
- *   SMS_US_S1_API_KEY / SMS_US_S1_BASE_URL
- *   SMS_US_S2_API_KEY / SMS_US_S2_BASE_URL
- *   SMS_US_S3_API_KEY / SMS_US_S3_BASE_URL
- *   SMS_US_S4_API_KEY / SMS_US_S4_BASE_URL
- *   SMS_ALL_S1_API_KEY / SMS_ALL_S1_BASE_URL
- *   … through SMS_ALL_S5_*
- *
- * Optional provider name per slot:
- *   SMS_US_S1_PROVIDER=hero-sms | 5sim | sms-activate | custom
- *
- * Products in Supabase `number_products.server_id` should use values like
- * S1, S2, US-S1, ALL-S3 so they appear under the matching button.
+ * 🌐 All Countries:
+ *   ALL-S1 → GRIZZLY_API_KEY
+ *   ALL-S2 → DOGESMS_API_KEY
+ *   ALL-S3 → TEXTVERIFIED_API_KEY
+ *   ALL-S4 → FIVESIM_API_KEY
+ *   ALL-S5 → SMSBUYZ_API_KEY
  */
 
 export type SmsSlotId =
@@ -28,33 +26,115 @@ export type SmsSlotId =
   | "ALL-S4"
   | "ALL-S5";
 
+export type SmsProviderId =
+  | "fivesim"
+  | "dogesms"
+  | "grizzly"
+  | "textverified"
+  | "smsbuyz";
+
 export type SmsSlotMeta = {
   id: SmsSlotId;
   label: string;
   flag: string;
   group: "usa" | "all";
-  /** Cloudflare env prefix, e.g. SMS_US_S1 */
-  envPrefix: string;
+  provider: SmsProviderId;
+  /** Env var names tried in order */
+  envKeys: string[];
 };
 
 export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
-  { id: "US-S1", label: "USA (S1)", flag: "🇺🇸", group: "usa", envPrefix: "SMS_US_S1" },
-  { id: "US-S2", label: "USA (S2)", flag: "🇺🇸", group: "usa", envPrefix: "SMS_US_S2" },
-  { id: "US-S3", label: "USA (S3)", flag: "🇺🇸", group: "usa", envPrefix: "SMS_US_S3" },
-  { id: "US-S4", label: "USA (S4)", flag: "🇺🇸", group: "usa", envPrefix: "SMS_US_S4" },
-  { id: "ALL-S1", label: "All Countries (S1)", flag: "🌐", group: "all", envPrefix: "SMS_ALL_S1" },
-  { id: "ALL-S2", label: "All Countries (S2)", flag: "🌐", group: "all", envPrefix: "SMS_ALL_S2" },
-  { id: "ALL-S3", label: "All Countries (S3)", flag: "🌐", group: "all", envPrefix: "SMS_ALL_S3" },
-  { id: "ALL-S4", label: "All Countries (S4)", flag: "🌐", group: "all", envPrefix: "SMS_ALL_S4" },
-  { id: "ALL-S5", label: "All Countries (S5)", flag: "🌐", group: "all", envPrefix: "SMS_ALL_S5" },
+  {
+    id: "US-S1",
+    label: "USA (S1)",
+    flag: "🇺🇸",
+    group: "usa",
+    provider: "fivesim",
+    envKeys: ["FIVESIM_API_KEY", "FIVE_SIM_API_KEY", "SMS_US_S1_API_KEY"],
+  },
+  {
+    id: "US-S2",
+    label: "USA (S2)",
+    flag: "🇺🇸",
+    group: "usa",
+    provider: "dogesms",
+    envKeys: ["DOGESMS_API_KEY", "DOGE_SMS_API_KEY", "SMS_US_S2_API_KEY"],
+  },
+  {
+    id: "US-S3",
+    label: "USA (S3)",
+    flag: "🇺🇸",
+    group: "usa",
+    provider: "grizzly",
+    envKeys: ["GRIZZLY_API_KEY", "GRIZZLY_SMS_API_KEY", "SMS_US_S3_API_KEY"],
+  },
+  {
+    id: "US-S4",
+    label: "USA (S4)",
+    flag: "🇺🇸",
+    group: "usa",
+    provider: "textverified",
+    envKeys: ["TEXTVERIFIED_API_KEY", "TEXT_VERIFIED_API_KEY", "SMS_US_S4_API_KEY"],
+  },
+  {
+    id: "ALL-S1",
+    label: "All Countries (S1)",
+    flag: "🌐",
+    group: "all",
+    provider: "grizzly",
+    envKeys: ["GRIZZLY_API_KEY", "GRIZZLY_SMS_API_KEY", "SMS_ALL_S1_API_KEY"],
+  },
+  {
+    id: "ALL-S2",
+    label: "All Countries (S2)",
+    flag: "🌐",
+    group: "all",
+    provider: "dogesms",
+    envKeys: ["DOGESMS_API_KEY", "DOGE_SMS_API_KEY", "SMS_ALL_S2_API_KEY"],
+  },
+  {
+    id: "ALL-S3",
+    label: "All Countries (S3)",
+    flag: "🌐",
+    group: "all",
+    provider: "textverified",
+    envKeys: ["TEXTVERIFIED_API_KEY", "TEXT_VERIFIED_API_KEY", "SMS_ALL_S3_API_KEY"],
+  },
+  {
+    id: "ALL-S4",
+    label: "All Countries (S4)",
+    flag: "🌐",
+    group: "all",
+    provider: "fivesim",
+    envKeys: ["FIVESIM_API_KEY", "FIVE_SIM_API_KEY", "SMS_ALL_S4_API_KEY"],
+  },
+  {
+    id: "ALL-S5",
+    label: "All Countries (S5)",
+    flag: "🌐",
+    group: "all",
+    provider: "smsbuyz",
+    envKeys: ["SMSBUYZ_API_KEY", "SMS_BUYZ_API_KEY", "SMS_ALL_S5_API_KEY"],
+  },
 ] as const;
+
+export function getSlotMeta(id: string): SmsSlotMeta | undefined {
+  return SMS_SERVER_SLOTS.find((s) => s.id === id);
+}
+
+export function readSlotApiKey(slot: SmsSlotMeta): string | null {
+  for (const k of slot.envKeys) {
+    const v = process.env[k]?.trim();
+    if (v) return v;
+  }
+  return null;
+}
 
 export function parseServerSlotNumber(serverId: string): number | null {
   const upper = String(serverId ?? "").toUpperCase().trim();
   if (!upper) return null;
   const m = upper.match(/(?:^|[^A-Z0-9])S(?:ERVER)?[-_ ]?(\d+)\b/);
   if (m) return Number(m[1]);
-  // bare "1" / "2"
   if (/^\d+$/.test(upper)) return Number(upper);
   return null;
 }
@@ -83,17 +163,19 @@ export function resolveSmsSlotId(
   return `ALL-S${slot}` as SmsSlotId;
 }
 
-/** Server-side: read API key for a slot from process.env */
 export function getSmsSlotCredentials(slotId: SmsSlotId): {
   apiKey: string | undefined;
-  baseUrl: string | undefined;
-  provider: string | undefined;
+  provider: SmsProviderId;
 } {
-  const meta = SMS_SERVER_SLOTS.find((s) => s.id === slotId);
-  const prefix = meta?.envPrefix ?? `SMS_${slotId.replace("-", "_")}`;
-  return {
-    apiKey: process.env[`${prefix}_API_KEY`] ?? process.env[`${prefix}_KEY`],
-    baseUrl: process.env[`${prefix}_BASE_URL`] ?? process.env[`${prefix}_URL`],
-    provider: process.env[`${prefix}_PROVIDER`],
-  };
+  const meta = getSlotMeta(slotId);
+  if (!meta) return { apiKey: undefined, provider: "fivesim" };
+  return { apiKey: readSlotApiKey(meta) ?? undefined, provider: meta.provider };
+}
+
+/** NGN selling price from provider USD cost */
+export function smsSellPriceNgn(costUsd: number): number {
+  const rate = Number(process.env.USD_TO_NGN_RATE || 1600);
+  const markup = Number(process.env.MARKUP_PERCENTAGE || 1.5);
+  const fixed = Number(process.env.FIXED_NGN_MARKUP || 200);
+  return Math.ceil(costUsd * rate * markup + fixed);
 }

@@ -98,8 +98,9 @@ function VirtualNumbers() {
     isError: productsError,
     refetch: refetchProducts,
   } = useQuery({
-    queryKey: ["number-products"],
-    queryFn: () => fetchProducts({ data: undefined }),
+    queryKey: ["number-products", serverId],
+    queryFn: () => fetchProducts({ data: { slotId: serverId as "US-S1" } }),
+    enabled: Boolean(serverId),
   });
 
   const { data: orders, isLoading: ordersLoading } = useQuery({
@@ -184,6 +185,7 @@ function VirtualNumbers() {
         data: {
           productId: selected.id,
           amount: selected.selling_price_ngn,
+          slotId: serverId as "US-S1",
         },
       });
       toast.success("Number ordered — waiting for SMS");
@@ -369,6 +371,11 @@ function VirtualNumbers() {
                     </div>
                     <div className="mt-0.5 text-xs font-semibold text-slate-400">
                       📦 {selected.stock_count.toLocaleString()} numbers in stock
+                      {selected.provider_cost_usd > 0 && (
+                        <span className="ml-2 text-slate-400">
+                          · Cost ${selected.provider_cost_usd.toFixed(3)} · {selected.provider}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span
