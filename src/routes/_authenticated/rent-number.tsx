@@ -202,15 +202,25 @@ function NumberCatalog({
   const rent = useMutation({
     mutationFn: async () => {
       if (!picked) throw new Error("Pick a number");
-      return rentFn({
+      const result = await rentFn({
         data: {
           rentalNumberId: picked.id,
           plan,
         },
       });
+      if (result && typeof result === "object" && "ok" in result && result.ok === false) {
+        throw new Error(
+          (result as { error?: string }).error || "Rental failed",
+        );
+      }
+      return result;
     },
-    onSuccess: () => {
-      toast.success("Number rented");
+    onSuccess: (result) => {
+      const phone =
+        result && typeof result === "object" && "phoneNumber" in result
+          ? String((result as { phoneNumber?: string }).phoneNumber || "")
+          : "";
+      toast.success(phone ? `Number rented: ${phone}` : "Number rented");
       queryClient.invalidateQueries({ queryKey: ["my-rentals", user.id] });
       queryClient.invalidateQueries({ queryKey: ["account", user.id] });
       setPicked(null);
