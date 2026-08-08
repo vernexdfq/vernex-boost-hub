@@ -1,6 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  isJapConfigured,
+  japAddOrder,
+  japOrderStatus,
+  resolveJapServiceId,
+} from "@/lib/providers/jap.server";
 
 export type BoostProduct = {
   id: string;
@@ -83,10 +89,20 @@ export const createBoostOrder = createServerFn({ method: "POST" })
       throw new Error(`Maximum quantity is ${maxQty.toLocaleString("en-NG")}`);
     }
 
-    // Scale pack price by requested quantity
     const expectedAmount = Math.ceil((packPrice / packQty) * data.quantity);
     if (Math.abs(expectedAmount - data.amount) > 1) {
       throw new Error("Price mismatch — please refresh and try again");
+    }
+
+    const japServiceId = resolveJapServiceId(product);
+    if (japServiceId == null) {
+      throw new Error(
+        "This service is not linked to JAP. Set boost_products.service_type to the numeric JAP service ID (e.g. 1234).",
+      );
+    }
+
+    if (!isJapConfigured()) {
+      throw new Error("Boost provider is not configured. Set BOOST_API_KEY in Cloudflare.");
     }
 
     const { data: wallet, error: walletError } = await supabaseAdmin
@@ -105,6 +121,7 @@ export const createBoostOrder = createServerFn({ method: "POST" })
 
     const reference = `VNX-BST-${Date.now().toString(36).toUpperCase()}`;
 
+    // Debit wallet first
     await supabaseAdmin.rpc("record_wallet_transaction", {
       _user_id: userId,
       _type: "debit",
@@ -117,8 +134,41 @@ export const createBoostOrder = createServerFn({ method: "POST" })
         product_id: data.productId,
         target_url: data.targetUrl,
         quantity: data.quantity,
+        jap_service_id: japServiceId,
       },
     });
+
+    // Submit to JustAnotherPanel
+    const jap = await japAddOrder({
+      serviceId: japServiceId,
+      link: data.targetUrl,
+      quantity: data.quantity,
+    });
+
+    if (!jap.ok) {
+      // Refund wallet on provider failure
+      const refundRef = `${reference}-REFUND`;
+      try {
+        await supabaseAdmin.rpc("record_wallet_transaction", {
+          _user_id: userId,
+          _type: "credit",
+          _amount: expectedAmount,
+          _fee: 0,
+          _description: `Refund — Boost failed (${jap.message})`,
+          _reference: refundRef,
+          _payment_method: "wallet",
+          _metadata: {
+            product_id: data.productId,
+            reason: jap.message,
+            jap_raw: jap.raw ?? null,
+          },
+        });
+      } catch (refundErr) {
+        console.error("[boost] refund failed after JAP error", refundErr);
+      }
+
+      throw new Error(jap.message || "Boost provider rejected the order");
+    }
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from("boost_orders")
@@ -128,27 +178,118 @@ export const createBoostOrder = createServerFn({ method: "POST" })
         target_url: data.targetUrl,
         quantity: data.quantity,
         amount_paid: expectedAmount,
-        status: "pending",
+        status: "processing",
         metadata: {
           platform: product.platform,
           service_type: product.service_type,
           pack_qty: packQty,
           pack_price: packPrice,
+          jap_service_id: japServiceId,
+          jap_order_id: jap.order,
+          provider: "jap",
+          wallet_reference: reference,
         },
       })
       .select("id, product_id, target_url, quantity, status, amount_paid, metadata, created_at")
       .single();
 
     if (orderError) {
-      throw new Error(`Order creation failed: ${orderError.message}`);
+      throw new Error(`Order saved but DB insert failed: ${orderError.message}`);
     }
 
     await supabaseAdmin.from("notifications").insert({
       user_id: userId,
       title: "Boost order placed",
-      body: `Your ${product.platform} ${product.service_type} order is processing.`,
+      body: `Your ${product.platform} order #${jap.order} is processing.`,
       type: "order",
     });
 
-    return order;
+    return {
+      ...order,
+      provider: "jap" as const,
+      providerOrderId: jap.order,
+      status: "processing" as const,
+    };
   });
+
+const statusSchema = z.object({
+  orderId: z.string().uuid(),
+});
+
+/** Refresh a boost order status from JAP (by our DB order id). */
+export const refreshBoostOrderStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => statusSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order, error } = await supabaseAdmin
+      .from("boost_orders")
+      .select("id, status, metadata")
+      .eq("id", data.orderId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error || !order) {
+      throw new Error("Order not found");
+    }
+
+    const meta =
+      order.metadata && typeof order.metadata === "object"
+        ? (order.metadata as Record<string, unknown>)
+        : {};
+    const japOrderId = meta.jap_order_id;
+    if (japOrderId == null) {
+      return {
+        ok: false as const,
+        status: order.status,
+        message: "No JAP order id on this order",
+      };
+    }
+
+    const jap = await japOrderStatus(String(japOrderId));
+    if (!jap.ok) {
+      return {
+        ok: false as const,
+        status: order.status,
+        message: jap.message,
+      };
+    }
+
+    const mapped = mapJapStatusToLocal(jap.status);
+    const nextMeta = {
+      ...meta,
+      jap_status: jap.status,
+      jap_charge: jap.charge,
+      jap_start_count: jap.startCount,
+      jap_remains: jap.remains,
+      jap_currency: jap.currency,
+      last_status_check: new Date().toISOString(),
+    };
+
+    await supabaseAdmin
+      .from("boost_orders")
+      .update({ status: mapped, metadata: nextMeta })
+      .eq("id", order.id);
+
+    return {
+      ok: true as const,
+      status: mapped,
+      providerStatus: jap.status,
+      remains: jap.remains,
+      startCount: jap.startCount,
+      charge: jap.charge,
+    };
+  });
+
+function mapJapStatusToLocal(japStatus: string): string {
+  const s = japStatus.toLowerCase();
+  if (s.includes("complete")) return "completed";
+  if (s.includes("cancel") || s.includes("refund")) return "cancelled";
+  if (s.includes("partial")) return "partial";
+  if (s.includes("pending") || s.includes("progress") || s.includes("processing")) {
+    return "processing";
+  }
+  return "processing";
+}
