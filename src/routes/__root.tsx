@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ThemeBoot } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -117,6 +118,11 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+                <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('vernex-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>
@@ -142,8 +148,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeBoot />
       <Outlet />
-      <Toaster theme="light" position="top-center" richColors closeButton />
+      <Toaster theme="system" position="top-center" richColors closeButton />
     </QueryClientProvider>
   );
 }

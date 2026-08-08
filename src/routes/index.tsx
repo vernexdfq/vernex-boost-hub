@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { VernexMark } from "@/components/brand";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -109,6 +110,7 @@ function Landing() {
             >
               Get Started
             </button>
+            <ThemeToggle className="hidden sm:grid" />
             <button
               type="button"
               className="p-2 text-slate-600 md:hidden"

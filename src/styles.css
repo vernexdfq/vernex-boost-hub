@@ -42,10 +42,53 @@
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
+/* ========== DEFAULT: light milk / white + indigo (replaces emerald) ========== */
 :root {
-  --radius: 1rem;
+  --radius: 0.875rem;
 
-  /* Midnight fintech — Revolut / Call.com */
+  --background: oklch(0.98 0.008 250);
+  --foreground: oklch(0.19 0.04 265);
+
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.97 0.01 250);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.04 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.04 265);
+
+  /* Indigo accent (was neon emerald) */
+  --brand: oklch(0.55 0.2 275);
+  --brand-glow: oklch(0.62 0.18 275);
+  --primary: oklch(0.55 0.2 275);
+  --primary-foreground: oklch(0.99 0.005 265);
+
+  --secondary: oklch(0.96 0.012 250);
+  --secondary-foreground: oklch(0.19 0.04 265);
+  --muted: oklch(0.96 0.01 250);
+  --muted-foreground: oklch(0.5 0.02 250);
+  --accent: oklch(0.95 0.03 275);
+  --accent-foreground: oklch(0.3 0.08 275);
+
+  --success: oklch(0.62 0.14 160);
+  --success-foreground: oklch(0.99 0.005 160);
+  --warning: oklch(0.78 0.14 75);
+  --warning-foreground: oklch(0.25 0.05 75);
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 25);
+
+  --border: oklch(0.91 0.01 250);
+  --input: oklch(0.94 0.008 250);
+  --ring: oklch(0.55 0.2 275);
+
+  --gradient-brand: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  --gradient-wallet: linear-gradient(145deg, #312E81 0%, #1E1B4B 50%, #0F172A 100%);
+  --shadow-wallet: 0 16px 40px -18px rgba(79, 70, 229, 0.35);
+  --shadow-card: 0 8px 24px -14px rgba(15, 23, 42, 0.12);
+}
+
+/* ========== OPTIONAL: dark midnight ========== */
+.dark {
   --background: oklch(0.14 0.02 265);
   --foreground: oklch(0.96 0.01 265);
   --surface: oklch(0.18 0.022 265);
@@ -54,29 +97,29 @@
   --card-foreground: oklch(0.96 0.01 265);
   --popover: oklch(0.18 0.022 265);
   --popover-foreground: oklch(0.96 0.01 265);
-  --brand: oklch(0.62 0.16 275);
-  --brand-glow: oklch(0.55 0.14 275);
-  --primary: oklch(0.62 0.16 275);
-  --primary-foreground: oklch(0.98 0.01 265);
+  --brand: oklch(0.68 0.16 275);
+  --brand-glow: oklch(0.6 0.14 275);
+  --primary: oklch(0.68 0.16 275);
+  --primary-foreground: oklch(0.16 0.03 275);
   --secondary: oklch(0.24 0.025 265);
   --secondary-foreground: oklch(0.92 0.01 265);
   --muted: oklch(0.22 0.02 265);
   --muted-foreground: oklch(0.68 0.02 265);
   --accent: oklch(0.26 0.04 275);
   --accent-foreground: oklch(0.94 0.02 275);
-  --success: oklch(0.68 0.1 175);
-  --success-foreground: oklch(0.16 0.02 175);
-  --warning: oklch(0.78 0.12 75);
+  --success: oklch(0.7 0.12 165);
+  --success-foreground: oklch(0.16 0.03 165);
+  --warning: oklch(0.8 0.12 75);
   --warning-foreground: oklch(0.22 0.04 75);
-  --destructive: oklch(0.58 0.2 25);
+  --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.98 0.01 25);
-  --border: oklch(0.28 0.02 265 / 0.65);
+  --border: oklch(0.28 0.02 265 / 0.7);
   --input: oklch(0.24 0.02 265);
-  --ring: oklch(0.62 0.16 275);
-  --gradient-brand: linear-gradient(135deg, oklch(0.55 0.16 275) 0%, oklch(0.48 0.12 290) 100%);
-  --gradient-wallet: linear-gradient(145deg, oklch(0.28 0.04 275) 0%, oklch(0.2 0.03 265) 55%, oklch(0.16 0.02 265) 100%);
-  --shadow-wallet: 0 16px 40px -20px oklch(0.2 0.06 275 / 0.55);
-  --shadow-card: 0 8px 24px -12px oklch(0.05 0.02 265 / 0.55);
+  --ring: oklch(0.68 0.16 275);
+  --gradient-brand: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  --gradient-wallet: linear-gradient(145deg, #312E81 0%, #1E1B4B 55%, #0B1020 100%);
+  --shadow-wallet: 0 16px 40px -20px rgba(99, 102, 241, 0.4);
+  --shadow-card: 0 8px 24px -12px rgba(0, 0, 0, 0.45);
 }
 
 @layer base {
@@ -90,7 +133,7 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -99,13 +142,20 @@
 @utility shadow-wallet { box-shadow: var(--shadow-wallet); }
 @utility shadow-card-elev { box-shadow: var(--shadow-card); }
 @utility dotted-bg {
+  background-image: radial-gradient(oklch(0.5 0.02 265 / 0.08) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+.dark .dotted-bg {
   background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px);
-  background-size: 16px 16px;
 }
 @utility icon-well {
   display: grid;
   place-items: center;
   border-radius: 0.85rem;
+  background: oklch(0.95 0.03 275);
+  color: oklch(0.45 0.16 275);
+}
+.dark .icon-well {
   background: oklch(0.24 0.03 275 / 0.55);
   color: oklch(0.78 0.08 275);
 }
@@ -149,8 +199,8 @@ button, a, [role="button"], input[type="submit"], input[type="button"] {
   50% { transform: translateY(-12px) rotate(-1deg); }
 }
 @keyframes vernex-pulse-glow {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.65; transform: scale(1.04); }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
 }
 .animate-float-slow { animation: vernex-float-slow 6s ease-in-out infinite; }
 .animate-float-fast { animation: vernex-float-fast 4s ease-in-out infinite; }
