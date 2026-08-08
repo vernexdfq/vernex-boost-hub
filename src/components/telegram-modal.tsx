@@ -33,7 +33,7 @@ export function TelegramModal() {
         >
           <X className="h-4 w-4" />
         </button>
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl brand-gradient text-white shadow-[0_10px_25px_-8px_rgba(22,199,132,0.5)]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl brand-gradient text-white shadow-[0_10px_25px_-8px_rgba(79,70,229,0.3)]">
           <Megaphone className="h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-bold">Join Our Telegram Community</h3>
@@ -46,7 +46,7 @@ export function TelegramModal() {
             target="_blank"
             rel="noreferrer"
             onClick={dismiss}
-            className="rounded-xl brand-gradient py-3 text-sm font-semibold text-white shadow-[0_8px_20px_-6px_rgba(22,199,132,0.5)]"
+            className="rounded-xl brand-gradient py-3 text-sm font-semibold text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.3)]"
           >
             Join Now
           </a>

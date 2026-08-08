@@ -198,7 +198,7 @@ function Landing() {
       <section className="relative px-6 pb-24 pt-16 md:pb-32 md:pt-24">
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <div className="animate-float-slow mb-8 inline-flex items-center space-x-2 rounded-full border border-slate-200/80 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-sm">
-            <span className="h-2.5 w-2.5 animate-ping rounded-full bg-emerald-500" />
+            <span className="h-2.5 w-2.5 animate-ping rounded-full bg-indigo-500" />
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-700">
               Canada &amp; USA — OTP Ready
             </span>
@@ -240,7 +240,7 @@ function Landing() {
                   <div className="text-sm font-bold text-slate-800">+1 (555) 012-3456</div>
                 </div>
               </div>
-              <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">
+              <span className="rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600">
                 OTP READY
               </span>
             </div>
@@ -373,7 +373,7 @@ function Landing() {
                 key={item}
                 className="flex items-center space-x-3 rounded-xl border border-slate-700/50 bg-slate-800/80 p-4"
               >
-                <span className="font-bold text-emerald-400">✓</span>
+                <span className="font-bold text-indigo-400">✓</span>
                 <span>{item}</span>
               </div>
             ))}

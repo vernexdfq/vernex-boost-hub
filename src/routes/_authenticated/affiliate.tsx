@@ -125,7 +125,7 @@ function Affiliate() {
                   onClick={() => setDomain(d)}
                   className={`rounded-2xl border p-3 text-left transition ${
                     domain.ext === d.ext
-                      ? "border-primary bg-primary/10 shadow-[0_8px_20px_-12px_rgba(22,199,132,0.8)]"
+                      ? "border-primary bg-primary/10 shadow-[0_8px_20px_-12px_rgba(79,70,229,0.8)]"
                       : "border-border bg-surface"
                   }`}
                 >
@@ -178,7 +178,7 @@ function Affiliate() {
           <button
             onClick={submit}
             disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6366F1] py-4 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(22,199,132,0.8)] transition active:scale-[0.99] disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6366F1] py-4 text-sm font-bold text-white shadow-[0_12px_28px_-12px_rgba(79,70,229,0.8)] transition active:scale-[0.99] disabled:opacity-60"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             Order My Website

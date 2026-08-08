@@ -136,7 +136,7 @@ function Dashboard() {
   return (
     <AppShell>
       <header className="flex items-center gap-3 px-5 pt-6">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(22,199,132,0.5)]">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.3)]">
           {initial}
         </div>
         <div className="min-w-0 flex-1">
@@ -166,8 +166,8 @@ function Dashboard() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
               Available Balance
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/30 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
               Active
             </span>
           </div>

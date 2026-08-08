@@ -69,7 +69,7 @@ const statusBadge: Record<string, { c: string; label: string }> = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Pending" },
   processing: { c: "border-sky-400/30 bg-sky-400/10 text-sky-600", label: "Processing" },
   in_progress: { c: "border-sky-400/30 bg-sky-400/10 text-sky-600", label: "Processing" },
-  completed: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Completed" },
+  completed: { c: "border-indigo-400/30 bg-indigo-400/10 text-indigo-400", label: "Completed" },
   partial: { c: "border-violet-400/30 bg-violet-400/10 text-violet-600", label: "Partial" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   canceled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
@@ -430,7 +430,7 @@ function BoostPage() {
                   }}
                   className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
                     category === c
-                      ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(16,185,129,0.8)]"
+                      ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(79,70,229,0.8)]"
                       : "border-border bg-surface text-muted-foreground hover:border-primary/40"
                   }`}
                 >
@@ -641,7 +641,7 @@ function BoostPage() {
             type="button"
             onClick={handleOrder}
             disabled={busy || !selected || qty < minQty}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(16,185,129,0.9)] transition active:scale-[0.99] disabled:opacity-50"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(79,70,229,0.45)] transition active:scale-[0.99] disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
             Order Boost

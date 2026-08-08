@@ -23,7 +23,7 @@ type OrderStatus = "pending" | "active" | "received" | "expired" | "cancelled" |
 const badge = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-500", label: "Pending" },
   active: { c: "border-amber-400/30 bg-amber-400/10 text-amber-500", label: "Active" },
-  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Received" },
+  received: { c: "border-indigo-400/30 bg-indigo-400/10 text-indigo-400", label: "Received" },
   expired: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Expired" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   refunded: { c: "border-slate-400/30 bg-slate-400/10 text-slate-500", label: "Refunded" },

@@ -309,7 +309,7 @@ function SignInScreen(props: {
             aria-pressed={props.tab === t.id}
             className={`rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
               props.tab === t.id
-                ? "brand-gradient text-primary-foreground shadow-[0_8px_20px_-12px_rgba(22,199,132,0.9)]"
+                ? "brand-gradient text-primary-foreground shadow-[0_8px_20px_-12px_rgba(79,70,229,0.45)]"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -356,7 +356,7 @@ function SignInScreen(props: {
         <button
           type="submit"
           disabled={!props.enabled || props.busy}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(22,199,132,0.7)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(79,70,229,0.4)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
         >
           {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
           Continue
@@ -686,7 +686,7 @@ function SignUpScreen(props: {
       <button
         type="submit"
         disabled={!valid || props.busy}
-        className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(22,199,132,0.7)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(79,70,229,0.4)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
       >
         {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
         Create Account

@@ -58,7 +58,7 @@ const tagTint: Record<string, string> = {
   TH: "bg-zinc-200 text-zinc-800",
   SP: "bg-indigo-500/15 text-indigo-300",
   NF: "bg-rose-100 text-rose-700",
-  AI: "bg-indigo-500/15 text-emerald-800",
+  AI: "bg-indigo-500/15 text-indigo-800",
   PX: "bg-cyan-100 text-cyan-700",
   WA: "bg-green-100 text-green-700",
   AM: "bg-orange-100 text-orange-600",
@@ -196,7 +196,7 @@ function BuyAccounts() {
 
       <div className="px-5 pt-4 pb-4 space-y-4">
         {/* Banner */}
-        <div className="relative overflow-hidden rounded-[20px] brand-gradient p-4 text-white shadow-[0_14px_32px_-16px_rgba(16,185,129,0.7)]">
+        <div className="relative overflow-hidden rounded-[20px] brand-gradient p-4 text-white shadow-[0_14px_32px_-16px_rgba(79,70,229,0.35)]">
           <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-8 right-8 h-20 w-20 rounded-full bg-white/10" />
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">
@@ -271,7 +271,7 @@ function BuyAccounts() {
                     }}
                     className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12px] font-bold transition ${
                       active
-                        ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(16,185,129,0.75)]"
+                        ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(79,70,229,0.75)]"
                         : "border-border bg-surface text-muted-foreground"
                     }`}
                   >
@@ -509,7 +509,7 @@ function BuyAccounts() {
                 type="button"
                 onClick={handleBuy}
                 disabled={busy || selected.stock < 1}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(16,185,129,0.9)] disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(79,70,229,0.45)] disabled:opacity-50"
               >
                 {busy ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

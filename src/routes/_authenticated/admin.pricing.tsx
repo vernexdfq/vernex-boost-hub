@@ -141,7 +141,7 @@ function AdminPricing() {
 
         <button
           onClick={save}
-          className="w-full rounded-2xl brand-gradient py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_-10px_rgba(22,199,132,0.6)]"
+          className="w-full rounded-2xl brand-gradient py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_-10px_rgba(79,70,229,0.35)]"
         >
           Save Configuration
         </button>

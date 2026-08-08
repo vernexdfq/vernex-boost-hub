@@ -549,7 +549,7 @@ function KeypadPanel({
           <button
             type="button"
             onClick={call}
-            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#6366F1] text-white shadow-[0_10px_28px_rgba(22,199,132,0.35)] transition hover:bg-[#4F46E5] active:scale-95"
+            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#6366F1] text-white shadow-[0_10px_28px_rgba(79,70,229,0.35)] transition hover:bg-[#4F46E5] active:scale-95"
             aria-label="Call"
           >
             <Phone className="h-7 w-7 fill-current" />

@@ -53,7 +53,7 @@ type OrderStatus = "pending" | "active" | "received" | "expired" | "cancelled" |
 const badge = {
   pending: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Waiting" },
   active: { c: "border-amber-400/30 bg-amber-400/10 text-amber-600", label: "Waiting" },
-  received: { c: "border-emerald-400/30 bg-emerald-400/10 text-indigo-400", label: "Received" },
+  received: { c: "border-indigo-400/30 bg-indigo-400/10 text-indigo-400", label: "Received" },
   expired: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Expired" },
   cancelled: { c: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelled" },
   refunded: { c: "border-slate-400/30 bg-slate-400/10 text-slate-500", label: "Refunded" },
@@ -344,7 +344,7 @@ function VirtualNumbers() {
                   }}
                   className={`rounded-2xl border px-3 py-2.5 text-left text-[13px] font-bold transition-all duration-200 ${
                     active
-                      ? "border-transparent brand-gradient text-white shadow-[0_10px_22px_-12px_rgba(16,185,129,0.85)]"
+                      ? "border-transparent brand-gradient text-white shadow-[0_10px_22px_-12px_rgba(79,70,229,0.4)]"
                       : "border-border/80 bg-surface text-foreground hover:border-primary/35"
                   }`}
                 >
@@ -454,7 +454,7 @@ function VirtualNumbers() {
                 <span
                   className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold ${
                     selected.stock_count > 0
-                      ? "bg-emerald-400/15 text-indigo-400"
+                      ? "bg-indigo-400/15 text-indigo-400"
                       : "bg-destructive/10 text-destructive"
                   }`}
                 >
@@ -470,7 +470,7 @@ function VirtualNumbers() {
             type="button"
             onClick={handleOrder}
             disabled={busy || !selected || selected.stock_count <= 0}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(16,185,129,0.9)] transition active:scale-[0.99] disabled:opacity-50"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(79,70,229,0.45)] transition active:scale-[0.99] disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
             Order Number
@@ -554,7 +554,7 @@ function VirtualNumbers() {
 
                   {o.otp_code && (
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
+                      <div className="min-w-0 flex-1 rounded-xl border border-indigo-400/30 bg-indigo-400/10 px-3 py-2">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
                           OTP
                         </p>
