@@ -32,11 +32,14 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       const { supabase, userId } = context;
 
       let configured = false;
+      let bvnConfigured = false;
       try {
         const flw = await import("@/lib/flutterwave.server");
         configured = flw.isFlutterwaveConfigured();
+        bvnConfigured = flw.isFlutterwaveBvnConfigured();
       } catch {
         configured = false;
+        bvnConfigured = false;
       }
 
       const { data: wallet } = await supabase
@@ -63,7 +66,12 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       let message: string | null = null;
       let permanent = Boolean(accountNumber);
 
-      if ((!accountNumber || force) && configured) {
+      // Create or upgrade VA. force=true regenerates (use after adding FLUTTERWAVE_BVN).
+      // When BVN is configured and no account yet, always provision permanent static.
+      const shouldProvision =
+        configured && (!accountNumber || force || (bvnConfigured && force));
+
+      if (shouldProvision) {
         try {
           const { provisionVirtualAccount } = await import("@/lib/flutterwave.server");
           const provisioned = await provisionVirtualAccount({
@@ -73,17 +81,21 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
               `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
             fullName: profile?.full_name ?? "Vernex Customer",
             phone: profile?.phone ?? null,
-            force,
+            force: force || !accountNumber,
           });
           if (provisioned) {
             accountNumber = provisioned.accountNumber;
             bankName = provisioned.bankName;
             reference = provisioned.reference;
             permanent = provisioned.permanent;
-            message = provisioned.message ?? null;
+            message = provisioned.permanent
+              ? null
+              : provisioned.message ??
+                "Temporary account — ensure FLUTTERWAVE_BVN is an 11-digit BVN in Cloudflare.";
           } else {
-            message =
-              "Flutterwave could not create a virtual account. Confirm FLUTTERWAVE_SECRET_KEY is set on Cloudflare, and for permanent accounts a BVN may be required.";
+            message = bvnConfigured
+              ? "Flutterwave rejected the permanent account request. Check FLUTTERWAVE_SECRET_KEY and that FLUTTERWAVE_BVN is a valid 11-digit BVN."
+              : "Flutterwave could not create a virtual account. Set FLUTTERWAVE_BVN (11 digits) for permanent static accounts.";
           }
         } catch (err) {
           message =
@@ -94,6 +106,9 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       } else if (!accountNumber && !configured) {
         message =
           "Flutterwave is not configured. Set FLUTTERWAVE_SECRET_KEY in Cloudflare Pages → Environment variables (Production).";
+      } else if (accountNumber && bvnConfigured && !force) {
+        // Existing account kept; user can tap Generate/Refresh (force) to upgrade to permanent
+        permanent = true;
       }
 
       return {
