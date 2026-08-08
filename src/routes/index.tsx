@@ -5,12 +5,11 @@ import {
   Rocket,
   KeyRound,
   ClipboardList,
-  BarChart3,
   ChevronDown,
   Menu,
   X,
+  ArrowRight,
   Check,
-  Star,
 } from "lucide-react";
 import { VernexMark } from "@/components/brand";
 
@@ -18,19 +17,18 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title:
-          "Vernex — Your digital toolkit for virtual numbers, OTP verification, and social media growth",
+        title: "Vernex — Your second number, anywhere in the world",
       },
       {
         name: "description",
         content:
-          "Get virtual numbers for OTP verification, rent long-term Non-VoIP lines, and boost your social accounts — all from one Nigerian wallet.",
+          "Verify accounts, rent virtual numbers, and manage your digital presence — all from one powerful toolkit built for Nigerians doing global business.",
       },
-      { property: "og:title", content: "Vernex — Virtual Numbers & SMM Boost" },
+      { property: "og:title", content: "Vernex — Virtual Numbers & OTP" },
       {
         property: "og:description",
         content:
-          "Instant OTPs from 300+ services, social growth tools, and instant Naira wallet funding.",
+          "Canada & USA OTP-ready numbers, long-term rentals, and social growth tools with instant Naira wallet funding.",
       },
     ],
   }),
@@ -38,20 +36,30 @@ export const Route = createFileRoute("/")({
 });
 
 const NAV = [
-  { label: "How it works", href: "#how" },
-  { label: "Features", href: "#features" },
-  { label: "Countries", href: "#countries" },
+  { label: "Virtual Numbers", href: "#features" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Download App", href: "#download" },
+  { label: "Countries", href: "#countries" },
   { label: "Support", href: "#faq" },
 ];
 
-const LIVE_FEED = [
-  { flag: "🇺🇸", country: "United States", number: "+1 (415) 555-0192", badge: "OTP" },
-  { flag: "🇬🇧", country: "United Kingdom", number: "+44 7911 123456", badge: "ACTIVE" },
-  { flag: "🇩🇪", country: "Germany", number: "+49 170 1234567", badge: "RENT" },
-  { flag: "🇨🇦", country: "Canada", number: "+1 (647) 555-0178", badge: "OTP" },
-  { flag: "🇫🇷", country: "France", number: "+33 6 12 34 56 78", badge: "ACTIVE" },
+const FLOAT_CARDS = [
+  {
+    flag: "🇨🇦",
+    label: "Canada Mobile",
+    number: "+1 (555) 012-3456",
+    badge: "OTP READY",
+    badgeClass: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    anim: "animate-float-slow",
+  },
+  {
+    flag: "🇫🇷",
+    label: "France Line",
+    number: "+33 6 12 34 56 78",
+    badge: "ACTIVE",
+    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    anim: "animate-float-fast",
+    delay: "1s",
+  },
 ];
 
 const COUNTRIES = [
@@ -67,10 +75,29 @@ const COUNTRIES = [
   ["🇲🇽", "Mexico"],
   ["🇺🇸", "United States"],
   ["🇬🇧", "United Kingdom"],
-  ["🇨🇦", "Canada"],
-  ["🇩🇪", "Germany"],
-  ["🇫🇷", "France"],
-  ["🇧🇷", "Brazil"],
+];
+
+const FEATURES = [
+  {
+    icon: Phone,
+    title: "Virtual Numbers",
+    body: "Instant OTP numbers for WhatsApp, TikTok, Instagram, Google and 300+ services.",
+  },
+  {
+    icon: KeyRound,
+    title: "Rent a Line",
+    body: "Keep a dedicated USA or global number for hours or days — exclusive to you.",
+  },
+  {
+    icon: Rocket,
+    title: "SMM Boost",
+    body: "Grow followers, likes, and views with tracked delivery from your Vernex wallet.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Buy Accounts",
+    body: "Aged and verified social accounts delivered instantly after wallet payment.",
+  },
 ];
 
 const FAQS = [
@@ -92,49 +119,16 @@ const FAQS = [
   },
   {
     q: "Is there a mobile app?",
-    a: "Vernex is a mobile-first web app. Install it to your home screen from Chrome or Safari for an app-like experience. Native store builds are on the roadmap.",
-  },
-  {
-    q: "Is Vernex legal to use in Nigeria?",
-    a: "Yes. Vernex provides legitimate virtual numbers and digital services. Always use accounts and numbers in line with each platform's terms of service.",
+    a: "Vernex is a mobile-first web app. Install it to your home screen from Chrome or Safari for an app-like experience.",
   },
 ];
-
-function LiveCard({
-  flag,
-  country,
-  number,
-  badge,
-}: {
-  flag: string;
-  country: string;
-  number: string;
-  badge: string;
-}) {
-  return (
-    <div className="flex w-72 shrink-0 items-center justify-between rounded-xl border border-slate-800 bg-slate-900/90 p-4 shadow-lg">
-      <div>
-        <div className="mb-1 flex items-center space-x-2">
-          <span className="text-lg leading-none">{flag}</span>
-          <span className="text-sm font-semibold text-slate-100">{country}</span>
-        </div>
-        <p className="font-mono text-xs text-slate-400 tabular-nums">{number}</p>
-      </div>
-      <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
-        {badge}
-      </span>
-    </div>
-  );
-}
 
 function Landing() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [marqueePaused, setMarqueePaused] = useState(false);
   const [going, setGoing] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Warm auth route module so first tap navigates immediately
   useEffect(() => {
     void import("@/routes/auth").catch(() => undefined);
   }, []);
@@ -142,567 +136,317 @@ function Landing() {
   const enter = () => {
     if (going) return;
     setGoing(true);
-    // Navigate on the next frame so the press state paints first
     requestAnimationFrame(() => {
       void navigate({ to: "/auth" });
     });
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center space-x-2">
-            <VernexMark className="h-8 w-8" />
-            <span className="text-xl font-bold tracking-tight text-white">
-              Vernex<span className="text-emerald-500">.com.ng</span>
+    <div className="min-h-screen overflow-x-hidden bg-[#F4F5FC] font-sans text-[#0F172A] antialiased selection:bg-emerald-500 selection:text-white">
+      {/* Ambient glows */}
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-7xl -translate-x-1/2 bg-gradient-to-b from-emerald-100/50 via-[#F4F5FC]/30 to-transparent" />
+      <div className="animate-pulse-glow pointer-events-none absolute right-10 top-20 -z-10 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+      <div
+        className="animate-pulse-glow pointer-events-none absolute left-10 top-40 -z-10 h-80 w-80 rounded-full bg-teal-200/40 blur-3xl"
+        style={{ animationDelay: "2.5s" }}
+      />
+
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6">
+          <Link to="/" className="flex items-center gap-2.5">
+            <VernexMark className="h-9 w-9 rounded-xl shadow-lg shadow-emerald-500/20" />
+            <span className="text-lg font-black tracking-tight text-slate-900 sm:text-xl">
+              Vernex<span className="text-emerald-600">.</span>com.ng
             </span>
           </Link>
-          <div className="flex items-center space-x-4">
+
+          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+            {NAV.map((l) => (
+              <a key={l.href} href={l.href} className="transition-colors hover:text-emerald-600">
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               to="/auth"
               preload="intent"
-              className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:block"
+              className="hidden text-sm font-semibold text-slate-700 transition hover:text-emerald-600 sm:inline-block"
             >
-              Sign In
+              Log In
             </Link>
             <button
               type="button"
+              onClick={enter}
+              disabled={going}
+              className="tap-fast rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-slate-900/10 transition-all duration-200 hover:bg-emerald-600 active:scale-[0.98] sm:px-5"
+            >
+              Get Started
+            </button>
+            <button
+              type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-2 text-slate-300 transition hover:text-white"
+              className="p-2 text-slate-600 md:hidden"
               aria-label="Menu"
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
+
         {menuOpen && (
-          <div className="border-t border-slate-900 bg-slate-950">
+          <div className="border-t border-slate-200 bg-white md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-2">
               {NAV.map((l) => (
                 <a
                   key={l.href}
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
-                  className="border-b border-slate-900 py-3.5 text-[15px] font-medium text-slate-100"
+                  className="border-b border-slate-100 py-3.5 text-[15px] font-medium text-slate-800"
                 >
                   {l.label}
                 </a>
               ))}
-              <Link
-                to="/auth"
-                preload="intent"
-                onClick={() => setMenuOpen(false)}
-                className="tap-fast mb-2 mt-3 flex w-full items-center justify-center rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 active:bg-emerald-600"
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  enter();
+                }}
+                className="tap-fast mb-3 mt-3 flex w-full items-center justify-center rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white"
               >
-                Get a Number Now →
-              </Link>
+                Get a Number Now
+              </button>
             </nav>
           </div>
         )}
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <div className="mb-8 flex flex-col items-center justify-center">
-          <div className="flex w-full max-w-lg flex-col items-center rounded-2xl border border-slate-800/80 bg-slate-900/80 p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-center space-x-3">
-              <VernexMark className="h-16 w-16 drop-shadow-md" />
-              <div className="text-left">
-                <h2 className="text-2xl font-extrabold tracking-tight text-white">
-                  Vernex<span className="text-emerald-400">.com.ng</span>
-                </h2>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
-              <span className="text-slate-300">Connect</span>
-              <span className="text-emerald-500">|</span>
-              <span className="text-emerald-400">Verify</span>
-              <span className="text-emerald-500">|</span>
-              <span className="text-slate-300">Grow</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 inline-flex items-center space-x-2 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-3.5 py-1.5 text-xs text-emerald-400">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-          <span>Canada - OTP Ready</span>
-        </div>
-        <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-          Your second number, anywhere in the world.
-        </h1>
-        <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
-          Verify accounts, rent virtual numbers, and manage your digital presence — all from one
-          powerful toolkit built for Nigerians doing global business.
-        </p>
-
-        <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            to="/auth"
-            preload="intent"
-            className="tap-fast inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-8 py-3.5 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-600 active:bg-emerald-700 sm:w-auto"
-          >
-            Get a Number Now →
-          </Link>
-        </div>
-
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <a
-            href="#download"
-            className="flex w-full items-center justify-center space-x-3 rounded-xl border border-slate-800 bg-slate-900 px-5 py-2.5 sm:w-auto"
-          >
-            <svg className="h-6 w-6 fill-white" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3.609 1.814L13.792 12 3.61 22.186a1.5 1.5 0 0 1-.944-1.39V3.204a1.5 1.5 0 0 1 .943-1.39zM15.207 13.414l2.122 2.122-11.31 6.524a1.5 1.5 0 0 1-1.545-.068l10.733-8.578zM15.207 10.586L4.394 2.008a1.5 1.5 0 0 1 1.545-.068l11.31 6.524-2.142 2.122zM17.329 12.707l3.268 1.886a1.5 1.5 0 0 1 0 2.594l-3.268 1.886-2.122-2.122 2.122-2.122z" />
-            </svg>
-            <div className="text-left">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Get it on</p>
-              <p className="text-sm font-bold">
-                Google Play{" "}
-                <span className="ml-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">
-                  LIVE
-                </span>
-              </p>
-            </div>
-          </a>
-          <a
-            href="#download"
-            className="flex w-full items-center justify-center space-x-3 rounded-xl border border-slate-800 bg-slate-900 px-5 py-2.5 sm:w-auto"
-          >
-            <svg className="h-6 w-6 fill-white" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.1c.67-.82 1.12-1.96.99-3.1-.97.04-2.16.65-2.85 1.47-.62.72-1.16 1.87-1.01 2.98 1.08.08 2.19-.55 2.87-1.35z" />
-            </svg>
-            <div className="text-left">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Download on the</p>
-              <p className="text-sm font-bold">App Store</p>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      {/* Live marquee */}
-      <section className="overflow-hidden border-y border-slate-900 bg-slate-900/40 py-6">
-        <div className="relative w-full overflow-hidden">
-          <div
-            className={`vernex-marquee-track py-2${marqueePaused ? " is-paused" : ""}`}
-            onMouseEnter={() => setMarqueePaused(true)}
-            onMouseLeave={() => setMarqueePaused(false)}
-            onTouchStart={() => setMarqueePaused(true)}
-            onTouchEnd={() => setMarqueePaused(false)}
-          >
-            <div className="vernex-marquee-group">
-              {LIVE_FEED.map((row) => (
-                <LiveCard key={`a-${row.number}`} {...row} />
-              ))}
-            </div>
-            <div className="vernex-marquee-group" aria-hidden="true">
-              {LIVE_FEED.map((row) => (
-                <LiveCard key={`b-${row.number}`} {...row} />
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mx-auto mt-3 flex max-w-7xl items-center justify-between px-4 font-mono text-xs text-slate-500">
-          <span>Last updated: just now</span>
-          <span className="flex items-center text-emerald-400">
-            <span className="mr-1.5 h-1.5 w-1.5 animate-ping rounded-full bg-emerald-400" />
-            5 Live
-          </span>
-        </div>
-      </section>
-
-      {/* Stats banner */}
-      <section className="bg-emerald-600 py-12 text-slate-950">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 text-center sm:px-6 md:grid-cols-4 lg:px-8">
-          {[
-            ["50+", "Countries"],
-            ["200K+", "Numbers Delivered"],
-            ["98%", "OTP Success Rate"],
-            ["24/7", "Platform Access"],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <p className="text-3xl font-extrabold tracking-tight sm:text-4xl">{value}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider opacity-90 sm:text-sm">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="mx-auto max-w-5xl px-4 py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-400">
-          — How it works
-        </p>
-        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-          From zero to verified in under 2 minutes.
-        </h2>
-        <p className="mt-2 max-w-lg text-[15px] text-slate-400">
-          No contracts, no SIM card, no waiting. Just instant access to numbers that work.
-        </p>
-        <ol className="mt-8 space-y-4">
-          {[
-            {
-              n: "01",
-              icon: <KeyRound className="h-5 w-5 text-emerald-400" />,
-              title: "Create your account",
-              body: "Sign up on Vernex with your phone number and PIN. Fund your wallet — quick and secure.",
-            },
-            {
-              n: "02",
-              icon: <span className="text-lg leading-none">🌍</span>,
-              title: "Pick your country",
-              body: "Browse 50+ countries. Select the one you need — USA, UK, Canada, Germany, and many more.",
-            },
-            {
-              n: "03",
-              icon: <Phone className="h-5 w-5 text-emerald-400" />,
-              title: "Receive your OTP",
-              body: "Your SMS or OTP lands in your Vernex dashboard in seconds. Copy, verify, done.",
-            },
-          ].map((s) => (
-            <li
-              key={s.n}
-              className="relative rounded-2xl border border-slate-800 bg-slate-900 p-5"
-            >
-              <span className="absolute right-4 top-4 text-4xl font-black text-slate-800">
-                {s.n}
-              </span>
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-500/10">
-                {s.icon}
-              </span>
-              <h3 className="mt-3 text-base font-bold text-white">{s.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-slate-400">{s.body}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="mx-auto max-w-5xl px-4 py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-400">
-          — Features
-        </p>
-        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-          Everything you need to go global.
-        </h2>
-        <p className="mt-2 text-[15px] text-slate-400">One platform. Every use case.</p>
-        <ul className="mt-8 space-y-5">
-          {[
-            {
-              icon: <KeyRound className="h-5 w-5" />,
-              title: "OTP Verification",
-              body: "Receive one-time passwords from WhatsApp, TikTok, Instagram, Facebook, Telegram, and hundreds more.",
-            },
-            {
-              icon: <ClipboardList className="h-5 w-5" />,
-              title: "Rent a Number",
-              body: "Need a dedicated line? Rent a number for hours or days — stays active and exclusively yours.",
-            },
-            {
-              icon: <Rocket className="h-5 w-5" />,
-              title: "Account Boost",
-              body: "Grow your social media presence with our account boost services — safely and effectively.",
-            },
-            {
-              icon: <BarChart3 className="h-5 w-5" />,
-              title: "SMS & Activity Log",
-              body: "Every message, every verification — logged and accessible in your dashboard.",
-            },
-          ].map((f) => (
-            <li key={f.title} className="flex gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-400">
-                {f.icon}
-              </span>
-              <div>
-                <h3 className="text-[15px] font-bold text-white">{f.title}</h3>
-                <p className="mt-0.5 text-sm leading-relaxed text-slate-400">{f.body}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Countries */}
-      <section id="countries" className="mx-auto max-w-5xl px-4 py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-400">
-          — Countries
-        </p>
-        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-          50+ countries. One platform.
-        </h2>
-        <p className="mt-2 text-[15px] text-slate-400">
-          Can&apos;t find a country? Request yours and we&apos;ll prioritise it.
-        </p>
-        <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-          {COUNTRIES.map(([flag, name]) => (
-            <div
-              key={name}
-              className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-3"
-            >
-              <span className="text-lg leading-none">{flag}</span>
-              <span className="truncate text-[13px] font-semibold text-slate-100">{name}</span>
-            </div>
-          ))}
-        </div>
-        <Link
-          to="/auth"
-          preload="intent"
-          className="tap-fast mt-4 flex w-full items-center justify-center rounded-xl border border-dashed border-slate-700 py-3 text-[13px] font-semibold text-emerald-400 active:bg-slate-900"
-        >
-          +29 more →
-        </Link>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="mx-auto max-w-5xl px-4 py-14">
-        <p className="text-center text-xs font-bold uppercase tracking-[0.16em] text-emerald-400">
-          — Pricing
-        </p>
-        <h2 className="mt-2 text-center text-3xl font-extrabold tracking-tight text-white">
-          Simple, transparent pricing.
-        </h2>
-        <p className="mx-auto mt-2 max-w-md text-center text-[15px] text-slate-400">
-          Pay only for what you use. Fund your wallet and pick the service you need — no
-          subscriptions.
-        </p>
-        <div className="mt-8 space-y-4">
-          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <h3 className="text-[17px] font-bold text-white">Virtual Number</h3>
-            <p className="mt-1 text-sm text-slate-400">
-              A temporary number active for ~20 minutes. Perfect for one-time OTP verification on
-              any platform.
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-slate-200">
-              {[
-                "20-minute active window",
-                "Works on WhatsApp, TikTok, Instagram & more",
-                "Multiple OTPs receivable",
-                "Full credit refund if no SMS received",
-                "Instant delivery to your dashboard",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-2">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/auth"
-              preload="intent"
-              className="tap-fast mt-5 flex w-full items-center justify-center rounded-lg bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 active:bg-emerald-600"
-            >
-              Get a Virtual Number
-            </Link>
-          </article>
-
-          <article className="relative rounded-2xl border border-emerald-500/40 bg-slate-900 p-5">
-            <span className="absolute -top-2.5 right-4 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-950">
-              Most popular
+      <section className="relative px-6 pb-20 pt-14 md:pb-28 md:pt-20">
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
+          <div className="animate-float-slow mb-8 inline-flex items-center space-x-2 rounded-full border border-slate-200/80 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-sm">
+            <span className="h-2.5 w-2.5 animate-ping rounded-full bg-emerald-500" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+              Canada &amp; USA — OTP Ready
             </span>
-            <h3 className="text-[17px] font-bold text-white">Rent a Number</h3>
-            <p className="mt-1 text-sm text-slate-400">
-              Lease a dedicated number for a custom duration — hours to days. Exclusively yours for
-              the full period.
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-slate-200">
-              {[
-                "Flexible duration — hours to days",
-                "Number stays exclusively assigned to you",
-                "Ideal for business registrations",
-                "USA on SignalWire · Global on DIDWW",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-2">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/auth"
-              preload="intent"
-              className="tap-fast mt-5 flex w-full items-center justify-center rounded-lg border border-slate-700 bg-slate-950 py-3.5 text-sm font-bold text-white active:bg-slate-900"
-            >
-              Rent a Number
-            </Link>
-          </article>
-        </div>
-      </section>
+          </div>
 
-      {/* Testimonials */}
-      <section className="border-y border-slate-800 bg-slate-900 px-4 py-14">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-400">
-            — Trusted by thousands
+          <h1 className="mb-6 text-4xl font-black leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
+            Your second number,{" "}
+            <br className="hidden sm:inline" />
+            <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 bg-clip-text text-transparent">
+              anywhere in the world.
+            </span>
+          </h1>
+
+          <p className="mx-auto mb-10 max-w-2xl text-lg font-normal leading-relaxed text-slate-600 sm:text-xl">
+            Verify accounts, rent virtual numbers, and manage your digital presence — all from one
+            powerful toolkit built for Nigerians doing global business.
           </p>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-            Real people, real results.
-          </h2>
-          <div className="mt-8 space-y-4">
-            {[
-              {
-                quote:
-                  "I needed a US number to verify my Stripe account for my online store. Vernex delivered an OTP in under 30 seconds. Mind blown.",
-                name: "Adewale Okafor",
-                role: "E-commerce entrepreneur · Lagos",
-                initials: "AO",
-              },
-              {
-                quote:
-                  "Finally a Nigerian platform that actually works. I've been using Vernex to verify my clients' social accounts. The rental feature is exactly what I needed.",
-                name: "Chioma Ezenwachi",
-                role: "Social media manager · Abuja",
-                initials: "CE",
-              },
-            ].map((t) => (
-              <blockquote
-                key={t.name}
-                className="rounded-2xl border border-slate-800 bg-slate-950 p-5"
+
+          <div className="mb-14 flex flex-col items-center justify-center sm:flex-row">
+            <button
+              type="button"
+              onClick={enter}
+              disabled={going}
+              className="tap-fast inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-8 py-4 font-bold text-white shadow-xl shadow-emerald-600/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-700 active:scale-[0.99] sm:w-auto"
+            >
+              Get a Number Now
+              <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Floating feature cards */}
+          <div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 text-left sm:grid-cols-2">
+            {FLOAT_CARDS.map((c) => (
+              <div
+                key={c.number}
+                className={`${c.anim} flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-xl shadow-emerald-500/5 backdrop-blur-md`}
+                style={c.delay ? { animationDelay: c.delay } : undefined}
               >
-                <div className="flex gap-0.5 text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <footer className="mt-4 flex items-center gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-slate-950">
-                    {t.initials}
-                  </span>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white">{t.name}</p>
-                    <p className="text-[11px] text-slate-500">{t.role}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-lg">
+                    {c.flag}
                   </div>
-                </footer>
-              </blockquote>
+                  <div>
+                    <div className="text-xs font-semibold text-slate-400">{c.label}</div>
+                    <div className="text-sm font-bold text-slate-800">{c.number}</div>
+                  </div>
+                </div>
+                <span
+                  className={`rounded-full border px-2.5 py-1 text-xs font-bold ${c.badgeClass}`}
+                >
+                  {c.badge}
+                </span>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="mx-auto max-w-5xl px-4 py-14">
-        <h2 className="text-3xl font-extrabold tracking-tight text-white">
-          Questions? We&apos;ve got answers.
-        </h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Can&apos;t find it? Email{" "}
-          <a href="mailto:support@vernex.com.ng" className="font-semibold text-emerald-400">
-            support@vernex.com.ng
-          </a>
-        </p>
-        <div className="mt-6 space-y-2">
-          {FAQS.map((f, i) => {
-            const open = openFaq === i;
-            return (
-              <div key={f.q} className="rounded-xl border border-slate-800 bg-slate-900">
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(open ? null : i)}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-semibold text-slate-100"
-                >
-                  <span>{f.q}</span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {open && (
-                  <p className="border-t border-slate-800 px-4 py-3 text-sm leading-relaxed text-slate-400">
-                    {f.a}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+      {/* Stats */}
+      <section className="relative border-y border-slate-200/60 bg-white py-14">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 text-center md:grid-cols-4">
+          {[
+            ["50+", "COUNTRIES"],
+            ["200K+", "NUMBERS DELIVERED"],
+            ["98%", "OTP SUCCESS RATE"],
+            ["24/7", "PLATFORM ACCESS"],
+          ].map(([v, l]) => (
+            <div key={l}>
+              <div className="mb-1 text-3xl font-black text-slate-900 sm:text-4xl">{v}</div>
+              <div className="text-sm font-medium text-slate-500">{l}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section id="download" className="bg-emerald-500 px-4 py-14 text-center text-slate-950">
-        <h2 className="text-3xl font-extrabold tracking-tight">
-          Ready to unlock any number, from anywhere?
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-slate-900/80">
-          Join thousands of Nigerians using Vernex to work, verify, and grow — without limits.
-        </p>
-        <div className="mx-auto mt-6 flex max-w-sm flex-col gap-3">
-          <Link
-            to="/auth"
-            preload="intent"
-            className="tap-fast flex items-center justify-center rounded-lg bg-slate-950 py-3.5 text-sm font-bold text-white active:opacity-90"
-          >
-            Create Free Account →
-          </Link>
-          <a
-            href="#download"
-            className="rounded-lg border border-slate-950/20 py-3.5 text-sm font-semibold text-slate-950"
-          >
-            Download the App
-          </a>
+      {/* Countries */}
+      <section id="countries" className="relative overflow-hidden px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-12 max-w-xl text-center">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
+              Global coverage
+            </h2>
+            <h3 className="text-3xl font-black text-slate-900 sm:text-4xl">
+              Unlock numbers from any country instantly.
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {COUNTRIES.map(([flag, name]) => (
+              <button
+                key={name}
+                type="button"
+                onClick={enter}
+                className="tap-fast group flex cursor-pointer items-center space-x-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl"
+              >
+                <span className="text-2xl">{flag}</span>
+                <span className="text-sm font-bold text-slate-800 group-hover:text-emerald-600">
+                  {name}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 px-4 py-10 text-slate-100">
+      {/* Features */}
+      <section id="features" className="border-t border-slate-200/60 bg-white px-6 py-20">
         <div className="mx-auto max-w-5xl">
-          <div className="flex items-center gap-2">
-            <VernexMark className="h-8 w-8" />
-            <span className="text-base font-bold text-emerald-400">
-              Vernex<span className="text-white">.com.ng</span>
-            </span>
+          <div className="mx-auto mb-12 max-w-xl text-center">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
+              Features
+            </h2>
+            <h3 className="text-3xl font-black text-slate-900">Everything in one toolkit</h3>
           </div>
-          <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">
-            Your digital toolkit for virtual numbers, OTP verification, and social media growth —
-            built for Nigeria, ready for the world.
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-8 text-[13px] sm:grid-cols-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
-                Product
-              </p>
-              <ul className="mt-3 space-y-2 text-slate-400">
-                <li>Virtual Numbers</li>
-                <li>Rent a Number</li>
-                <li>Account Boost</li>
-                <li>SMS Log</li>
-                <li>Pricing</li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">App</p>
-              <ul className="mt-3 space-y-2 text-slate-400">
-                <li>Download App</li>
-                <li>
-                  <button type="button" onClick={enter} className="text-left">
-                    Log In
-                  </button>
-                </li>
-                <li>
-                  <button type="button" onClick={enter} className="text-left">
-                    Sign Up
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
-                Help
-              </p>
-              <ul className="mt-3 space-y-2 text-slate-400">
-                <li>Support Centre</li>
-                <li>Privacy Policy</li>
-                <li>Terms of Service</li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-10 border-t border-slate-900 pt-5 text-[11px] text-slate-600">
-            <p>© {new Date().getFullYear()} Vernex · vernex.com.ng · All rights reserved.</p>
-            <p className="mt-1">support@vernex.com.ng</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {FEATURES.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div
+                  key={f.title}
+                  className="rounded-2xl border border-slate-200 bg-[#F8FAFC] p-5 shadow-sm"
+                >
+                  <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900">{f.title}</h4>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{f.body}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
+      </section>
+
+      {/* Pricing teaser */}
+      <section id="pricing" className="px-6 py-20">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/50 sm:p-12">
+          <h2 className="text-2xl font-black text-slate-900 sm:text-3xl">
+            Start with any amount
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-slate-600">
+            Fund your Naira wallet, then buy OTPs, rent numbers, or boost accounts — pay only for
+            what you use.
+          </p>
+          <ul className="mx-auto mt-6 max-w-sm space-y-2 text-left text-sm text-slate-700">
+            {[
+              "Instant bank-transfer funding",
+              "OTP numbers from ₦200+",
+              "5% referral commission",
+            ].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                {t}
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={enter}
+            className="tap-fast mt-8 inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
+          >
+            Create free account
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </button>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="border-t border-slate-200/60 bg-white px-6 py-20">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-8 text-center text-2xl font-black text-slate-900">FAQ</h2>
+          <div className="space-y-2">
+            {FAQS.map((item, i) => {
+              const open = openFaq === i;
+              return (
+                <div
+                  key={item.q}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-[#F8FAFC]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(open ? null : i)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
+                  >
+                    <span className="text-sm font-bold text-slate-900">{item.q}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {open && (
+                    <p className="border-t border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-600">
+                      {item.a}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="bg-emerald-600 px-6 py-14 text-center text-white">
+        <h2 className="text-2xl font-black sm:text-3xl">Ready for your second number?</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-white/90">
+          Join Vernex and get OTP-ready lines from Canada, the USA, and 50+ countries.
+        </p>
+        <button
+          type="button"
+          onClick={enter}
+          className="tap-fast mt-6 inline-flex items-center rounded-2xl bg-white px-8 py-3.5 text-sm font-bold text-emerald-700 shadow-lg transition hover:bg-slate-50"
+        >
+          Get a Number Now
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </button>
+      </section>
+
+      <footer className="border-t border-slate-200 bg-white px-6 py-8 text-center text-xs text-slate-500">
+        © {new Date().getFullYear()} Vernex.com.ng · Virtual numbers &amp; digital growth tools
       </footer>
     </div>
   );
