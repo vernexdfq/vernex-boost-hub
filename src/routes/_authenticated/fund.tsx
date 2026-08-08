@@ -131,7 +131,7 @@ function FundPage() {
   }
 
   return (
-    <AppShell title="Fund Wallet" hideHeader>
+    <AppShell showThemeToggle={false}>
       <div className="mx-auto max-w-md space-y-6 px-4 pb-6 pt-2 sm:px-6">
         {/* Top bar */}
         <div className="flex items-center justify-between">
@@ -169,7 +169,7 @@ function FundPage() {
             </svg>
             <span>Wallet Balance</span>
           </div>
-          <div className="mb-2 text-3xl font-black sm:text-4xl">{naira(balance)}</div>
+          <div className="mb-2 text-3xl font-black sm:text-4xl">{naira(Number(balance) || 0)}</div>
           <div className="inline-flex items-center space-x-1.5 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-3 py-1 text-xs text-emerald-400">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             <span>Available for transactions</span>

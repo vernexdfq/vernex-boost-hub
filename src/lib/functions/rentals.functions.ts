@@ -60,6 +60,7 @@ function normalize(row: Record<string, unknown>): RentalNumber {
 export const listRentalCountries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<RentalCountry[]> => {
+    try {
     const map = new Map<string, RentalCountry>();
 
     const { data } = await context.supabase
@@ -108,7 +109,7 @@ export const listRentalCountries = createServerFn({ method: "GET" })
     if (isDidwwConfigured()) {
       const live = await listDidwwCountries();
       if (live.ok) {
-        for (const c of live.countries.slice(0, 80)) {
+        for (const c of live.countries.slice(0, 40)) {
           if (c.iso === "US") continue;
           const price = rentalPriceNgnFromUsd(defaultRentalUsd(c.iso));
           const existing = map.get(c.iso);
@@ -135,6 +136,10 @@ export const listRentalCountries = createServerFn({ method: "GET" })
       if (b.country_code === "US") return 1;
       return a.country_name.localeCompare(b.country_name);
     });
+    } catch (err) {
+      console.error("[rental] listRentalCountries", err);
+      return [];
+    }
   });
 
 const listNumbersSchema = z.object({

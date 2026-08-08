@@ -69,49 +69,62 @@ export const listNumberProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => listSchema.parse(data ?? {}))
   .handler(async ({ data, context }): Promise<NumberProduct[]> => {
-    const slotId = data?.slotId as SmsSlotId | undefined;
-
-    // Live provider catalog (primary)
     try {
-      // Only one slot per request — never fan-out to all providers (Worker CPU limit)
+      const slotId = data?.slotId as SmsSlotId | undefined;
+
+      // Live provider catalog — one slot only, never crashes the page
       if (slotId) {
-        const live = await listLiveProductsForSlot(slotId);
-        if (live.length) return live.map(fromLive);
+        try {
+          const live = await listLiveProductsForSlot(slotId);
+          if (live.length) return live.map(fromLive);
+        } catch (err) {
+          console.error("[numbers] live catalog failed", slotId, err);
+        }
+      }
+
+      // Fallback: Supabase catalog
+      try {
+        const { supabase } = context;
+        const { data: rows, error } = await supabase
+          .from("number_products")
+          .select(
+            "id, service_key, service_name, country_code, country_name, server_id, provider, provider_cost_usd, selling_price_ngn, stock_count",
+          )
+          .eq("is_active", true)
+          .order("country_name", { ascending: true })
+          .order("service_name", { ascending: true });
+
+        if (error) {
+          console.error("[numbers] supabase catalog", error.message);
+          return [];
+        }
+
+        let products = (rows ?? []).map((p) => ({
+          ...p,
+          provider_cost_usd: Number(p.provider_cost_usd) || 0,
+          selling_price_ngn: Number(p.selling_price_ngn) || 0,
+          stock_count: Number(p.stock_count) || 0,
+        }));
+
+        if (slotId) {
+          products = products.filter((p) => {
+            const sid = String(p.server_id || "").toUpperCase();
+            return (
+              sid === slotId ||
+              sid.includes(slotId.replace("-", "")) ||
+              sid.endsWith(slotId.slice(-2))
+            );
+          });
+        }
+        return products;
+      } catch (err) {
+        console.error("[numbers] supabase fallback failed", err);
+        return [];
       }
     } catch (err) {
-      console.error("[numbers] live catalog failed", err);
+      console.error("[numbers] listNumberProducts fatal", err);
+      return [];
     }
-
-    // Fallback: Supabase catalog
-    const { supabase } = context;
-    let query = supabase
-      .from("number_products")
-      .select(
-        "id, service_key, service_name, country_code, country_name, server_id, provider, provider_cost_usd, selling_price_ngn, stock_count",
-      )
-      .eq("is_active", true);
-
-    const { data: rows, error } = await query
-      .order("country_name", { ascending: true })
-      .order("service_name", { ascending: true });
-
-    if (error) throw new Error(`Failed to load products: ${error.message}`);
-
-    let products = (rows ?? []).map((p) => ({
-      ...p,
-      provider_cost_usd: Number(p.provider_cost_usd),
-      selling_price_ngn: Number(p.selling_price_ngn),
-      stock_count: Number(p.stock_count),
-    }));
-
-    if (slotId) {
-      products = products.filter((p) => {
-        const sid = String(p.server_id || "").toUpperCase();
-        return sid === slotId || sid.includes(slotId.replace("-", "")) || sid.endsWith(slotId.slice(-2));
-      });
-    }
-
-    return products;
   });
 
 export const listNumberOrders = createServerFn({ method: "GET" })
@@ -127,7 +140,10 @@ export const listNumberOrders = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(50);
 
-    if (error) throw new Error(`Failed to load orders: ${error.message}`);
+    if (error) {
+      console.error("[numbers] list orders", error.message);
+      return [];
+    }
     return data ?? [];
   });
 

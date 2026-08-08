@@ -52,7 +52,19 @@ export function isSignalWireConfigured(): boolean {
 function basicAuthHeader(): string {
   const id = projectId()!;
   const token = apiToken()!;
-  return `Basic ${Buffer.from(`${id}:${token}`).toString("base64")}`;
+  const raw = `${id}:${token}`;
+  // Cloudflare Workers: prefer btoa (Buffer may be unavailable)
+  try {
+    if (typeof btoa === "function") {
+      return `Basic ${btoa(raw)}`;
+    }
+  } catch {
+    /* fall through */
+  }
+  const bytes = new TextEncoder().encode(raw);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
+  return `Basic ${btoa(bin)}`;
 }
 
 function apiBase(): string | null {

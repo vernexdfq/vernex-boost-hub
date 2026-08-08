@@ -95,10 +95,14 @@ function Dashboard() {
 
   useEffect(() => {
     if (summary && summary.transactions.length === 0) {
-      seedDemo({ data: undefined }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
-        queryClient.invalidateQueries({ queryKey: ["account", user.id] });
-      });
+      seedDemo({ data: undefined })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
+          queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+        })
+        .catch(() => {
+          /* seed is optional — never crash dashboard */
+        });
     }
   }, [summary, seedDemo, queryClient, user.id]);
 

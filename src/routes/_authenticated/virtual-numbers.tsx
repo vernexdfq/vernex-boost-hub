@@ -99,8 +99,17 @@ function VirtualNumbers() {
     refetch: refetchProducts,
   } = useQuery({
     queryKey: ["number-products", serverId],
-    queryFn: () => fetchProducts({ data: { slotId: serverId as "US-S1" } }),
+    queryFn: async () => {
+      try {
+        return (await fetchProducts({ data: { slotId: serverId as "US-S1" } })) ?? [];
+      } catch (err) {
+        console.error("[virtual-numbers] products", err);
+        return [] as NumberProduct[];
+      }
+    },
     enabled: Boolean(serverId),
+    retry: 0,
+    staleTime: 60_000,
   });
 
   const { data: orders, isLoading: ordersLoading } = useQuery({
@@ -118,8 +127,9 @@ function VirtualNumbers() {
 
   const slotProducts = useMemo(() => {
     if (!products) return [] as NumberProduct[];
-    return products.filter((p) => activeSlot.match(p));
-  }, [products, activeSlot]);
+    // Products are already scoped to the selected server tab by the API
+    return products;
+  }, [products]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -278,13 +288,16 @@ function VirtualNumbers() {
               <Skeleton className="h-24" />
               <Skeleton className="h-14" />
             </div>
-          ) : productsError ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center">
-              <p className="text-sm font-semibold text-slate-800">Couldn&apos;t load services</p>
+          ) : productsError || (!productsLoading && slotProducts.length === 0) ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
+              <p className="text-sm font-bold text-slate-900">Server currently offline / try another server</p>
+              <p className="mt-1 text-xs text-slate-600">
+                This tab could not load live services. Pick a different server or retry.
+              </p>
               <button
                 type="button"
                 onClick={() => void refetchProducts()}
-                className="mt-2 text-sm font-bold text-indigo-600"
+                className="mt-3 text-sm font-bold text-indigo-600"
               >
                 Retry
               </button>
