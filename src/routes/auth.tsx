@@ -15,6 +15,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { VernexMark } from "@/components/brand";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -109,17 +110,6 @@ type SignInTab = "phone" | "email";
 /* ------------------------------------------------------------------ */
 /* logo mark (inline — no asset load risk)                             */
 /* ------------------------------------------------------------------ */
-
-function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
-  return (
-    <div
-      className={`flex items-center justify-center rounded-full bg-indigo-600 text-xs font-black text-white ${className}`}
-      aria-hidden
-    >
-      V
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /* page                                                                */
@@ -247,7 +237,7 @@ function AuthPage() {
               <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
             </Link>
           )}
-          <LogoMark className="h-8 w-8 text-xs" />
+          <VernexMark className="h-8 w-8 rounded-full" />
         </header>
 
         <main className="my-auto w-full space-y-5 py-4">
