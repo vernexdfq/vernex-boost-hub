@@ -1,58 +1,74 @@
 import { useEffect, useState } from "react";
-import { Megaphone, X } from "lucide-react";
+import { X } from "lucide-react";
 
-const STORAGE_KEY = "vernex-telegram-modal-dismissed";
+const TELEGRAM_URL = "https://t.me/VernexOfficial";
 
+/**
+ * Telegram community modal — shows each time the dashboard (Home) mounts.
+ * "Maybe later" / X only dismisses for the current view; returns on next Home visit.
+ */
 export function TelegramModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!window.localStorage.getItem(STORAGE_KEY)) {
-      const t = setTimeout(() => setOpen(true), 500);
-      return () => clearTimeout(t);
-    }
+    const t = setTimeout(() => setOpen(true), 500);
+    return () => clearTimeout(t);
   }, []);
 
-  const dismiss = () => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, "1");
-    }
-    setOpen(false);
-  };
+  const close = () => setOpen(false);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 px-4">
-      <div className="relative w-full max-w-sm rounded-2xl border border-border bg-surface p-6 text-center shadow-wallet animate-in zoom-in-95 duration-200">
+    <div
+      id="telegramModal"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-[2px]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="telegram-modal-title"
+    >
+      <div className="relative w-full max-w-sm scale-100 transform rounded-3xl bg-white p-6 text-center shadow-2xl shadow-slate-900/20 transition-all">
+        {/* Close */}
         <button
-          onClick={dismiss}
+          type="button"
+          onClick={close}
           aria-label="Close"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" strokeWidth={2.5} />
         </button>
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl brand-gradient text-white shadow-[0_10px_25px_-8px_rgba(79,70,229,0.3)]">
-          <Megaphone className="h-7 w-7" />
+
+        {/* Icon */}
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 shadow-inner">
+          <span className="text-3xl" aria-hidden>
+            📢
+          </span>
         </div>
-        <h3 className="mt-4 text-lg font-bold">Join Our Telegram Community</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Stay updated with the latest promotions, important announcements, and exclusive offers from Vernex.
+
+        <h3
+          id="telegram-modal-title"
+          className="mb-2 text-xl font-black tracking-tight text-slate-900"
+        >
+          Join Our Telegram Community
+        </h3>
+        <p className="mb-6 px-2 text-xs leading-relaxed text-slate-500">
+          Stay updated with the latest promotions, important announcements, and exclusive
+          offers from Vernex.
         </p>
-        <div className="mt-6 flex flex-col gap-2">
+
+        <div className="space-y-3">
           <a
-            href="https://t.me/"
+            href={TELEGRAM_URL}
             target="_blank"
-            rel="noreferrer"
-            onClick={dismiss}
-            className="rounded-xl brand-gradient py-3 text-sm font-semibold text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.3)]"
+            rel="noopener noreferrer"
+            className="block w-full rounded-2xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-700 active:scale-95"
           >
             Join Now
           </a>
           <button
-            onClick={dismiss}
-            className="rounded-xl bg-transparent py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition"
+            type="button"
+            onClick={close}
+            className="w-full rounded-2xl bg-transparent px-4 py-2.5 text-xs font-semibold text-slate-500 transition-all hover:bg-slate-50 active:scale-95"
           >
             Maybe later
           </button>
