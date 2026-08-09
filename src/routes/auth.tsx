@@ -100,7 +100,7 @@ function AuthPage() {
   }, [navigate]);
 
   /* sign-in state */
-  const [tab, setTab] = useState<SignInTab>("phone");
+  const [tab, setTab] = useState<SignInTab>("email");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
@@ -173,26 +173,28 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F5FC] text-slate-900">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pb-10 pt-6">
-        <button
-          type="button"
-          onClick={() => (screen === "pin" ? setScreen("signin") : undefined)}
-          className={screen === "pin" ? "w-fit" : "hidden"}
-        >
-          <span className="inline-flex items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600">
-            <ArrowLeft className="mr-2 h-5 w-5" /> Back
-          </span>
-        </button>
-        {screen !== "pin" && (
-          <Link
-            to="/"
-            className="inline-flex w-fit items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" /> Back
-          </Link>
-        )}
+    <div className="flex min-h-screen flex-col justify-between bg-[#F4F5FC] p-6 text-slate-900 antialiased">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
+        <header className="pt-2">
+          {screen === "pin" ? (
+            <button
+              type="button"
+              onClick={() => setScreen("signin")}
+              className="inline-flex items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" /> Back
+            </button>
+          ) : (
+            <Link
+              to="/"
+              className="inline-flex items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" /> Back
+            </Link>
+          )}
+        </header>
 
+        <main className="my-auto w-full py-8">
         <BrandHeading screen={screen} />
 
         <div key={screen} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -248,6 +250,7 @@ function AuthPage() {
             />
           )}
         </div>
+        </main>
       </div>
     </div>
   );
@@ -450,39 +453,44 @@ function PinScreen(props: {
   const keys = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"], []);
 
   return (
-    <div className="mt-8 flex flex-col items-center">
-      <p className="text-sm text-slate-500">
-        Signing in as{" "}
-        <span className="font-semibold text-slate-900">{props.identifier}</span>
-      </p>
+    <div className="mt-2 flex flex-col items-center">
+      <div className="mb-6 w-full rounded-3xl border border-slate-200/80 bg-white p-6 text-center shadow-sm">
+        <p className="text-sm text-slate-500">
+          Signing in as{" "}
+          <span className="font-semibold text-slate-900">{props.identifier}</span>
+        </p>
+        <p className="mt-1 text-xs text-slate-400">Enter your 4-digit Vernex PIN</p>
 
-      <div className="mt-8 flex items-center gap-4" aria-label="PIN entry">
-        {[0, 1, 2, 3].map((i) => {
-          const filled = props.pin.length > i;
-          return (
-            <span
-              key={i}
-              className={`h-4 w-4 rounded-full border-2 transition-all duration-200 ${
-                filled
-                  ? "scale-110 border-indigo-600 bg-indigo-600"
-                  : "border-slate-200 bg-white"
-              }`}
-            />
-          );
-        })}
+        <div className="mt-8 flex items-center justify-center gap-4" aria-label="PIN entry">
+          {[0, 1, 2, 3].map((i) => {
+            const filled = props.pin.length > i;
+            return (
+              <span
+                key={i}
+                className={`h-3.5 w-3.5 rounded-full border-2 transition-all duration-200 ${
+                  filled
+                    ? "scale-110 border-indigo-600 bg-indigo-600"
+                    : "border-slate-200 bg-slate-50"
+                }`}
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-4 min-h-[1.25rem]">
+          {props.busy ? (
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying PIN…
+            </span>
+          ) : props.error ? (
+            <span className="text-xs font-semibold text-red-600">{props.error}</span>
+          ) : (
+            <span className="text-xs text-slate-400">PIN is required every time you sign in</span>
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 h-5">
-        {props.busy ? (
-          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying PIN…
-          </span>
-        ) : props.error ? (
-          <span className="text-xs font-semibold text-red-600">{props.error}</span>
-        ) : null}
-      </div>
-
-      <div className="mt-6 grid w-full grid-cols-3 gap-3">
+      <div className="grid w-full grid-cols-3 gap-3">
         {keys.map((key, index) =>
           key === "" ? (
             <span key={`spacer-${index}`} />
@@ -521,7 +529,7 @@ function PinScreen(props: {
               redirectTo: `${window.location.origin}/auth`,
             });
             if (error) toast.error(error.message);
-            else toast.success(`We sent PIN recovery instructions to ${email}`);
+            else toast.success(`We sent recovery instructions to ${email}`);
           }}
           className="font-semibold text-indigo-600 underline-offset-4 hover:underline disabled:opacity-50"
         >
