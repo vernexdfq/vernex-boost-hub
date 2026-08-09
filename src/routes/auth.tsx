@@ -22,10 +22,37 @@ import {
   signInWithPin,
   signUpWithPin,
 } from "@/lib/functions/auth.functions";
-import { VernexMark } from "@/components/brand";
+
+function AuthError({ error, reset }: { error: Error; reset: () => void }) {
+  console.error("[auth]", error);
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F4F5FC] px-6 text-center">
+      <h1 className="text-xl font-black text-slate-900">Sign in unavailable</h1>
+      <p className="mt-2 max-w-sm text-sm text-slate-500">
+        Something went wrong loading this page. Please try again.
+      </p>
+      <div className="mt-6 flex gap-2">
+        <button
+          type="button"
+          onClick={() => reset()}
+          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white"
+        >
+          Try again
+        </button>
+        <a
+          href="/"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700"
+        >
+          Go home
+        </a>
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  errorComponent: AuthError,
   head: () => ({
     meta: [
       { title: "Sign In or Create Account — Vernex" },
@@ -80,6 +107,21 @@ type Screen = "signin" | "pin" | "signup";
 type SignInTab = "phone" | "email";
 
 /* ------------------------------------------------------------------ */
+/* logo mark (inline — no asset load risk)                             */
+/* ------------------------------------------------------------------ */
+
+function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
+  return (
+    <div
+      className={`flex items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-lg font-bold text-white shadow-lg shadow-indigo-500/25 ${className}`}
+      aria-hidden
+    >
+      V
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* page                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -91,12 +133,23 @@ function AuthPage() {
   // Only redirect AFTER a successful login in this page session.
   // Do NOT restore / skip login from any stored session (shared-phone safety).
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
-        navigate({ to: "/dashboard", replace: true });
-      }
-    });
-    return () => sub.subscription.unsubscribe();
+    try {
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+          navigate({ to: "/dashboard", replace: true });
+        }
+      });
+      return () => {
+        try {
+          sub.subscription.unsubscribe();
+        } catch {
+          /* ignore */
+        }
+      };
+    } catch (err) {
+      console.error("[auth] onAuthStateChange failed", err);
+      return undefined;
+    }
   }, [navigate]);
 
   /* sign-in state */
@@ -197,7 +250,7 @@ function AuthPage() {
         <main className="my-auto w-full py-8">
         <BrandHeading screen={screen} />
 
-        <div key={screen} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div key={screen} className="">
           {screen === "signin" && (
             <SignInScreen
               tab={tab}
@@ -284,7 +337,7 @@ function BrandHeading({ screen }: { screen: Screen }) {
     return (
       <div className="mt-6">
         <div className="mb-6 flex items-center space-x-3">
-          <VernexMark className="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-indigo-500/25" />
+          <LogoMark className="h-10 w-10" />
         </div>
         <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">
           Welcome back 👋
@@ -297,7 +350,7 @@ function BrandHeading({ screen }: { screen: Screen }) {
   return (
     <div className="mt-6">
       <div className="mb-6 flex items-center space-x-3">
-        <VernexMark className="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-indigo-500/25" />
+        <LogoMark className="h-10 w-10" />
       </div>
       <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">Enter your PIN</h1>
       <p className="mb-2 text-sm font-normal text-slate-500">
