@@ -113,7 +113,7 @@ type SignInTab = "phone" | "email";
 function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
   return (
     <div
-      className={`flex items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-lg font-bold text-white shadow-lg shadow-indigo-500/25 ${className}`}
+      className={`flex items-center justify-center rounded-full bg-indigo-600 text-xs font-black text-white ${className}`}
       aria-hidden
     >
       V
@@ -153,7 +153,7 @@ function AuthPage() {
   }, [navigate]);
 
   /* sign-in state */
-  const [tab, setTab] = useState<SignInTab>("email");
+  const [tab, setTab] = useState<SignInTab>("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
@@ -226,84 +226,108 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-[#F4F5FC] p-6 text-slate-900 antialiased">
+    <div className="flex min-h-screen flex-col justify-between bg-white px-4 py-6 text-slate-900 antialiased">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-        <header className="pt-2">
+        <header className="flex w-full items-center justify-between">
           {screen === "pin" ? (
             <button
               type="button"
               onClick={() => setScreen("signin")}
-              className="inline-flex items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+              aria-label="Back"
             >
-              <ArrowLeft className="mr-2 h-5 w-5" /> Back
+              <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
             </button>
           ) : (
             <Link
               to="/"
-              className="inline-flex items-center text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+              aria-label="Back"
             >
-              <ArrowLeft className="mr-2 h-5 w-5" /> Back
+              <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
             </Link>
           )}
+          <LogoMark className="h-8 w-8 text-xs" />
         </header>
 
-        <main className="my-auto w-full py-8">
-        <BrandHeading screen={screen} />
-
-        <div key={screen} className="">
-          {screen === "signin" && (
-            <SignInScreen
-              tab={tab}
-              setTab={(next) => {
-                setTab(next);
-                setFieldError(null);
-              }}
-              phone={phone}
-              setPhone={(v) => {
-                setPhone(v);
-                setFieldError(null);
-              }}
-              email={email}
-              setEmail={(v) => {
-                setEmail(v);
-                setFieldError(null);
-              }}
-              busy={busy}
-              enabled={continueEnabled}
-              error={fieldError}
-              onSubmit={handleContinue}
-              onCreateAccount={() => {
-                setFieldError(null);
-                setScreen("signup");
-              }}
-            />
+        <main className="my-auto w-full space-y-5 py-4">
+          {screen === "pin" ? (
+            <div>
+              <h1 className="flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                <span>Enter your PIN</span>
+                <span className="text-xl" aria-hidden>
+                  🔒
+                </span>
+              </h1>
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                Authorise your login with your 4-digit Vernex PIN
+              </p>
+            </div>
+          ) : (
+            <BrandHeading screen={screen} />
           )}
 
-          {screen === "pin" && (
-            <PinScreen
-              identifier={tab === "phone" ? formatPhone(phone) || phone : email.trim()}
-              pin={pin}
-              busy={busy}
-              error={pinError}
-              onKey={pressKey}
-              onChangeNumber={() => setScreen("signin")}
-            />
-          )}
+          <div key={screen}>
+            {screen === "signin" && (
+              <SignInScreen
+                tab={tab}
+                setTab={(next) => {
+                  setTab(next);
+                  setFieldError(null);
+                }}
+                phone={phone}
+                setPhone={(v) => {
+                  setPhone(v);
+                  setFieldError(null);
+                }}
+                email={email}
+                setEmail={(v) => {
+                  setEmail(v);
+                  setFieldError(null);
+                }}
+                busy={busy}
+                enabled={continueEnabled}
+                error={fieldError}
+                onSubmit={handleContinue}
+                onCreateAccount={() => {
+                  setFieldError(null);
+                  setScreen("signup");
+                }}
+              />
+            )}
 
-          {screen === "signup" && (
-            <SignUpScreen
-              busy={busy}
-              setBusy={setBusy}
-              onSignIn={() => setScreen("signin")}
-              onRegistered={(registeredEmail) => {
-                setTab("email");
-                setEmail(registeredEmail);
-                setScreen("signin");
-              }}
-            />
-          )}
-        </div>
+            {screen === "pin" && (
+              <PinScreen
+                identifier={tab === "phone" ? formatPhone(phone) || phone : email.trim()}
+                pin={pin}
+                busy={busy}
+                error={pinError}
+                onKey={pressKey}
+                onChangeNumber={() => setScreen("signin")}
+              />
+            )}
+
+            {screen === "signup" && (
+              <SignUpScreen
+                busy={busy}
+                setBusy={setBusy}
+                onSignIn={() => setScreen("signin")}
+                onRegistered={(registeredEmail) => {
+                  setTab("email");
+                  setEmail(registeredEmail);
+                  setScreen("signin");
+                }}
+              />
+            )}
+          </div>
         </main>
+
+        <footer className="pt-2 text-center">
+          <div className="inline-flex items-center space-x-1.5 rounded-full border border-slate-200/60 bg-slate-50 px-3 py-1.5 text-[11px] text-slate-500">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+            <span className="font-semibold">Bank-grade encryption - NDPR compliant</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -316,58 +340,36 @@ function AuthPage() {
 function BrandHeading({ screen }: { screen: Screen }) {
   if (screen === "signup") {
     return (
-      <div className="mt-6">
-        <div className="mb-4 inline-flex items-center space-x-2 rounded-full border border-slate-200/80 bg-white px-3.5 py-1 shadow-sm">
+      <div>
+        <div className="mb-3 inline-flex items-center space-x-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
           <span className="text-xs">🚀</span>
-          <span className="text-xs font-bold uppercase tracking-wide text-slate-700">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-700">
             Get started for free
           </span>
         </div>
-        <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
           Create your account
         </h1>
-        <p className="mb-2 text-sm font-normal text-slate-500">
+        <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
           Fill in your details below to get started
         </p>
       </div>
     );
   }
 
-  if (screen === "signin") {
-    return (
-      <div className="mt-6">
-        <div className="mb-6 flex items-center space-x-3">
-          <LogoMark className="h-10 w-10" />
-        </div>
-        <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">
-          Welcome back 👋
-        </h1>
-        <p className="mb-2 text-sm font-normal text-slate-500">Sign in to your Vernex account</p>
-      </div>
-    );
-  }
-
+  // signin (default welcome)
   return (
-    <div className="mt-4">
-      <div className="mb-4 flex items-center space-x-3">
-        <LogoMark className="h-10 w-10" />
-      </div>
-      <h1 className="mb-1 flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900">
-        <span>Enter your PIN</span>
-        <span className="text-lg" aria-hidden>
-          🔒
+    <div>
+      <h1 className="flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+        <span>Welcome back</span>
+        <span className="text-xl" aria-hidden>
+          👋
         </span>
       </h1>
-      <p className="mb-2 text-xs font-normal text-slate-500">
-        Authorise your login with your 4-digit Vernex PIN
-      </p>
+      <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Sign in to your Vernex account</p>
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* sign in                                                             */
-/* ------------------------------------------------------------------ */
 
 function SignInScreen(props: {
   tab: SignInTab;
@@ -383,19 +385,19 @@ function SignInScreen(props: {
   onCreateAccount: () => void;
 }) {
   const inputClass =
-    "w-full rounded-2xl border border-slate-200/80 bg-white py-4 pl-12 pr-4 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10";
+    "w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition-all placeholder:font-medium placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white";
 
   return (
-    <>
-      {/* Phone / Email toggle */}
-      <div className="mb-6 flex rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
+    <div className="space-y-4">
+      {/* Phone / Email tabs */}
+      <div className="flex rounded-2xl bg-slate-100 p-1">
         <button
           type="button"
           onClick={() => props.setTab("phone")}
           aria-pressed={props.tab === "phone"}
-          className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+          className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all sm:text-sm ${
             props.tab === "phone"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+              ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
@@ -405,9 +407,9 @@ function SignInScreen(props: {
           type="button"
           onClick={() => props.setTab("email")}
           aria-pressed={props.tab === "email"}
-          className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+          className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-all sm:text-sm ${
             props.tab === "email"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+              ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
@@ -415,14 +417,34 @@ function SignInScreen(props: {
         </button>
       </div>
 
-      <form onSubmit={props.onSubmit} className="space-y-6">
-        {props.tab === "email" ? (
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+      <form onSubmit={props.onSubmit} className="space-y-4">
+        {props.tab === "phone" ? (
+          <div>
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Phone Number
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-4 text-indigo-600">
+                <Phone className="h-5 w-5" />
+              </span>
+              <input
+                value={props.phone}
+                onChange={(e) => props.setPhone(formatPhone(e.target.value))}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="08012345678"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Email Address
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-4 text-indigo-500">
+              <span className="absolute left-4 text-indigo-600">
                 <Mail className="h-5 w-5" />
               </span>
               <input
@@ -435,30 +457,10 @@ function SignInScreen(props: {
               />
             </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-              Phone Number
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-4 text-indigo-500">
-                <Phone className="h-5 w-5" />
-              </span>
-              <input
-                value={props.phone}
-                onChange={(e) => props.setPhone(formatPhone(e.target.value))}
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="0803 123 4567"
-                className={inputClass}
-              />
-            </div>
-          </div>
         )}
 
         {props.error && (
-          <p className="rounded-2xl bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+          <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
             {props.error}
           </p>
         )}
@@ -466,39 +468,26 @@ function SignInScreen(props: {
         <button
           type="submit"
           disabled={!props.enabled || props.busy}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-4 text-center text-sm font-bold text-white shadow-xl shadow-indigo-600/25 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
           Continue
         </button>
       </form>
 
-      <div className="mt-8 text-center">
-        <p className="text-sm font-normal text-slate-500">
-          Don&apos;t have an account?{" "}
-          <button
-            type="button"
-            onClick={props.onCreateAccount}
-            className="font-bold text-indigo-600 hover:underline"
-          >
-            Create one free
-          </button>
-        </p>
+      <div className="pt-1 text-center text-xs text-slate-500">
+        <span>Don&apos;t have an account? </span>
+        <button
+          type="button"
+          onClick={props.onCreateAccount}
+          className="font-bold text-indigo-600 hover:underline"
+        >
+          Create one free
+        </button>
       </div>
-
-      <div className="mt-8 text-center">
-        <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <span>Bank-grade encryption · NDPR compliant</span>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* PIN                                                                 */
-/* ------------------------------------------------------------------ */
 
 function PinScreen(props: {
   identifier: string;
@@ -511,40 +500,32 @@ function PinScreen(props: {
   const keys = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"], []);
 
   return (
-    <div className="mt-2 w-full">
-      {/* Signing in as */}
-      <p className="mb-6 text-xs font-medium text-slate-600">
-        Signing in as{" "}
-        <span className="font-bold text-slate-900">{props.identifier}</span>
+    <div className="space-y-4">
+      <p className="text-xs font-medium text-slate-600">
+        Signing in as <span className="font-bold text-slate-900">{props.identifier}</span>
       </p>
 
-      {/* 4 PIN boxes */}
-      <div className="mb-8 flex justify-center space-x-4" aria-label="PIN entry">
+      {/* PIN dots */}
+      <div className="flex items-center justify-center gap-4 py-2" aria-label="PIN entry">
         {[0, 1, 2, 3].map((i) => {
           const filled = props.pin.length > i;
-          const active = props.pin.length === i;
           return (
-            <div
+            <span
               key={i}
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition-all ${
+              className={`h-4 w-4 rounded-full transition-all ${
                 filled
-                  ? "border-2 border-indigo-600 shadow-md shadow-indigo-600/10"
-                  : active
-                    ? "border-2 border-indigo-300"
-                    : "border border-slate-200/80"
+                  ? "bg-indigo-600"
+                  : "border-2 border-slate-300 bg-transparent"
               }`}
-            >
-              {filled ? <span className="h-3 w-3 rounded-full bg-indigo-600" /> : null}
-            </div>
+            />
           );
         })}
       </div>
 
-      {/* Status */}
-      <div className="mb-4 min-h-[1.25rem] text-center">
+      <div className="min-h-[1.1rem] text-center">
         {props.busy ? (
           <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying PIN…
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying…
           </span>
         ) : props.error ? (
           <span className="text-xs font-semibold text-red-600">{props.error}</span>
@@ -552,7 +533,7 @@ function PinScreen(props: {
       </div>
 
       {/* Keypad */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2.5">
         {keys.map((key, index) =>
           key === "" ? (
             <div key={`spacer-${index}`} />
@@ -563,9 +544,9 @@ function PinScreen(props: {
               onClick={() => props.onKey(key)}
               disabled={props.busy}
               aria-label="Delete"
-              className="flex items-center justify-center rounded-2xl border border-red-200 bg-red-50 py-4 text-red-600 shadow-sm transition-all hover:bg-red-100 active:scale-95 disabled:opacity-50"
+              className="flex items-center justify-center rounded-2xl border border-red-200 bg-red-50 py-3.5 text-red-600 transition-all hover:bg-red-100 active:scale-95 disabled:opacity-50"
             >
-              <Delete className="h-6 w-6" />
+              <Delete className="h-5 w-5" />
             </button>
           ) : (
             <button
@@ -573,7 +554,7 @@ function PinScreen(props: {
               type="button"
               onClick={() => props.onKey(key)}
               disabled={props.busy}
-              className="rounded-2xl border border-slate-200/80 bg-white py-4 text-lg font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+              className="rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-lg font-bold text-slate-800 transition-all hover:bg-slate-100 active:scale-95 disabled:opacity-50"
             >
               {key}
             </button>
@@ -581,8 +562,7 @@ function PinScreen(props: {
         )}
       </div>
 
-      {/* Footer links */}
-      <div className="flex items-center justify-between pt-2 text-xs font-bold">
+      <div className="flex items-center justify-between pt-1 text-xs font-bold">
         <button
           type="button"
           onClick={props.onChangeNumber}
@@ -609,14 +589,6 @@ function PinScreen(props: {
         >
           Forgot PIN?
         </button>
-      </div>
-
-      {/* Trust badge */}
-      <div className="mt-10 text-center">
-        <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <span>Bank-grade encryption · NDPR compliant</span>
-        </div>
       </div>
     </div>
   );
