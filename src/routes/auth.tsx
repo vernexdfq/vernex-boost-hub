@@ -277,17 +277,28 @@ function BrandHeading({ screen }: { screen: Screen }) {
     );
   }
 
-  const copy =
-    screen === "pin"
-      ? { title: "Enter your PIN 🔒", sub: "Authorise your login with your 4-digit Vernex PIN" }
-      : { title: "Welcome back 👋", sub: "Sign in to your Vernex account" };
+  if (screen === "signin") {
+    return (
+      <div className="mt-6">
+        <div className="mb-6 flex items-center space-x-3">
+          <VernexMark className="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-indigo-500/25" />
+        </div>
+        <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">
+          Welcome back 👋
+        </h1>
+        <p className="mb-2 text-sm font-normal text-slate-500">Sign in to your Vernex account</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8 flex items-start gap-3">
       <VernexMark className="h-11 w-11 shrink-0" />
       <div>
-        <h1 className="font-display text-xl font-black tracking-tight">{copy.title}</h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">{copy.sub}</p>
+        <h1 className="font-display text-xl font-black tracking-tight">Enter your PIN 🔒</h1>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Authorise your login with your 4-digit Vernex PIN
+        </p>
       </div>
     </div>
   );
@@ -310,62 +321,83 @@ function SignInScreen(props: {
   onSubmit: (e: React.FormEvent) => void;
   onCreateAccount: () => void;
 }) {
-  const tabs: Array<{ id: SignInTab; label: string }> = [
-    { id: "phone", label: "Phone Number" },
-    { id: "email", label: "Email Address" },
-  ];
+  const inputClass =
+    "w-full rounded-2xl border border-slate-200/80 bg-white py-4 pl-12 pr-4 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10";
 
   return (
     <>
-      <div className="mt-6 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-surface p-1">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => props.setTab(t.id)}
-            aria-pressed={props.tab === t.id}
-            className={`rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
-              props.tab === t.id
-                ? "brand-gradient text-primary-foreground shadow-[0_8px_20px_-12px_rgba(79,70,229,0.45)]"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Phone / Email toggle */}
+      <div className="mb-6 flex rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => props.setTab("phone")}
+          aria-pressed={props.tab === "phone"}
+          className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+            props.tab === "phone"
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          Phone Number
+        </button>
+        <button
+          type="button"
+          onClick={() => props.setTab("email")}
+          aria-pressed={props.tab === "email"}
+          className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+            props.tab === "email"
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          Email Address
+        </button>
       </div>
 
-      <form onSubmit={props.onSubmit} className="mt-6 space-y-3">
-        {props.tab === "phone" ? (
-          <Field icon={Phone} label="Phone number">
-            <input
-              value={props.phone}
-              onChange={(e) => props.setPhone(e.target.value)}
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              maxLength={20}
-              placeholder="0803 123 4567"
-              className="w-full bg-transparent text-sm font-medium tracking-wide outline-none placeholder:text-muted-foreground/70"
-            />
-          </Field>
+      <form onSubmit={props.onSubmit} className="space-y-6">
+        {props.tab === "email" ? (
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+              Email Address
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-4 text-indigo-500">
+                <Mail className="h-5 w-5" />
+              </span>
+              <input
+                value={props.email}
+                onChange={(e) => props.setEmail(e.target.value)}
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                className={inputClass}
+              />
+            </div>
+          </div>
         ) : (
-          <Field icon={Mail} label="Email address">
-            <input
-              value={props.email}
-              onChange={(e) => props.setEmail(e.target.value)}
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              maxLength={255}
-              placeholder="you@example.com"
-              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-            />
-          </Field>
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+              Phone Number
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-4 text-indigo-500">
+                <Phone className="h-5 w-5" />
+              </span>
+              <input
+                value={props.phone}
+                onChange={(e) => props.setPhone(formatPhone(e.target.value))}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="0803 123 4567"
+                className={inputClass}
+              />
+            </div>
+          </div>
         )}
 
         {props.error && (
-          <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+          <p className="rounded-2xl bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
             {props.error}
           </p>
         )}
@@ -373,27 +405,32 @@ function SignInScreen(props: {
         <button
           type="submit"
           disabled={!props.enabled || props.busy}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(79,70,229,0.4)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-4 text-center text-sm font-bold text-white shadow-xl shadow-indigo-600/25 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
         >
           {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
           Continue
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        Don't have an account?{" "}
-        <button
-          type="button"
-          onClick={props.onCreateAccount}
-          className="font-bold text-primary underline-offset-4 hover:underline"
-        >
-          Create one free
-        </button>
-      </p>
+      <div className="mt-8 text-center">
+        <p className="text-sm font-normal text-slate-500">
+          Don&apos;t have an account?{" "}
+          <button
+            type="button"
+            onClick={props.onCreateAccount}
+            className="font-bold text-indigo-600 hover:underline"
+          >
+            Create one free
+          </button>
+        </p>
+      </div>
 
-      <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-        <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Bank-grade encryption · NDPR compliant
-      </p>
+      <div className="mt-8 text-center">
+        <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <span>Bank-grade encryption · NDPR compliant</span>
+        </div>
+      </div>
     </>
   );
 }
