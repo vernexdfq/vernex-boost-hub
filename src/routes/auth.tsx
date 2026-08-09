@@ -348,12 +348,17 @@ function BrandHeading({ screen }: { screen: Screen }) {
   }
 
   return (
-    <div className="mt-6">
-      <div className="mb-6 flex items-center space-x-3">
+    <div className="mt-4">
+      <div className="mb-4 flex items-center space-x-3">
         <LogoMark className="h-10 w-10" />
       </div>
-      <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">Enter your PIN</h1>
-      <p className="mb-2 text-sm font-normal text-slate-500">
+      <h1 className="mb-1 flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900">
+        <span>Enter your PIN</span>
+        <span className="text-lg" aria-hidden>
+          🔒
+        </span>
+      </h1>
+      <p className="mb-2 text-xs font-normal text-slate-500">
         Authorise your login with your 4-digit Vernex PIN
       </p>
     </div>
@@ -506,68 +511,84 @@ function PinScreen(props: {
   const keys = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"], []);
 
   return (
-    <div className="mt-2 flex flex-col items-center">
-      <div className="mb-6 w-full rounded-3xl border border-slate-200/80 bg-white p-6 text-center shadow-sm">
-        <p className="text-sm text-slate-500">
-          Signing in as{" "}
-          <span className="font-semibold text-slate-900">{props.identifier}</span>
-        </p>
-        <p className="mt-1 text-xs text-slate-400">Enter your 4-digit Vernex PIN</p>
+    <div className="mt-2 w-full">
+      {/* Signing in as */}
+      <p className="mb-6 text-xs font-medium text-slate-600">
+        Signing in as{" "}
+        <span className="font-bold text-slate-900">{props.identifier}</span>
+      </p>
 
-        <div className="mt-8 flex items-center justify-center gap-4" aria-label="PIN entry">
-          {[0, 1, 2, 3].map((i) => {
-            const filled = props.pin.length > i;
-            return (
-              <span
-                key={i}
-                className={`h-3.5 w-3.5 rounded-full border-2 transition-all duration-200 ${
-                  filled
-                    ? "scale-110 border-indigo-600 bg-indigo-600"
-                    : "border-slate-200 bg-slate-50"
-                }`}
-              />
-            );
-          })}
-        </div>
-
-        <div className="mt-4 min-h-[1.25rem]">
-          {props.busy ? (
-            <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying PIN…
-            </span>
-          ) : props.error ? (
-            <span className="text-xs font-semibold text-red-600">{props.error}</span>
-          ) : (
-            <span className="text-xs text-slate-400">PIN is required every time you sign in</span>
-          )}
-        </div>
+      {/* 4 PIN boxes */}
+      <div className="mb-8 flex justify-center space-x-4" aria-label="PIN entry">
+        {[0, 1, 2, 3].map((i) => {
+          const filled = props.pin.length > i;
+          const active = props.pin.length === i;
+          return (
+            <div
+              key={i}
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition-all ${
+                filled
+                  ? "border-2 border-indigo-600 shadow-md shadow-indigo-600/10"
+                  : active
+                    ? "border-2 border-indigo-300"
+                    : "border border-slate-200/80"
+              }`}
+            >
+              {filled ? <span className="h-3 w-3 rounded-full bg-indigo-600" /> : null}
+            </div>
+          );
+        })}
       </div>
 
-      <div className="grid w-full grid-cols-3 gap-3">
+      {/* Status */}
+      <div className="mb-4 min-h-[1.25rem] text-center">
+        {props.busy ? (
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying PIN…
+          </span>
+        ) : props.error ? (
+          <span className="text-xs font-semibold text-red-600">{props.error}</span>
+        ) : null}
+      </div>
+
+      {/* Keypad */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
         {keys.map((key, index) =>
           key === "" ? (
-            <span key={`spacer-${index}`} />
+            <div key={`spacer-${index}`} />
+          ) : key === "del" ? (
+            <button
+              key={key}
+              type="button"
+              onClick={() => props.onKey(key)}
+              disabled={props.busy}
+              aria-label="Delete"
+              className="flex items-center justify-center rounded-2xl border border-red-200 bg-red-50 py-4 text-red-600 shadow-sm transition-all hover:bg-red-100 active:scale-95 disabled:opacity-50"
+            >
+              <Delete className="h-6 w-6" />
+            </button>
           ) : (
             <button
               key={key}
               type="button"
               onClick={() => props.onKey(key)}
               disabled={props.busy}
-              className="grid h-16 place-items-center rounded-2xl border border-slate-200/80 bg-white text-xl font-bold text-slate-900 shadow-sm transition-all duration-150 active:scale-95 active:bg-slate-50 disabled:opacity-50"
+              className="rounded-2xl border border-slate-200/80 bg-white py-4 text-lg font-bold text-slate-800 shadow-sm transition-all hover:bg-slate-50 active:scale-95 disabled:opacity-50"
             >
-              {key === "del" ? <Delete className="h-5 w-5 text-slate-400" /> : key}
+              {key}
             </button>
           ),
         )}
       </div>
 
-      <div className="mt-8 flex w-full items-center justify-between text-sm">
+      {/* Footer links */}
+      <div className="flex items-center justify-between pt-2 text-xs font-bold">
         <button
           type="button"
           onClick={props.onChangeNumber}
-          className="font-semibold text-slate-500 transition hover:text-slate-900"
+          className="text-slate-600 transition-colors hover:text-indigo-600"
         >
-          Change number / email
+          ← Change number / email
         </button>
         <button
           type="button"
@@ -584,12 +605,13 @@ function PinScreen(props: {
             if (error) toast.error(error.message);
             else toast.success(`We sent recovery instructions to ${email}`);
           }}
-          className="font-semibold text-indigo-600 underline-offset-4 hover:underline disabled:opacity-50"
+          className="text-indigo-600 hover:underline disabled:opacity-50"
         >
           Forgot PIN?
         </button>
       </div>
 
+      {/* Trust badge */}
       <div className="mt-10 text-center">
         <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
           <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -599,10 +621,6 @@ function PinScreen(props: {
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* sign up                                                             */
-/* ------------------------------------------------------------------ */
 
 function SignUpScreen(props: {
   busy: boolean;
