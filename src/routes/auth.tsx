@@ -258,12 +258,29 @@ function AuthPage() {
 /* ------------------------------------------------------------------ */
 
 function BrandHeading({ screen }: { screen: Screen }) {
+  if (screen === "signup") {
+    return (
+      <div className="mt-6">
+        <div className="mb-4 inline-flex items-center space-x-2 rounded-full border border-slate-200/80 bg-white px-3.5 py-1 shadow-sm">
+          <span className="text-xs">🚀</span>
+          <span className="text-xs font-bold uppercase tracking-wide text-slate-700">
+            Get started for free
+          </span>
+        </div>
+        <h1 className="mb-2 text-3xl font-black tracking-tight text-slate-900">
+          Create your account
+        </h1>
+        <p className="mb-2 text-sm font-normal text-slate-500">
+          Fill in your details below to get started
+        </p>
+      </div>
+    );
+  }
+
   const copy =
-    screen === "signup"
-      ? { title: "Create your account 🚀", sub: "Fill in your details below to get started for free" }
-      : screen === "pin"
-        ? { title: "Enter your PIN 🔒", sub: "Authorise your login with your 4-digit Vernex PIN" }
-        : { title: "Welcome back 👋", sub: "Sign in to your Vernex account" };
+    screen === "pin"
+      ? { title: "Enter your PIN 🔒", sub: "Authorise your login with your 4-digit Vernex PIN" }
+      : { title: "Welcome back 👋", sub: "Sign in to your Vernex account" };
 
   return (
     <div className="mt-8 flex items-start gap-3">
@@ -487,8 +504,7 @@ function SignUpScreen(props: {
   onSignIn: () => void;
   onRegistered: (email: string) => void;
 }) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -496,10 +512,12 @@ function SignUpScreen(props: {
   const [showPassword, setShowPassword] = useState(false);
   const [pin, setPin] = useState("");
   const [referral, setReferral] = useState("");
-  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const usernameOk = /^[a-zA-Z0-9_]{3,20}$/.test(username.trim());
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] ?? "";
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : firstName;
 
   const valid =
     nameSchema.safeParse(firstName).success &&
@@ -508,8 +526,7 @@ function SignUpScreen(props: {
     isValidPhone(phone) &&
     isValidEmail(email) &&
     passwordSchema.safeParse(password).success &&
-    /^\d{4}$/.test(pin) &&
-    agreed;
+    /^\d{4}$/.test(pin);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -545,163 +562,208 @@ function SignUpScreen(props: {
     }
   }
 
-  return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-3">
-      <SectionLabel>Personal information</SectionLabel>
+  const inputClass =
+    "w-full rounded-2xl border border-slate-200/80 bg-white py-4 pl-12 pr-4 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10";
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field icon={UserIcon} label="First name">
+  return (
+    <form onSubmit={onSubmit} className="mt-6 space-y-5">
+      {/* Full Name */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Full Name
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <UserIcon className="h-5 w-5" />
+          </span>
           <input
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            autoComplete="given-name"
-            maxLength={40}
-            placeholder="Denny"
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
+            maxLength={80}
+            placeholder="Destiny Ikedi"
+            className={inputClass}
           />
-        </Field>
-        <Field icon={UserIcon} label="Last name">
-          <input
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            autoComplete="family-name"
-            maxLength={40}
-            placeholder="Okoro"
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-          />
-        </Field>
+        </div>
       </div>
 
-      <Field
-        icon={UserIcon}
-        label="Username"
-        hint="3-20 characters — letters, numbers and underscores"
-      >
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20))}
-          autoComplete="username"
-          maxLength={20}
-          placeholder="dennyokoro"
-          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-        />
-      </Field>
+      {/* Username */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Username
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <UserIcon className="h-5 w-5" />
+          </span>
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
+            autoComplete="username"
+            maxLength={20}
+            placeholder="destinyokoro"
+            className={inputClass}
+          />
+        </div>
+        <p className="pl-1 text-[11px] text-slate-400">
+          3-20 characters — letters, numbers and underscores
+        </p>
+      </div>
 
-      <Field icon={Phone} label="Phone number">
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          maxLength={20}
-          placeholder="0803 123 4567"
-          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-        />
-      </Field>
+      {/* Phone */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Phone Number
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <Phone className="h-5 w-5" />
+          </span>
+          <input
+            value={phone}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="0803 123 4567"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <Field icon={Mail} label="Email address">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          maxLength={255}
-          placeholder="you@example.com"
-          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-        />
-      </Field>
+      {/* Email */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Email Address
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <Mail className="h-5 w-5" />
+          </span>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoComplete="email"
+            maxLength={255}
+            placeholder="you@example.com"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <SectionLabel>Security</SectionLabel>
+      {/* Password */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Password
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <Lock className="h-5 w-5" />
+          </span>
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            maxLength={72}
+            placeholder="••••••••"
+            className={`${inputClass} pr-12`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-4 text-slate-400 transition hover:text-slate-600"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
+        </div>
+        <p className="pl-1 text-[11px] text-slate-400">Minimum of 8 characters</p>
+      </div>
 
-      <Field icon={Lock} label="Password" hint="Minimum of 8 characters">
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          type={showPassword ? "text" : "password"}
-          autoComplete="new-password"
-          maxLength={72}
-          placeholder="••••••••"
-          className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/70"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((s) => !s)}
-          aria-label={showPassword ? "Hide password" : "Show password"}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </button>
-      </Field>
+      {/* PIN */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          4-Digit Transaction PIN
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <ShieldCheck className="h-5 w-5" />
+          </span>
+          <input
+            value={pin}
+            onChange={(e) => setPin(digitsOnly(e.target.value).slice(0, 4))}
+            inputMode="numeric"
+            type="password"
+            maxLength={4}
+            placeholder="••••"
+            className={`${inputClass} tracking-widest`}
+          />
+        </div>
+        <p className="pl-1 text-[11px] text-slate-400">
+          Used to authorise transactions — keep it secret
+        </p>
+      </div>
 
-      <Field
-        icon={ShieldCheck}
-        label="4-digit transaction PIN"
-        hint="Used to authorise transactions — keep it secret"
-      >
-        <input
-          value={pin}
-          onChange={(e) => setPin(digitsOnly(e.target.value).slice(0, 4))}
-          inputMode="numeric"
-          type="password"
-          maxLength={4}
-          placeholder="••••"
-          className="w-full bg-transparent text-sm font-semibold tracking-[0.4em] outline-none placeholder:tracking-[0.4em] placeholder:text-muted-foreground/70"
-        />
-      </Field>
-
-      <Field icon={Ticket} label="Referral code (optional)">
-        <input
-          value={referral}
-          onChange={(e) => setReferral(e.target.value.toUpperCase())}
-          maxLength={24}
-          placeholder="VNX-XXXX"
-          className="w-full bg-transparent text-sm font-medium uppercase outline-none placeholder:text-muted-foreground/70"
-        />
-      </Field>
-
-      <button
-        type="button"
-        onClick={() => setAgreed((a) => !a)}
-        className="flex w-full items-start gap-3 rounded-2xl border border-border bg-surface px-4 py-3 text-left"
-      >
-        <span
-          className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
-            agreed ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"
-          }`}
-        >
-          {agreed && <Check className="h-3.5 w-3.5" />}
-        </span>
-        <span className="text-xs leading-relaxed text-muted-foreground">
-          I agree to Vernex's <span className="font-semibold text-foreground">Terms of Service</span> and{" "}
-          <span className="font-semibold text-foreground">Privacy Policy</span>.
-        </span>
-      </button>
+      {/* Referral */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          Referral Code (Optional)
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-indigo-500">
+            <Ticket className="h-5 w-5" />
+          </span>
+          <input
+            value={referral}
+            onChange={(e) => setReferral(e.target.value.toUpperCase())}
+            maxLength={24}
+            placeholder="VNX-XXXX"
+            className={`${inputClass} uppercase`}
+          />
+        </div>
+      </div>
 
       {error && (
-        <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">{error}</p>
+        <p className="rounded-2xl bg-red-50 px-3 py-2 text-xs font-medium text-red-600">{error}</p>
       )}
 
-      <button
-        type="submit"
-        disabled={!valid || props.busy}
-        className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-bold text-primary-foreground shadow-[0_12px_30px_-12px_rgba(79,70,229,0.4)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-      >
-        {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
-        Create Account
-      </button>
-
-      <p className="pt-2 text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
+      <div className="pt-2">
         <button
-          type="button"
-          onClick={props.onSignIn}
-          className="font-bold text-primary underline-offset-4 hover:underline"
+          type="submit"
+          disabled={!valid || props.busy}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-4 text-center text-sm font-bold text-white shadow-xl shadow-indigo-600/25 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-y-0"
         >
-          Sign In
+          {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
+          Create Account
         </button>
+      </div>
+
+      <p className="pt-1 text-center text-[11px] font-medium text-slate-400">
+        By clicking continue, you agree to Vernex&apos;s{" "}
+        <span className="text-indigo-600">Terms of Service</span> and{" "}
+        <span className="text-indigo-600">Privacy Policy</span>.
       </p>
+
+      <div className="mt-4 text-center">
+        <p className="text-sm font-normal text-slate-500">
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={props.onSignIn}
+            className="font-bold text-indigo-600 hover:underline"
+          >
+            Sign In
+          </button>
+        </p>
+      </div>
+
+      <div className="pt-4 text-center">
+        <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <span>Bank-grade encryption · NDPR compliant</span>
+        </div>
+      </div>
     </form>
   );
 }
