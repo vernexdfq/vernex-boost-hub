@@ -44,6 +44,9 @@ function FundPage() {
   const { data: account } = useQuery({
     queryKey: ["account", user.id],
     queryFn: () => fetchAccount(user.id),
+    staleTime: 5_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 12_000,
   });
 
   const {

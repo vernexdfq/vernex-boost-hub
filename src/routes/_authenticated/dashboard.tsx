@@ -23,9 +23,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { TelegramModal } from "@/components/telegram-modal";
 import { fetchAccount } from "@/lib/account";
+import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { getDashboardSummary, markNotificationsRead } from "@/lib/functions/dashboard.functions";
-import { seedDemoActivity } from "@/lib/functions/seed.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -80,31 +80,59 @@ function Dashboard() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const fetchSummary = useServerFn(getDashboardSummary);
-  const seedDemo = useServerFn(seedDemoActivity);
   const markRead = useServerFn(markNotificationsRead);
 
-  const { data: account } = useQuery({
+  const { data: account, isLoading: accountLoading } = useQuery({
     queryKey: ["account", user.id],
     queryFn: () => fetchAccount(user.id),
+    staleTime: 5_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchInterval: 15_000,
   });
+
+  // Live wallet balance: subscribe to DB changes for this user
+  useEffect(() => {
+    const channel = supabase
+      .channel(`wallet-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "wallets",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+          void queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+          void queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [user.id, queryClient]);
+
 
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ["dashboard", user.id],
     queryFn: () => fetchSummary({ data: { limit: 5 } }),
   });
 
-  useEffect(() => {
-    if (summary && summary.transactions.length === 0) {
-      seedDemo({ data: undefined })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ["dashboard", user.id] });
-          queryClient.invalidateQueries({ queryKey: ["account", user.id] });
-        })
-        .catch(() => {
-          /* seed is optional — never crash dashboard */
-        });
-    }
-  }, [summary, seedDemo, queryClient, user.id]);
 
   const displayName =
     account?.profile?.full_name?.split(" ")[0] ??

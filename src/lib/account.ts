@@ -43,6 +43,27 @@ export async function fetchAccount(userId: string): Promise<Account> {
   if (profileRes.error) throw profileRes.error;
   if (walletRes.error) throw walletRes.error;
 
+  // Create a real wallet row at ₦0 if missing (never invent a balance)
+  let walletRow = walletRes.data;
+  if (!walletRow) {
+    const { data: created, error: createErr } = await supabase
+      .from("wallets")
+      .upsert(
+        {
+          user_id: userId,
+          balance: 0,
+          ledger_balance: 0,
+          currency: "NGN",
+        },
+        { onConflict: "user_id" },
+      )
+      .select(
+        "user_id, balance, ledger_balance, currency, virtual_account_number, virtual_bank_name, virtual_account_reference",
+      )
+      .maybeSingle();
+    if (!createErr && created) walletRow = created;
+  }
+
   const profile = profileRes.data
     ? ({
         ...profileRes.data,
@@ -52,11 +73,11 @@ export async function fetchAccount(userId: string): Promise<Account> {
       } as Profile)
     : null;
 
-  const wallet = walletRes.data
+  const wallet = walletRow
     ? ({
-        ...walletRes.data,
-        balance: Number(walletRes.data.balance),
-        ledger_balance: Number(walletRes.data.ledger_balance),
+        ...walletRow,
+        balance: Number(walletRow.balance ?? 0),
+        ledger_balance: Number(walletRow.ledger_balance ?? 0),
       } as Wallet)
     : null;
 

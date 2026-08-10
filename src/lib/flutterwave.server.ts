@@ -1,5 +1,5 @@
 /**
- * Server-only Flutterwave helpers for Vernex.
+ * Server-only Flutterwave helpers for Vernex (LIVE mode only — test keys are rejected).
  * Endpoint: POST https://api.flutterwave.com/v3/virtual-account-numbers
  *
  * Static (permanent) NGN accounts use is_permanent: true and amount: 0.
@@ -20,12 +20,28 @@ type FlwVirtualAccount = {
 };
 
 export function flutterwaveSecretKey(): string | null {
+  // Prefer explicit LIVE key env vars; never use Flutterwave test keys in production.
   const key =
     process.env["FLUTTERWAVE_SECRET_KEY"]?.trim() ||
     process.env["FLW_SECRET_KEY"]?.trim() ||
     process.env["FLUTTERWAVE_SECRET"]?.trim() ||
+    process.env["FLUTTERWAVE_LIVE_SECRET_KEY"]?.trim() ||
     "";
-  return key || null;
+  if (!key) return null;
+  // Block accidental test-mode keys (FLWSECK_TEST...)
+  if (/_TEST/i.test(key) || key.includes("FLWSECK_TEST")) {
+    console.error(
+      "[Flutterwave] TEST secret key detected. Set your LIVE FLUTTERWAVE_SECRET_KEY in Cloudflare.",
+    );
+    return null;
+  }
+  return key;
+}
+
+/** True when a live (non-test) Flutterwave secret is configured. */
+export function isFlutterwaveLiveMode(): boolean {
+  const key = flutterwaveSecretKey();
+  return Boolean(key && (key.startsWith("FLWSECK-") || key.startsWith("FLWSECK_")));
 }
 
 export function isFlutterwaveConfigured(): boolean {
