@@ -25,9 +25,9 @@ export type LiveSmsProduct = {
   stock_count: number;
 };
 
-const MAX_PRODUCTS = 120;
+const MAX_PRODUCTS = 40;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const FETCH_MS = 3500;
+const FETCH_MS = 2500;
 
 const SERVICE_NAMES: Record<string, string> = {
   wa: "WhatsApp",
@@ -94,15 +94,18 @@ function prioritize(products: LiveSmsProduct[]): LiveSmsProduct[] {
     "instagram",
     "ig",
   ];
-  products.sort((a, b) => {
-    const ai = priority.indexOf(a.service_key.toLowerCase());
-    const bi = priority.indexOf(b.service_key.toLowerCase());
+  const list = (products ?? []).filter((p) => p && p.id);
+  list.sort((a, b) => {
+    const ak = String(a.service_key ?? "").toLowerCase();
+    const bk = String(b.service_key ?? "").toLowerCase();
+    const ai = priority.indexOf(ak);
+    const bi = priority.indexOf(bk);
     const ap = ai === -1 ? 999 : ai;
     const bp = bi === -1 ? 999 : bi;
     if (ap !== bp) return ap - bp;
-    return a.service_name.localeCompare(b.service_name);
+    return String(a.service_name ?? "").localeCompare(String(b.service_name ?? ""));
   });
-  return products.slice(0, MAX_PRODUCTS);
+  return list.slice(0, MAX_PRODUCTS);
 }
 
 async function fetchActivatePrices(
@@ -329,43 +332,61 @@ async function fetchTextVerifiedServices(apiKey: string): Promise<LiveSmsProduct
 }
 
 export async function listLiveProductsForSlot(slotId: SmsSlotId): Promise<LiveSmsProduct[]> {
-  return cached(`sms-slot:${slotId}`, CACHE_TTL, async () => {
-    const meta = getSlotMeta(slotId);
-    if (!meta) return [];
-    const apiKey = readSlotApiKey(meta);
-    if (!apiKey) return [];
-
-    const filter = meta.group === "usa" ? "usa" : "all";
-    let products: LiveSmsProduct[] = [];
-
-    try {
-      switch (meta.provider) {
-        case "fivesim":
-          products = await fetchFiveSimPrices(apiKey, filter);
-          break;
-        case "grizzly":
-        case "dogesms":
-        case "smsbuyz":
-          products = await fetchActivatePrices(meta.provider, apiKey, filter);
-          break;
-        case "textverified":
-          products = await fetchTextVerifiedServices(apiKey);
-          break;
+  try {
+    return await cached(`sms-slot:${slotId}`, CACHE_TTL, async () => {
+      const meta = getSlotMeta(slotId);
+      if (!meta) return [];
+      const apiKey = readSlotApiKey(meta);
+      if (!apiKey) {
+        console.warn(`[sms] missing API key for ${slotId}`);
+        return [];
       }
-    } catch (err) {
-      console.error(`[sms] listLiveProductsForSlot ${slotId}`, err);
-      return [];
-    }
 
-    return prioritize(
-      products.map((p) => ({
-        ...p,
-        server_id: slotId,
-        country_code: meta.group === "usa" ? "US" : p.country_code,
-        country_name: meta.group === "usa" ? "United States" : p.country_name,
-      })),
-    );
-  });
+      const filter = meta.group === "usa" ? "usa" : "all";
+      let products: LiveSmsProduct[] = [];
+
+      try {
+        switch (meta.provider) {
+          case "fivesim":
+            products = await fetchFiveSimPrices(apiKey, filter);
+            break;
+          case "grizzly":
+          case "dogesms":
+          case "smsbuyz":
+            products = await fetchActivatePrices(meta.provider, apiKey, filter);
+            break;
+          case "textverified":
+            products = await fetchTextVerifiedServices(apiKey);
+            break;
+          default:
+            products = [];
+        }
+      } catch (err) {
+        console.error(`[sms] listLiveProductsForSlot ${slotId}`, err);
+        return [];
+      }
+
+      return prioritize(
+        (products ?? []).map((p) => ({
+          ...p,
+          id: String(p.id),
+          service_key: String(p.service_key ?? ""),
+          service_name: String(p.service_name ?? p.service_key ?? "Service"),
+          country_code: meta.group === "usa" ? "US" : String(p.country_code ?? ""),
+          country_name:
+            meta.group === "usa" ? "United States" : String(p.country_name ?? ""),
+          server_id: slotId,
+          provider: String(p.provider ?? meta.provider),
+          provider_cost_usd: Number(p.provider_cost_usd) || 0,
+          selling_price_ngn: Number(p.selling_price_ngn) || 0,
+          stock_count: Number(p.stock_count) || 0,
+        })),
+      );
+    });
+  } catch (err) {
+    console.error(`[sms] listLiveProductsForSlot outer ${slotId}`, err);
+    return [];
+  }
 }
 
 /** Never fan-out to all providers in one request — Worker CPU limit. */

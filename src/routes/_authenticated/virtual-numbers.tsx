@@ -43,6 +43,22 @@ export const Route = createFileRoute("/_authenticated/virtual-numbers")({
     ],
   }),
   component: VirtualNumbers,
+  errorComponent: ({ error, reset }) => (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
+      <h1 className="text-xl font-bold text-slate-900">Virtual Numbers</h1>
+      <p className="max-w-sm text-sm text-slate-500">
+        Could not load this page. Your servers are still connected — try again.
+      </p>
+      <p className="max-w-sm text-xs text-slate-400">{error?.message}</p>
+      <button
+        type="button"
+        onClick={reset}
+        className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white"
+      >
+        Try again
+      </button>
+    </div>
+  ),
 });
 
 type OrderStatus = "pending" | "active" | "received" | "expired" | "cancelled" | "refunded";
@@ -58,8 +74,19 @@ const badge = {
 
 const SERVER_SLOTS = SMS_SERVER_SLOTS.map((s) => ({
   ...s,
-  match: (p: NumberProduct) =>
-    resolveSmsSlotId(p.country_code, p.country_name, p.server_id) === s.id,
+  match: (p: NumberProduct) => {
+    try {
+      return (
+        resolveSmsSlotId(
+          p?.country_code ?? "",
+          p?.country_name ?? "",
+          p?.server_id ?? "",
+        ) === s.id
+      );
+    } catch {
+      return false;
+    }
+  },
 }));
 
 function timeAgo(iso: string) {
@@ -126,10 +153,21 @@ function VirtualNumbers() {
   const activeSlot = SERVER_SLOTS.find((s) => s.id === serverId) ?? SERVER_SLOTS[0];
 
   const slotProducts = useMemo(() => {
-    if (!products) return [] as NumberProduct[];
+    if (!Array.isArray(products)) return [] as NumberProduct[];
     // Live API only for this server tab — sort tiers by price then stock
     return products
-      .slice()
+      .filter((p) => p && typeof p === "object" && p.id)
+      .map((p) => ({
+        ...p,
+        service_name: String(p.service_name ?? p.service_key ?? "Service"),
+        service_key: String(p.service_key ?? ""),
+        country_name: String(p.country_name ?? ""),
+        country_code: String(p.country_code ?? ""),
+        provider: String(p.provider ?? ""),
+        selling_price_ngn: Number(p.selling_price_ngn) || 0,
+        stock_count: Number(p.stock_count) || 0,
+        provider_cost_usd: Number(p.provider_cost_usd) || 0,
+      }))
       .sort(
         (a, b) =>
           a.selling_price_ngn - b.selling_price_ngn ||
@@ -140,12 +178,12 @@ function VirtualNumbers() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return slotProducts;
-    return slotProducts.filter(
-      (p) =>
-        p.service_name.toLowerCase().includes(q) ||
-        p.service_key.toLowerCase().includes(q) ||
-        p.country_name.toLowerCase().includes(q),
-    );
+    return slotProducts.filter((p) => {
+      const name = (p.service_name || "").toLowerCase();
+      const key = (p.service_key || "").toLowerCase();
+      const country = (p.country_name || "").toLowerCase();
+      return name.includes(q) || key.includes(q) || country.includes(q);
+    });
   }, [slotProducts, query]);
 
   useEffect(() => {

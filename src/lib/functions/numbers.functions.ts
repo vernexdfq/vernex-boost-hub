@@ -34,16 +34,16 @@ export type NumberProduct = {
 
 function fromLive(p: LiveSmsProduct): NumberProduct {
   return {
-    id: p.id,
-    service_key: p.service_key,
-    service_name: p.service_name,
-    country_code: p.country_code,
-    country_name: p.country_name,
-    server_id: p.server_id,
-    provider: p.provider,
-    provider_cost_usd: p.provider_cost_usd,
-    selling_price_ngn: p.selling_price_ngn,
-    stock_count: p.stock_count,
+    id: String(p.id),
+    service_key: String(p.service_key ?? ""),
+    service_name: String(p.service_name ?? p.service_key ?? "Service"),
+    country_code: String(p.country_code ?? ""),
+    country_name: String(p.country_name ?? ""),
+    server_id: String(p.server_id ?? ""),
+    provider: String(p.provider ?? ""),
+    provider_cost_usd: Number(p.provider_cost_usd) || 0,
+    selling_price_ngn: Number(p.selling_price_ngn) || 0,
+    stock_count: Number(p.stock_count) || 0,
   };
 }
 
