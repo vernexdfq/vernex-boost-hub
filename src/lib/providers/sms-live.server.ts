@@ -23,9 +23,13 @@ export type LiveSmsProduct = {
   provider_cost_usd: number;
   selling_price_ngn: number;
   stock_count: number;
+  /** Provider operator / route name (e.g. virtual63) */
+  operator?: string;
+  /** Optional delivery success rate 0–100 */
+  success_rate?: number;
 };
 
-const MAX_PRODUCTS = 80;
+const MAX_PRODUCTS = 200;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const FETCH_MS = 4000;
 
@@ -325,33 +329,39 @@ async function fetchFiveSimPrices(
         for (const [product, operators] of Object.entries(products)) {
           if (parsed >= MAX_PRODUCTS) break;
           if (!operators || typeof operators !== "object") continue;
-          // Prefer cheapest operator with stock (one row per service; more services fit)
-          let bestCost = Infinity;
-          let bestCount = 0;
-          let bestOp = "any";
+          // Emit every operator tier so the UI can list all prices (like 5sim / Grizzly)
           for (const [operator, op] of Object.entries(operators)) {
+            if (parsed >= MAX_PRODUCTS) break;
             const cost = Number(op?.cost ?? 0);
             const count = Number(op?.count ?? 0);
-            if (count > 0 && cost > 0 && cost < bestCost) {
-              bestCost = cost;
-              bestCount = count;
-              bestOp = operator;
-            }
+            const rateRaw = Number(
+              (op as { rate?: number; success?: number })?.rate ??
+                (op as { success?: number })?.success ??
+                NaN,
+            );
+            if (!(count > 0 && cost > 0)) continue;
+            const success =
+              Number.isFinite(rateRaw) && rateRaw > 0
+                ? rateRaw <= 1
+                  ? Math.round(rateRaw * 1000) / 10
+                  : Math.round(rateRaw * 10) / 10
+                : undefined;
+            out.push({
+              id: `live-fivesim-${cName}-${product}-${operator}`,
+              service_key: product,
+              service_name: prettyService(product),
+              country_code: isUs ? "US" : cName.slice(0, 3).toUpperCase(),
+              country_name: isUs ? "United States" : cName,
+              server_id: "",
+              provider: "fivesim",
+              provider_cost_usd: cost,
+              selling_price_ngn: smsSellPriceNgn(cost),
+              stock_count: Math.min(count, 9999),
+              operator: operator === "any" ? undefined : operator,
+              success_rate: success,
+            });
+            parsed++;
           }
-          if (!Number.isFinite(bestCost) || bestCost === Infinity || bestCount <= 0) continue;
-          out.push({
-            id: `live-fivesim-${cName}-${product}-${bestOp}`,
-            service_key: product,
-            service_name: prettyService(product),
-            country_code: isUs ? "US" : cName.slice(0, 3).toUpperCase(),
-            country_name: isUs ? "United States" : cName,
-            server_id: "",
-            provider: "fivesim",
-            provider_cost_usd: bestCost,
-            selling_price_ngn: smsSellPriceNgn(bestCost),
-            stock_count: Math.min(bestCount, 9999),
-          });
-          parsed++;
         }
       }
     } catch (err) {
@@ -467,6 +477,11 @@ export async function listLiveProductsForSlot(slotId: SmsSlotId): Promise<LiveSm
           provider_cost_usd: Number(p.provider_cost_usd) || 0,
           selling_price_ngn: Number(p.selling_price_ngn) || 0,
           stock_count: Number(p.stock_count) || 0,
+          operator: p.operator ? String(p.operator) : undefined,
+          success_rate:
+            p.success_rate != null && Number.isFinite(Number(p.success_rate))
+              ? Number(p.success_rate)
+              : undefined,
         })),
       );
     });

@@ -111,13 +111,17 @@ function VirtualNumbers() {
   const orderNumber = useServerFn(createNumberOrder);
 
   const [serverId, setServerId] = useState<SmsSlotId>("US-S1");
-  const [serviceId, setServiceId] = useState<string | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [countryKey, setCountryKey] = useState<string>("");
+  const [serviceKey, setServiceKey] = useState<string>("");
+  const [productId, setProductId] = useState<string | null>(null);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [serviceOpen, setServiceOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showFund, setShowFund] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  const countryRef = useRef<HTMLDivElement>(null);
+  const serviceRef = useRef<HTMLDivElement>(null);
 
   const {
     data: products,
@@ -154,7 +158,6 @@ function VirtualNumbers() {
 
   const slotProducts = useMemo(() => {
     if (!Array.isArray(products)) return [] as NumberProduct[];
-    // Live API only for this server tab — sort tiers by price then stock
     return products
       .filter((p) => p && typeof p === "object" && p.id)
       .map((p) => ({
@@ -167,6 +170,11 @@ function VirtualNumbers() {
         selling_price_ngn: Number(p.selling_price_ngn) || 0,
         stock_count: Number(p.stock_count) || 0,
         provider_cost_usd: Number(p.provider_cost_usd) || 0,
+        operator: p.operator ? String(p.operator) : undefined,
+        success_rate:
+          p.success_rate != null && Number.isFinite(Number(p.success_rate))
+            ? Number(p.success_rate)
+            : undefined,
       }))
       .sort(
         (a, b) =>
@@ -175,42 +183,103 @@ function VirtualNumbers() {
       );
   }, [products]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return slotProducts;
-    return slotProducts.filter((p) => {
-      const name = (p.service_name || "").toLowerCase();
-      const key = (p.service_key || "").toLowerCase();
-      const country = (p.country_name || "").toLowerCase();
-      return name.includes(q) || key.includes(q) || country.includes(q);
-    });
-  }, [slotProducts, query]);
+  const countries = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; count: number }>();
+    for (const p of slotProducts) {
+      const key = (p.country_code || p.country_name || "XX").toUpperCase();
+      const name = p.country_name || p.country_code || key;
+      const cur = map.get(key);
+      if (cur) cur.count += 1;
+      else map.set(key, { key, name, count: 1 });
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [slotProducts]);
 
   useEffect(() => {
-    setServiceId(null);
+    setCountryKey("");
+    setServiceKey("");
+    setProductId(null);
     setQuery("");
-    setPickerOpen(false);
+    setCountryOpen(false);
+    setServiceOpen(false);
   }, [serverId]);
 
   useEffect(() => {
-    if (slotProducts.length > 0 && !serviceId) {
-      const wa = slotProducts.find((p) => /whatsapp/i.test(p.service_name));
-      setServiceId((wa ?? slotProducts[0]).id);
+    if (!countryKey && countries.length) {
+      const us = countries.find((c) => c.key === "US" || /united|usa/i.test(c.name));
+      setCountryKey((us ?? countries[0]).key);
     }
-  }, [slotProducts, serviceId]);
+  }, [countries, countryKey]);
 
-  const selected = slotProducts.find((p) => p.id === serviceId) ?? null;
+  const countryProducts = useMemo(() => {
+    if (!countryKey) return slotProducts;
+    return slotProducts.filter(
+      (p) => (p.country_code || p.country_name || "").toUpperCase() === countryKey
+        || (p.country_code || "").toUpperCase() === countryKey,
+    );
+  }, [slotProducts, countryKey]);
+
+  const services = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; count: number }>();
+    for (const p of countryProducts) {
+      const key = p.service_key || p.service_name;
+      const name = p.service_name || p.service_key;
+      const cur = map.get(key);
+      if (cur) cur.count += 1;
+      else map.set(key, { key, name, count: 1 });
+    }
+    const list = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const q = query.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((s) => s.name.toLowerCase().includes(q) || s.key.toLowerCase().includes(q));
+  }, [countryProducts, query]);
 
   useEffect(() => {
-    if (!pickerOpen) return;
+    if (!serviceKey && services.length) {
+      const wa = services.find((s) => /whatsapp/i.test(s.name));
+      setServiceKey((wa ?? services[0]).key);
+    }
+  }, [services, serviceKey]);
+
+  useEffect(() => {
+    setServiceKey("");
+    setProductId(null);
+  }, [countryKey]);
+
+  const operators = useMemo(() => {
+    if (!serviceKey) return [] as NumberProduct[];
+    return countryProducts
+      .filter((p) => (p.service_key || p.service_name) === serviceKey)
+      .sort(
+        (a, b) =>
+          a.selling_price_ngn - b.selling_price_ngn ||
+          b.stock_count - a.stock_count,
+      );
+  }, [countryProducts, serviceKey]);
+
+  useEffect(() => {
+    if (operators.length && (!productId || !operators.some((o) => o.id === productId))) {
+      setProductId(operators[0].id);
+    }
+  }, [operators, productId]);
+
+  const selected = operators.find((p) => p.id === productId) ?? null;
+  const activeCountry = countries.find((c) => c.key === countryKey);
+  const activeService = services.find((s) => s.key === serviceKey);
+
+  useEffect(() => {
+    if (!countryOpen && !serviceOpen) return;
     function onClick(e: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-        setPickerOpen(false);
+      if (countryRef.current && !countryRef.current.contains(e.target as Node)) {
+        setCountryOpen(false);
+      }
+      if (serviceRef.current && !serviceRef.current.contains(e.target as Node)) {
+        setServiceOpen(false);
       }
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [pickerOpen]);
+  }, [countryOpen, serviceOpen]);
 
   async function copy(value: string, key: string, label: string) {
     try {
@@ -318,28 +387,26 @@ function VirtualNumbers() {
         </div>
 
         {/* Order card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xl shadow-slate-200/50 sm:p-6">
           <h2 className="mb-1 text-lg font-black text-slate-900">Order a Number</h2>
-          <p className="mb-6 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Service ({slotProducts.length} available)
-            <span className="ml-2 font-medium normal-case tracking-normal text-slate-400">
-              · {activeSlot.label}
-            </span>
+          <p className="mb-5 text-xs font-medium text-slate-400">
+            {activeSlot.label} · live provider catalog
           </p>
 
           {productsLoading ? (
             <div className="space-y-4">
-              <Skeleton className="h-16" />
-              <Skeleton className="h-24" />
               <Skeleton className="h-14" />
+              <Skeleton className="h-14" />
+              <Skeleton className="h-28" />
             </div>
           ) : productsError || (!productsLoading && slotProducts.length === 0) ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
-              <p className="text-sm font-bold text-slate-900">Server currently offline / try another server</p>
+              <p className="text-sm font-bold text-slate-900">
+                Server currently offline / try another server
+              </p>
               <p className="mt-1 text-xs text-slate-600">
-                No live services returned for this tab. Usually this means the Cloudflare API key for
-                this provider is missing, wrong, or the provider rejected the request. Confirm the
-                key in Cloudflare, then retry.
+                No live services for this tab. Check the Cloudflare API key for this provider,
+                then retry.
               </p>
               <button
                 type="button"
@@ -351,71 +418,106 @@ function VirtualNumbers() {
             </div>
           ) : (
             <>
-              {/* Service dropdown */}
-              <div className="relative mb-6" ref={pickerRef}>
+              {/* Country */}
+              <div className="relative mb-4" ref={countryRef}>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Country ({countries.length} available)
+                </p>
                 <button
                   type="button"
-                  onClick={() => setPickerOpen((v) => !v)}
-                  className="flex w-full cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/50 p-4 transition-all hover:border-indigo-300"
+                  onClick={() => {
+                    setCountryOpen((v) => !v);
+                    setServiceOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-left transition hover:border-indigo-300"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-600">
-                      <Smartphone className="h-5 w-5" />
-                    </div>
-                    <span className="text-sm font-bold text-slate-800 sm:text-base">
-                      {selected?.service_name ?? "Select a service"}
+                  <span className="flex items-center gap-3">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                      🌐
                     </span>
-                  </div>
-                  <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition ${pickerOpen ? "rotate-180" : ""}`}
-                  />
+                    <span className="text-sm font-bold text-slate-800">
+                      {activeCountry?.name ?? "Select country"}
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
                 </button>
+                {countryOpen && (
+                  <div className="absolute left-0 right-0 z-30 mt-2 max-h-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
+                    {countries.map((c) => (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setCountryKey(c.key);
+                          setCountryOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
+                          c.key === countryKey ? "bg-indigo-50 font-bold text-indigo-700" : "text-slate-800"
+                        }`}
+                      >
+                        <span>{c.name}</span>
+                        <span className="text-xs text-slate-400">{c.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                {pickerOpen && (
-                  <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+              {/* Service */}
+              <div className="relative mb-5" ref={serviceRef}>
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Service ({services.length} available)
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceOpen((v) => !v);
+                    setCountryOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-left transition hover:border-indigo-300"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                      <Smartphone className="h-4 w-4" />
+                    </span>
+                    <span className="text-sm font-bold text-slate-800">
+                      {activeService?.name ?? "Select service"}
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                </button>
+                {serviceOpen && (
+                  <div className="absolute left-0 right-0 z-30 mt-2 max-h-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
                     <div className="border-b border-slate-100 p-2">
                       <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                         <input
                           value={query}
                           onChange={(e) => setQuery(e.target.value)}
-                          placeholder="Search services…"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-indigo-400"
-                          autoFocus
+                          placeholder="Search service…"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-indigo-400"
                         />
                       </div>
                     </div>
-                    <ul className="max-h-64 overflow-y-auto py-1">
-                      {filtered.length === 0 ? (
-                        <li className="px-4 py-6 text-center text-sm text-slate-500">
-                          No services on this server
-                        </li>
+                    <ul className="max-h-48 overflow-y-auto">
+                      {services.length === 0 ? (
+                        <li className="px-4 py-6 text-center text-sm text-slate-500">No services</li>
                       ) : (
-                        filtered.map((p) => (
-                          <li key={p.id}>
+                        services.map((s) => (
+                          <li key={s.key}>
                             <button
                               type="button"
                               onClick={() => {
-                                setServiceId(p.id);
-                                setPickerOpen(false);
+                                setServiceKey(s.key);
+                                setServiceOpen(false);
                                 setQuery("");
                               }}
-                              className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-slate-50 ${
-                                p.id === serviceId ? "bg-indigo-50" : ""
+                              className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
+                                s.key === serviceKey ? "bg-indigo-50 font-bold text-indigo-700" : "text-slate-800"
                               }`}
                             >
-                              <span className="min-w-0">
-                                <span className="block font-semibold text-slate-800">
-                                  {p.service_name}
-                                </span>
-                                <span className="text-[11px] text-slate-500">
-                                  Available {p.stock_count.toLocaleString()} qty
-                                  {p.country_name ? ` · ${p.country_name}` : ""}
-                                </span>
-                              </span>
-                              <span className="shrink-0 rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-bold tabular-nums text-white">
-                                {naira(p.selling_price_ngn)}
-                              </span>
+                              <span>{s.name}</span>
+                              <span className="text-xs text-slate-400">{s.count} tiers</span>
                             </button>
                           </li>
                         ))
@@ -425,36 +527,79 @@ function VirtualNumbers() {
                 )}
               </div>
 
-              {/* Price & stock */}
-              {selected ? (
-                <div className="mb-8 flex items-center justify-between rounded-2xl border border-slate-200/80 bg-slate-50/80 p-5">
+              {/* Operators / price board */}
+              <div className="mb-5">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Select operator
+                </p>
+                <div className="mb-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3.5 py-2.5 text-[11px] leading-relaxed text-slate-600">
+                  <span className="font-semibold text-indigo-700">Info: </span>
+                  Each operator has different pricing and delivery success rates. Higher % = more
+                  likely to receive OTP.
+                </div>
+
+                {operators.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-500">
+                    No operators for this service
+                  </div>
+                ) : (
+                  <div className="max-h-72 space-y-2 overflow-y-auto pr-0.5">
+                    {operators.map((op) => {
+                      const active = op.id === productId;
+                      const label =
+                        op.operator ||
+                        (op.provider ? `${op.provider}` : "default");
+                      return (
+                        <button
+                          key={op.id}
+                          type="button"
+                          onClick={() => setProductId(op.id)}
+                          className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition ${
+                            active
+                              ? "border-indigo-500 bg-indigo-50/40 shadow-sm"
+                              : "border-slate-200 bg-white hover:border-indigo-200"
+                          }`}
+                        >
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
+                            <Smartphone className="h-4 w-4" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-bold text-slate-900">{label}</span>
+                              {op.success_rate != null && (
+                                <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                                  {op.success_rate}% SUCCESS
+                                </span>
+                              )}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] text-slate-500">
+                              {op.stock_count.toLocaleString()} available
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-sm font-black tabular-nums text-indigo-600">
+                            {naira(op.selling_price_ngn)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {selected && (
+                <div className="mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                   <div>
-                    <div className="text-2xl font-black text-indigo-600 sm:text-3xl">
+                    <div className="text-2xl font-black text-indigo-600">
                       {naira(selected.selling_price_ngn)}
                     </div>
                     <div className="mt-0.5 text-xs font-semibold text-slate-400">
                       📦 {selected.stock_count.toLocaleString()} numbers in stock
-                      {selected.provider_cost_usd > 0 && (
-                        <span className="ml-2 text-slate-400">
-                          · Cost ${selected.provider_cost_usd.toFixed(3)} · {selected.provider}
-                        </span>
-                      )}
+                      {selected.operator ? ` · ${selected.operator}` : ""}
                     </div>
                   </div>
-                  <span
-                    className={`h-fit rounded-full border px-3 py-1 text-xs font-bold ${
-                      selected.stock_count > 0
-                        ? "border-emerald-100 bg-emerald-50 text-emerald-600"
-                        : "border-red-100 bg-red-50 text-red-600"
-                    }`}
-                  >
-                    {selected.stock_count > 0 ? "Available" : "Out of Stock"}
+                  <span className="h-fit rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                    Available
                   </span>
-                </div>
-              ) : (
-                <div className="mb-8 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-5 text-center text-sm text-slate-500">
-                  No services on {activeSlot.label} yet. Connect this slot&apos;s API in Cloudflare
-                  to populate products.
                 </div>
               )}
 
@@ -471,7 +616,7 @@ function VirtualNumbers() {
                 type="button"
                 onClick={handleOrder}
                 disabled={busy || !selected || selected.stock_count <= 0}
-                className="tap-fast flex w-full items-center justify-center space-x-2 rounded-2xl bg-indigo-600 py-4 font-bold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="tap-fast flex w-full items-center justify-center space-x-2 rounded-2xl bg-indigo-600 py-4 font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

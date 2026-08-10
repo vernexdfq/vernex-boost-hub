@@ -30,6 +30,8 @@ export type NumberProduct = {
   provider_cost_usd: number;
   selling_price_ngn: number;
   stock_count: number;
+  operator?: string;
+  success_rate?: number;
 };
 
 function fromLive(p: LiveSmsProduct): NumberProduct {
@@ -44,6 +46,11 @@ function fromLive(p: LiveSmsProduct): NumberProduct {
     provider_cost_usd: Number(p.provider_cost_usd) || 0,
     selling_price_ngn: Number(p.selling_price_ngn) || 0,
     stock_count: Number(p.stock_count) || 0,
+    operator: p.operator ? String(p.operator) : undefined,
+    success_rate:
+      p.success_rate != null && Number.isFinite(Number(p.success_rate))
+        ? Number(p.success_rate)
+        : undefined,
   };
 }
 
