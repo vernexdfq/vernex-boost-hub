@@ -554,33 +554,67 @@ export async function syncUserDeposits(params: {
 
 export async function handleFlutterwaveWebhookPayload(
   payload: Record<string, unknown>,
-): Promise<{ ok: boolean; credited?: boolean }> {
+): Promise<{ ok: boolean; credited?: boolean; event?: string }> {
+  const event = String(payload["event"] || payload["type"] || "").toLowerCase();
   const data = (payload["data"] || {}) as Record<string, unknown>;
+
+  // Primary event for virtual-account bank transfers
+  // Also accept bank_transfer / transfer success payloads without a named event
+  const isChargeEvent =
+    !event ||
+    event === "charge.completed" ||
+    event.includes("charge") ||
+    event.includes("bank_transfer") ||
+    event.includes("transfer");
+
+  if (!isChargeEvent) {
+    console.info("[Flutterwave webhook] ignored event", event);
+    return { ok: true, credited: false, event };
+  }
+
   const status = String(data["status"] || "").toLowerCase();
   if (status && status !== "successful" && status !== "success") {
-    return { ok: true, credited: false };
+    console.info("[Flutterwave webhook] non-success status", status);
+    return { ok: true, credited: false, event };
   }
 
   const amount = Number(data["amount"]);
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { ok: true, credited: false };
+    console.error("[Flutterwave webhook] invalid amount", data["amount"]);
+    return { ok: true, credited: false, event };
   }
 
   const flwRef = String(data["flw_ref"] || data["flwRef"] || "").trim();
   const txRef = String(data["tx_ref"] || data["txRef"] || "").trim();
-  const reference = flwRef || txRef;
-  if (!reference) return { ok: true, credited: false };
+  const id = data["id"] != null ? String(data["id"]) : "";
+  const reference = flwRef || txRef || (id ? `FLW-${id}` : "");
+  if (!reference) {
+    console.error("[Flutterwave webhook] missing reference");
+    return { ok: true, credited: false, event };
+  }
 
   const customer = (data["customer"] || {}) as Record<string, unknown>;
   const email = typeof customer["email"] === "string" ? customer["email"] : null;
   const meta = (data["meta"] || {}) as Record<string, unknown>;
+  const accountObj = data["account"] as { account_number?: string } | undefined;
   const account =
-    (data["account"] as { account_number?: string } | undefined)?.account_number ||
+    accountObj?.account_number ||
     (typeof meta["account_number"] === "string" ? meta["account_number"] : null) ||
     (typeof meta["recipientaccountnumber"] === "string"
       ? meta["recipientaccountnumber"]
       : null) ||
-    (typeof meta["virtualaccountnumber"] === "string" ? meta["virtualaccountnumber"] : null);
+    (typeof meta["virtualaccountnumber"] === "string" ? meta["virtualaccountnumber"] : null) ||
+    (typeof meta["narration"] === "string" && /\d{10}/.test(meta["narration"])
+      ? meta["narration"]
+      : null);
+
+  console.info(
+    "[Flutterwave webhook] crediting",
+    reference,
+    amount,
+    account || "(no account)",
+    email || "(no email)",
+  );
 
   const result = await creditWalletFromTransfer({
     reference,
@@ -590,5 +624,5 @@ export async function handleFlutterwaveWebhookPayload(
     txRef: txRef || null,
   });
 
-  return { ok: true, credited: result.credited };
+  return { ok: true, credited: result.credited, event };
 }
