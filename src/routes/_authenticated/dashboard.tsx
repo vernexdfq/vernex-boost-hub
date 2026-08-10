@@ -6,14 +6,13 @@ import {
   EyeOff,
   Plus,
   History,
-  Phone,
   Rocket,
   Store,
   PhoneCall,
+  PhoneForwarded,
   Globe,
   BarChart3,
   Star,
-  Clock,
   ChevronRight,
   ArrowUpRight,
   ArrowDownLeft,
@@ -40,14 +39,54 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const quickActions = [
-  { label: "Virtual\nNumber", icon: Phone, tint: "bg-indigo-500/10 text-indigo-400", to: "/virtual-numbers" },
-  { label: "Boost\nAccount", icon: Rocket, tint: "bg-violet-50 text-violet-600", to: "/boost" },
-  { label: "Buy\nLogs", icon: Store, tint: "bg-amber-50 text-amber-600", to: "/buy-accounts" },
-  { label: "Rent\nNumber", icon: PhoneCall, tint: "bg-blue-50 text-blue-600", to: "/rent-number" },
-  { label: "Get Affiliate\nWebsite", icon: Globe, tint: "bg-indigo-500/10 text-indigo-400", to: "/affiliate" },
-  { label: "Number\nOrders", icon: BarChart3, tint: "bg-indigo-50 text-indigo-600", to: "/number-orders" },
-  { label: "Boost\nOrders", icon: Star, tint: "bg-violet-50 text-violet-600", to: "/boost-orders" },
-  { label: "Log\nHistory", icon: Clock, tint: "bg-slate-100 text-slate-700", to: "/log-history" },
+  {
+    label: "Virtual Number",
+    icon: PhoneCall,
+    tint: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    to: "/virtual-numbers",
+  },
+  {
+    label: "Boost Account",
+    icon: Rocket,
+    tint: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+    to: "/boost",
+  },
+  {
+    label: "Buy Logs",
+    icon: Store,
+    tint: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    to: "/buy-accounts",
+  },
+  {
+    label: "Rent Number",
+    icon: PhoneForwarded,
+    tint: "bg-sky-500/10 text-sky-500 border-sky-500/20",
+    to: "/rent-number",
+  },
+  {
+    label: "Get Affiliate Website",
+    icon: Globe,
+    tint: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+    to: "/affiliate",
+  },
+  {
+    label: "Number Orders",
+    icon: BarChart3,
+    tint: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    to: "/number-orders",
+  },
+  {
+    label: "Boost Orders",
+    icon: Star,
+    tint: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+    to: "/boost-orders",
+  },
+  {
+    label: "Log History",
+    icon: History,
+    tint: "bg-slate-500/10 text-slate-500 border-slate-500/20",
+    to: "/log-history",
+  },
 ] as const;
 
 function greeting() {
@@ -234,26 +273,25 @@ function Dashboard() {
       </section>
 
       <section className="px-5 pt-7">
-        <div className="mb-3 flex items-center gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Quick Actions</h2>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card-elev">
-          <div className="grid grid-cols-4">
-            {quickActions.map((a, i) => {
+        <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Quick Actions
+        </h2>
+        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev backdrop-blur-md">
+          <div className="grid grid-cols-4 gap-3">
+            {quickActions.map((a) => {
               const Icon = a.icon;
-              const rightEdge = (i + 1) % 4 === 0;
-              const bottomRow = i >= 4;
               return (
                 <Link
                   key={a.label}
                   to={a.to}
-                  className={`group flex flex-col items-center gap-2 p-3 transition hover:bg-accent/60 active:scale-[0.97] ${!rightEdge ? "border-r border-border" : ""} ${bottomRow ? "border-t border-border" : ""}`}
+                  className="group flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-background/40 p-3 text-center transition hover:bg-accent/60 active:scale-[0.97]"
                 >
-                  <span className={`grid h-11 w-11 place-items-center rounded-2xl ${a.tint} transition-transform group-hover:scale-105`}>
-                    <Icon className="h-5 w-5" strokeWidth={2.2} />
+                  <span
+                    className={`mb-2 flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition group-hover:scale-105 ${a.tint}`}
+                  >
+                    <Icon size={22} strokeWidth={2.1} />
                   </span>
-                  <span className="whitespace-pre-line text-center text-[11px] font-semibold leading-tight text-foreground/90">
+                  <span className="text-[11px] font-medium leading-tight text-foreground">
                     {a.label}
                   </span>
                 </Link>
