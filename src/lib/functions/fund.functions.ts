@@ -136,3 +136,58 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       };
     }
   });
+
+export const confirmWalletDeposit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{
+    credited: number;
+    totalAmount: number;
+    balance: number;
+    message: string;
+  }> => {
+    const { supabase, userId } = context;
+
+    const { data: wallet } = await supabase
+      .from("wallets")
+      .select("virtual_account_number, balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const { syncUserDeposits } = await import("@/lib/flutterwave.server");
+    const result = await syncUserDeposits({
+      userId,
+      accountNumber: wallet?.virtual_account_number ?? null,
+      email: profile?.email ?? null,
+    });
+
+    const { data: walletAfter } = await supabase
+      .from("wallets")
+      .select("balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const balance = Number(walletAfter?.balance ?? wallet?.balance ?? 0);
+
+    if (result.credited > 0) {
+      return {
+        credited: result.credited,
+        totalAmount: result.totalAmount,
+        balance,
+        message: `₦${result.totalAmount.toLocaleString("en-NG")} added to your wallet.`,
+      };
+    }
+
+    return {
+      credited: 0,
+      totalAmount: 0,
+      balance,
+      message:
+        "No new deposit found yet. Bank transfers can take a few minutes — tap again shortly. Ensure you transferred to your Vernex virtual account.",
+    };
+  });

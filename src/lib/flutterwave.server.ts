@@ -423,3 +423,172 @@ export async function creditWalletFromTransfer(params: {
     return { credited: false };
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Deposit sync + webhook helpers                                      */
+/* ------------------------------------------------------------------ */
+
+type FlwTransaction = {
+  id?: number;
+  tx_ref?: string;
+  flw_ref?: string;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  payment_type?: string;
+  created_at?: string;
+  customer?: { email?: string; name?: string; phone_number?: string };
+  meta?: Record<string, unknown> | null;
+  account?: { account_number?: string; bank_name?: string };
+};
+
+function extractAccountNumber(tx: FlwTransaction): string | null {
+  const meta = (tx.meta || {}) as Record<string, unknown>;
+  const candidates = [
+    tx.account?.account_number,
+    meta["account_number"],
+    meta["accountnumber"],
+    meta["recipientaccountnumber"],
+    meta["virtualaccountnumber"],
+    meta["originatoraccountnumber"],
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.replace(/\D/g, "").length >= 10) {
+      return c.replace(/\D/g, "");
+    }
+  }
+  return null;
+}
+
+export async function listRecentFlutterwaveTransactions(
+  days = 14,
+): Promise<FlwTransaction[]> {
+  const key = flutterwaveSecretKey();
+  if (!key) return [];
+
+  const to = new Date();
+  const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const url = new URL(`${FLW_BASE}/transactions`);
+  url.searchParams.set("from", fmt(from));
+  url.searchParams.set("to", fmt(to));
+  url.searchParams.set("status", "successful");
+  url.searchParams.set("currency", "NGN");
+
+  try {
+    const res = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${key}`,
+        Accept: "application/json",
+      },
+    });
+    const body = (await res.json()) as {
+      status?: string;
+      data?: FlwTransaction[];
+      message?: string;
+    };
+    if (!res.ok || body.status !== "success" || !Array.isArray(body.data)) {
+      console.error("[Flutterwave] list transactions failed", body?.message || res.status);
+      return [];
+    }
+    return body.data;
+  } catch (error) {
+    console.error("[Flutterwave] list transactions error", error);
+    return [];
+  }
+}
+
+export async function syncUserDeposits(params: {
+  userId: string;
+  accountNumber?: string | null;
+  email?: string | null;
+}): Promise<{ credited: number; totalAmount: number; references: string[] }> {
+  const txs = await listRecentFlutterwaveTransactions(21);
+  const accountDigits = (params.accountNumber || "").replace(/\D/g, "");
+  const email = (params.email || "").trim().toLowerCase();
+
+  let credited = 0;
+  let totalAmount = 0;
+  const references: string[] = [];
+
+  for (const tx of txs) {
+    if (String(tx.status || "").toLowerCase() !== "successful") continue;
+    if (String(tx.currency || "NGN").toUpperCase() !== "NGN") continue;
+    const amount = Number(tx.amount);
+    if (!Number.isFinite(amount) || amount <= 0) continue;
+
+    const ref =
+      String(tx.flw_ref || "").trim() ||
+      String(tx.tx_ref || "").trim() ||
+      (tx.id != null ? `FLW-${tx.id}` : "");
+    if (!ref) continue;
+
+    const txAccount = extractAccountNumber(tx);
+    const txEmail = (tx.customer?.email || "").trim().toLowerCase();
+
+    const matchesAccount =
+      Boolean(accountDigits) &&
+      Boolean(txAccount) &&
+      (txAccount === accountDigits ||
+        accountDigits.endsWith(txAccount!) ||
+        txAccount!.endsWith(accountDigits));
+    const matchesEmail = Boolean(email) && Boolean(txEmail) && txEmail === email;
+    if (!matchesAccount && !matchesEmail) continue;
+
+    const result = await creditWalletFromTransfer({
+      reference: ref,
+      amount,
+      accountNumber: params.accountNumber || txAccount,
+      customerEmail: email || txEmail || null,
+      txRef: tx.tx_ref || null,
+    });
+    if (result.credited) {
+      credited += 1;
+      totalAmount += amount;
+      references.push(ref);
+    }
+  }
+
+  return { credited, totalAmount, references };
+}
+
+export async function handleFlutterwaveWebhookPayload(
+  payload: Record<string, unknown>,
+): Promise<{ ok: boolean; credited?: boolean }> {
+  const data = (payload["data"] || {}) as Record<string, unknown>;
+  const status = String(data["status"] || "").toLowerCase();
+  if (status && status !== "successful" && status !== "success") {
+    return { ok: true, credited: false };
+  }
+
+  const amount = Number(data["amount"]);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { ok: true, credited: false };
+  }
+
+  const flwRef = String(data["flw_ref"] || data["flwRef"] || "").trim();
+  const txRef = String(data["tx_ref"] || data["txRef"] || "").trim();
+  const reference = flwRef || txRef;
+  if (!reference) return { ok: true, credited: false };
+
+  const customer = (data["customer"] || {}) as Record<string, unknown>;
+  const email = typeof customer["email"] === "string" ? customer["email"] : null;
+  const meta = (data["meta"] || {}) as Record<string, unknown>;
+  const account =
+    (data["account"] as { account_number?: string } | undefined)?.account_number ||
+    (typeof meta["account_number"] === "string" ? meta["account_number"] : null) ||
+    (typeof meta["recipientaccountnumber"] === "string"
+      ? meta["recipientaccountnumber"]
+      : null) ||
+    (typeof meta["virtualaccountnumber"] === "string" ? meta["virtualaccountnumber"] : null);
+
+  const result = await creditWalletFromTransfer({
+    reference,
+    amount,
+    accountNumber: account,
+    customerEmail: email,
+    txRef: txRef || null,
+  });
+
+  return { ok: true, credited: result.credited };
+}

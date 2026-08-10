@@ -17,7 +17,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { naira } from "@/lib/pricing";
 import { fetchAccount } from "@/lib/account";
-import { getWalletFundingDetails } from "@/lib/functions/fund.functions";
+import { getWalletFundingDetails, confirmWalletDeposit } from "@/lib/functions/fund.functions";
 
 export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
@@ -38,6 +38,8 @@ function FundPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const fetchFunding = useServerFn(getWalletFundingDetails);
+  const confirmDeposit = useServerFn(confirmWalletDeposit);
+  const [confirming, setConfirming] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderTab>("primary");
 
@@ -113,6 +115,25 @@ function FundPage() {
       toast.success("Permanent account refreshed");
     } catch {
       toast.error("Could not refresh funding details");
+    }
+  }
+
+  async function handleConfirmDeposit() {
+    if (confirming) return;
+    setConfirming(true);
+    try {
+      const result = await confirmDeposit();
+      await queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+      await queryClient.invalidateQueries({ queryKey: ["wallet-funding", user.id] });
+      if (result.credited > 0) {
+        toast.success(result.message);
+      } else {
+        toast.message(result.message);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not confirm deposit");
+    } finally {
+      setConfirming(false);
     }
   }
 
@@ -250,6 +271,14 @@ function FundPage() {
               >
                 <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
                 Generate / Refresh
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleConfirmDeposit()}
+                disabled={confirming}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {confirming ? "Checking Flutterwave…" : "I've paid — Confirm deposit"}
               </button>
             </div>
           ) : (
