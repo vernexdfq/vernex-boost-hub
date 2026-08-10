@@ -127,8 +127,14 @@ function VirtualNumbers() {
 
   const slotProducts = useMemo(() => {
     if (!products) return [] as NumberProduct[];
-    // Products are already scoped to the selected server tab by the API
-    return products;
+    // Live API only for this server tab — sort tiers by price then stock
+    return products
+      .slice()
+      .sort(
+        (a, b) =>
+          a.selling_price_ngn - b.selling_price_ngn ||
+          b.stock_count - a.stock_count,
+      );
   }, [products]);
 
   const filtered = useMemo(() => {
@@ -137,7 +143,8 @@ function VirtualNumbers() {
     return slotProducts.filter(
       (p) =>
         p.service_name.toLowerCase().includes(q) ||
-        p.service_key.toLowerCase().includes(q),
+        p.service_key.toLowerCase().includes(q) ||
+        p.country_name.toLowerCase().includes(q),
     );
   }, [slotProducts, query]);
 
@@ -353,12 +360,20 @@ function VirtualNumbers() {
                                 setPickerOpen(false);
                                 setQuery("");
                               }}
-                              className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
+                              className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-slate-50 ${
                                 p.id === serviceId ? "bg-indigo-50" : ""
                               }`}
                             >
-                              <span className="font-semibold text-slate-800">{p.service_name}</span>
-                              <span className="tabular-nums text-xs font-bold text-indigo-600">
+                              <span className="min-w-0">
+                                <span className="block font-semibold text-slate-800">
+                                  {p.service_name}
+                                </span>
+                                <span className="text-[11px] text-slate-500">
+                                  Available {p.stock_count.toLocaleString()} qty
+                                  {p.country_name ? ` · ${p.country_name}` : ""}
+                                </span>
+                              </span>
+                              <span className="shrink-0 rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-bold tabular-nums text-white">
                                 {naira(p.selling_price_ngn)}
                               </span>
                             </button>

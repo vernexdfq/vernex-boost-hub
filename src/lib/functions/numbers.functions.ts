@@ -72,55 +72,19 @@ export const listNumberProducts = createServerFn({ method: "GET" })
     try {
       const slotId = data?.slotId as SmsSlotId | undefined;
 
-      // Live provider catalog — one slot only, never crashes the page
+      // Live provider catalog only for a selected server slot — no dummy/static prices
       if (slotId) {
         try {
           const live = await listLiveProductsForSlot(slotId);
-          if (live.length) return live.map(fromLive);
+          return (live ?? []).map(fromLive);
         } catch (err) {
           console.error("[numbers] live catalog failed", slotId, err);
-        }
-      }
-
-      // Fallback: Supabase catalog
-      try {
-        const { supabase } = context;
-        const { data: rows, error } = await supabase
-          .from("number_products")
-          .select(
-            "id, service_key, service_name, country_code, country_name, server_id, provider, provider_cost_usd, selling_price_ngn, stock_count",
-          )
-          .eq("is_active", true)
-          .order("country_name", { ascending: true })
-          .order("service_name", { ascending: true });
-
-        if (error) {
-          console.error("[numbers] supabase catalog", error.message);
           return [];
         }
-
-        let products = (rows ?? []).map((p) => ({
-          ...p,
-          provider_cost_usd: Number(p.provider_cost_usd) || 0,
-          selling_price_ngn: Number(p.selling_price_ngn) || 0,
-          stock_count: Number(p.stock_count) || 0,
-        }));
-
-        if (slotId) {
-          products = products.filter((p) => {
-            const sid = String(p.server_id || "").toUpperCase();
-            return (
-              sid === slotId ||
-              sid.includes(slotId.replace("-", "")) ||
-              sid.endsWith(slotId.slice(-2))
-            );
-          });
-        }
-        return products;
-      } catch (err) {
-        console.error("[numbers] supabase fallback failed", err);
-        return [];
       }
+
+      // No slot: return empty (UI always selects a slot)
+      return [];
     } catch (err) {
       console.error("[numbers] listNumberProducts fatal", err);
       return [];

@@ -25,7 +25,7 @@ export type LiveSmsProduct = {
   stock_count: number;
 };
 
-const MAX_PRODUCTS = 60;
+const MAX_PRODUCTS = 120;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const FETCH_MS = 3500;
 
@@ -159,23 +159,50 @@ async function fetchActivatePrices(
     for (const [svc, info] of Object.entries(services)) {
       if (parsed >= MAX_PRODUCTS) break;
       if (!info || typeof info !== "object") continue;
-      const cost = Number((info as { cost?: number; price?: number }).cost ?? (info as { price?: number }).price ?? 0);
-      const count = Number((info as { count?: number }).count ?? 0);
-      if (!Number.isFinite(cost) || cost <= 0 || count <= 0) continue;
       const treatUs = countryFilter === "usa" || isUs;
-      out.push({
-        id: `live-${provider}-${countryId}-${svc}`,
-        service_key: svc,
-        service_name: prettyService(svc),
-        country_code: treatUs ? "US" : String(countryId).slice(0, 3).toUpperCase(),
-        country_name: treatUs ? "United States" : `Country ${countryId}`,
-        server_id: "",
-        provider,
-        provider_cost_usd: cost,
-        selling_price_ngn: smsSellPriceNgn(cost),
-        stock_count: Math.min(count, 9999),
-      });
-      parsed++;
+      const asRec = info as Record<string, unknown>;
+      // Flat { cost, count }
+      if ("cost" in asRec || "price" in asRec || "count" in asRec) {
+        const cost = Number(asRec.cost ?? asRec.price ?? 0);
+        const count = Number(asRec.count ?? 0);
+        if (!Number.isFinite(cost) || cost <= 0 || count <= 0) continue;
+        out.push({
+          id: `live-${provider}-${countryId}-${svc}`,
+          service_key: svc,
+          service_name: prettyService(svc),
+          country_code: treatUs ? "US" : String(countryId).slice(0, 3).toUpperCase(),
+          country_name: treatUs ? "United States" : `Country ${countryId}`,
+          server_id: "",
+          provider,
+          provider_cost_usd: cost,
+          selling_price_ngn: smsSellPriceNgn(cost),
+          stock_count: Math.min(count, 9999),
+        });
+        parsed++;
+        continue;
+      }
+      // Nested tiers e.g. { "100": { cost, count }, "500": { cost, count } }
+      for (const [tierKey, tierVal] of Object.entries(asRec)) {
+        if (parsed >= MAX_PRODUCTS) break;
+        if (!tierVal || typeof tierVal !== "object") continue;
+        const tv = tierVal as { cost?: number; price?: number; count?: number };
+        const cost = Number(tv.cost ?? tv.price ?? 0);
+        const count = Number(tv.count ?? tierKey ?? 0);
+        if (!Number.isFinite(cost) || cost <= 0 || count <= 0) continue;
+        out.push({
+          id: `live-${provider}-${countryId}-${svc}-${tierKey}`,
+          service_key: svc,
+          service_name: `${prettyService(svc)} · ${count.toLocaleString()} qty`,
+          country_code: treatUs ? "US" : String(countryId).slice(0, 3).toUpperCase(),
+          country_name: treatUs ? "United States" : `Country ${countryId}`,
+          server_id: "",
+          provider,
+          provider_cost_usd: cost,
+          selling_price_ngn: smsSellPriceNgn(cost),
+          stock_count: Math.min(count, 9999),
+        });
+        parsed++;
+      }
     }
   }
   return out;
@@ -220,28 +247,27 @@ async function fetchFiveSimPrices(
     for (const [product, operators] of Object.entries(products)) {
       if (parsed >= MAX_PRODUCTS) break;
       if (!operators || typeof operators !== "object") continue;
-      let bestCost = Infinity;
-      let totalCount = 0;
-      for (const op of Object.values(operators)) {
+      // One listing per operator = multi-tier price options (stock + rate)
+      for (const [operator, op] of Object.entries(operators)) {
+        if (parsed >= MAX_PRODUCTS) break;
         const cost = Number(op?.cost ?? 0);
         const count = Number(op?.count ?? 0);
-        if (count > 0 && cost > 0 && cost < bestCost) bestCost = cost;
-        if (count > 0) totalCount += count;
+        if (!(count > 0 && cost > 0)) continue;
+        const opLabel = operator && operator !== "any" ? ` · ${operator}` : "";
+        out.push({
+          id: `live-fivesim-${country}-${product}-${operator}`,
+          service_key: product,
+          service_name: `${prettyService(product)}${opLabel}`,
+          country_code: isUs ? "US" : country.slice(0, 3).toUpperCase(),
+          country_name: isUs ? "United States" : country,
+          server_id: "",
+          provider: "fivesim",
+          provider_cost_usd: cost,
+          selling_price_ngn: smsSellPriceNgn(cost),
+          stock_count: Math.min(count, 9999),
+        });
+        parsed++;
       }
-      if (!Number.isFinite(bestCost) || bestCost === Infinity || totalCount <= 0) continue;
-      out.push({
-        id: `live-fivesim-${country}-${product}`,
-        service_key: product,
-        service_name: prettyService(product),
-        country_code: isUs ? "US" : country.slice(0, 3).toUpperCase(),
-        country_name: isUs ? "United States" : country,
-        server_id: "",
-        provider: "fivesim",
-        provider_cost_usd: bestCost,
-        selling_price_ngn: smsSellPriceNgn(bestCost),
-        stock_count: Math.min(totalCount, 9999),
-      });
-      parsed++;
     }
   }
   return out;
@@ -365,9 +391,13 @@ export async function buyLiveNumber(input: {
   try {
     if (meta.provider === "fivesim" && id.startsWith("live-fivesim-")) {
       const rest = id.slice("live-fivesim-".length);
-      const [country, ...prodParts] = rest.split("-");
-      const product = prodParts.join("-");
-      const buyUrl = `https://5sim.net/v1/user/buy/activation/${encodeURIComponent(country)}/any/${encodeURIComponent(product)}`;
+      const parts = rest.split("-");
+      const country = parts[0] || "usa";
+      // id: live-fivesim-{country}-{product}-{operator?}
+      const operator = parts.length >= 3 ? parts[parts.length - 1] : "any";
+      const product =
+        parts.length >= 3 ? parts.slice(1, -1).join("-") : parts.slice(1).join("-");
+      const buyUrl = `https://5sim.net/v1/user/buy/activation/${encodeURIComponent(country)}/${encodeURIComponent(operator || "any")}/${encodeURIComponent(product)}`;
       const res = await fetchWithTimeout(
         buyUrl,
         {
