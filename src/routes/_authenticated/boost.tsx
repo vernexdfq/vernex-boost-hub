@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AppShell } from "@/components/app-shell";
 import { naira } from "@/lib/pricing";
 import { fetchAccount } from "@/lib/account";
 import {
@@ -317,221 +316,219 @@ function BoostPage() {
   }
 
   return (
-    <AppShell>
+    <div className="min-h-screen bg-[#f4f6f9] pb-12 text-slate-800 antialiased">
       {/* Top bar */}
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
-        <Link
-          to="/dashboard"
-          aria-label="Back"
-          className="inline-flex shrink-0 items-center gap-0.5 text-sm font-bold text-primary"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
-        <div className="min-w-0 flex-1 text-center">
-          <h1 className="truncate text-[15px] font-bold tracking-tight">Boost Account</h1>
-          <p className="truncate text-[11px] text-muted-foreground">SMM delivery in minutes</p>
+      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+        <div className="flex items-center space-x-3">
+          <Link to="/dashboard" className="text-slate-600 hover:text-slate-900" aria-label="Back">
+            <ChevronLeft className="h-6 w-6" />
+          </Link>
+          <h1 className="text-lg font-bold text-slate-900">Boost Account</h1>
         </div>
-        <span className="shrink-0 rounded-full bg-indigo-500/12 px-2.5 py-1 text-xs font-black tabular-nums text-indigo-400">
+        <div className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-[#3b3cfb]">
           {naira(Math.round(balance))}
-        </span>
-        <Link
-          to="/alerts"
-          aria-label="Notifications"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-surface"
-        >
-          <Bell className="h-4 w-4 text-foreground/80" />
-        </Link>
+        </div>
       </header>
 
-      <div className="space-y-4 px-5 pt-5 pb-4">
-        {/* Platform */}
-        <section>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Platform
-          </label>
-          <div ref={platformRef} className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setPlatformOpen((o) => !o);
-                setServiceOpen(false);
-              }}
-              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-3 py-3 text-left transition hover:border-primary/30"
-            >
-              <span className="min-w-0 flex-1 truncate text-[15px] font-bold">
-                {platform || "Select platform"}
-              </span>
-              <ChevronDown
-                className={`h-5 w-5 shrink-0 text-muted-foreground transition ${platformOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {platformOpen && (
-              <div className="absolute z-30 mt-2 max-h-72 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
-                <div className="border-b border-border p-2">
-                  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
-                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <input
-                      autoFocus
-                      value={platformQuery}
-                      onChange={(e) => setPlatformQuery(e.target.value)}
-                      placeholder="Search platforms…"
-                      className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                    />
-                  </div>
-                </div>
-                <ul className="max-h-52 overflow-y-auto py-1">
-                  {filteredPlatforms.length === 0 ? (
-                    <li className="px-4 py-6 text-center text-sm text-muted-foreground">
-                      No platforms found
-                    </li>
-                  ) : (
-                    filteredPlatforms.map((p) => (
-                      <li key={p}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPlatform(p);
-                            setPlatformOpen(false);
-                            setPlatformQuery("");
-                            setCategory("");
-                            setProductId(null);
-                          }}
-                          className={`flex w-full px-4 py-2.5 text-left text-sm transition ${
-                            platform === p
-                              ? "bg-indigo-500/10 font-bold text-indigo-300"
-                              : "hover:bg-muted/50"
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Category chips */}
-        {categories.length > 0 && (
-          <section>
-            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Category
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => {
-                    setCategory(c);
-                    setProductId(null);
-                  }}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
-                    category === c
-                      ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(79,70,229,0.8)]"
-                      : "border-border bg-surface text-muted-foreground hover:border-primary/40"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
+      <main className="mx-auto mt-4 max-w-xl space-y-4 px-4">
+        {/* Hero */}
+        <div className="relative overflow-hidden rounded-2xl bg-[#0c0d78] p-5 text-white shadow-lg">
+          <div className="relative z-10">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#3b3cfb]">
+              <Rocket className="h-6 w-6 text-white" />
             </div>
-          </section>
-        )}
+            <h2 className="text-xl font-bold">Boost Your Account</h2>
+            <p className="mt-1 text-sm text-slate-300">
+              Get followers, likes, views & more instantly
+            </p>
+          </div>
+        </div>
 
-        {/* Service */}
-        <section>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Service
-          </label>
-          {productsLoading ? (
-            <Skeleton className="h-12" />
-          ) : productsError ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-center">
-              <p className="text-sm font-semibold">Couldn&apos;t load services</p>
+        {/* Wallet strip */}
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center space-x-2 text-sm font-medium text-slate-600">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            <span>WALLET BALANCE</span>
+          </div>
+          <span className="font-bold text-slate-900">{naira(Math.round(balance))}</span>
+        </div>
+
+        {/* Tip */}
+        <div className="flex items-start space-x-3 rounded-xl border border-blue-100 bg-blue-50 p-3.5">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#3b3cfb]" />
+          <p className="text-xs leading-relaxed text-blue-900">
+            <strong className="font-semibold">Quick Tip:</strong> Select a platform, pick a
+            category, choose a service, then enter your link and quantity.
+          </p>
+        </div>
+
+        {/* Form card */}
+        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          {/* Platform */}
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Platform
+            </label>
+            <div ref={platformRef} className="relative">
               <button
                 type="button"
-                onClick={() => refetch()}
-                className="mt-2 rounded-lg brand-gradient px-3 py-1.5 text-[11px] font-bold text-white"
+                onClick={() => {
+                  setPlatformOpen((o) => !o);
+                  setServiceOpen(false);
+                }}
+                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-left text-sm text-slate-800 focus:border-[#3b3cfb]"
               >
-                Retry
+                <span className="truncate font-medium">{platform || "Select platform"}</span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-slate-400 transition ${platformOpen ? "rotate-180" : ""}`}
+                />
               </button>
+              {platformOpen && (
+                <div className="absolute z-30 mt-2 max-h-72 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                  <div className="border-b border-slate-100 p-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                      <Search className="h-4 w-4 shrink-0 text-slate-400" />
+                      <input
+                        autoFocus
+                        value={platformQuery}
+                        onChange={(e) => setPlatformQuery(e.target.value)}
+                        placeholder="Search platforms…"
+                        className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+                  <ul className="max-h-52 overflow-y-auto py-1">
+                    {filteredPlatforms.length === 0 ? (
+                      <li className="px-4 py-6 text-center text-sm text-slate-400">
+                        No platforms found
+                      </li>
+                    ) : (
+                      filteredPlatforms.map((p) => (
+                        <li key={p}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPlatform(p);
+                              setPlatformOpen(false);
+                              setPlatformQuery("");
+                              setCategory("");
+                              setProductId(null);
+                            }}
+                            className={`flex w-full px-4 py-2.5 text-left text-sm transition ${
+                              platform === p
+                                ? "bg-[#3b3cfb]/10 font-semibold text-[#3b3cfb]"
+                                : "text-slate-800 hover:bg-slate-50"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
-          ) : (
+          </div>
+
+          {/* Category */}
+          {categories.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Category
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      setCategory(c);
+                      setProductId(null);
+                    }}
+                    className={`rounded-xl p-3 text-center text-sm font-semibold transition ${
+                      category === c
+                        ? "bg-[#3b3cfb] text-white shadow-sm"
+                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Service */}
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Service
+            </label>
             <div ref={serviceRef} className="relative">
               <button
                 type="button"
                 onClick={() => {
+                  if (!platform) {
+                    toast.message("Select a platform first");
+                    return;
+                  }
                   setServiceOpen((o) => !o);
                   setPlatformOpen(false);
                 }}
-                disabled={!selected}
-                className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-3 py-3 text-left transition hover:border-primary/30 disabled:opacity-60"
+                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-left text-sm text-slate-800"
               >
-                <span className="min-w-0 flex-1">
-                  {selected ? (
-                    <>
-                      <span className="block truncate text-[15px] font-bold">
-                        {selected.service_type}
-                      </span>
-                      <span className="block text-[12px] text-muted-foreground">
-                        {selected.quantity.toLocaleString("en-NG")} for{" "}
-                        {naira(selected.price_ngn)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-[15px] font-bold text-muted-foreground">
-                      {platformProducts.length === 0
-                        ? "No services for this platform yet"
-                        : "Select a service"}
-                    </span>
-                  )}
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {selected
+                    ? `${selected.service_type} (${selected.quantity.toLocaleString("en-NG")} for ${naira(Math.round(ratePer1000))})`
+                    : productsLoading
+                      ? "Loading services…"
+                      : "Select a service"}
                 </span>
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-muted-foreground transition ${serviceOpen ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 shrink-0 text-slate-400 transition ${serviceOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {serviceOpen && (
-                <div className="absolute z-30 mt-2 max-h-80 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
-                  <div className="border-b border-border p-2">
-                    <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
-                      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="absolute z-30 mt-2 max-h-72 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                  <div className="border-b border-slate-100 p-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                      <Search className="h-4 w-4 shrink-0 text-slate-400" />
                       <input
                         autoFocus
                         value={serviceQuery}
                         onChange={(e) => setServiceQuery(e.target.value)}
                         placeholder="Search services…"
-                        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                        className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
                       />
                     </div>
                   </div>
-                  <ul className="max-h-60 overflow-y-auto py-1">
+                  <ul className="max-h-52 overflow-y-auto py-1">
                     {filteredServices.length === 0 ? (
-                      <li className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        No matching services
+                      <li className="px-4 py-6 text-center text-sm text-slate-400">
+                        {productsLoading ? "Loading…" : "No services for this filter"}
                       </li>
                     ) : (
-                      filteredServices.map((s: BoostProduct) => (
+                      filteredServices.map((s) => (
                         <li key={s.id}>
                           <button
                             type="button"
                             onClick={() => {
                               setProductId(s.id);
-                              setQty(s.quantity);
                               setServiceOpen(false);
                               setServiceQuery("");
+                              setQty(Number(s.quantity) || 1000);
                             }}
-                            className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition ${
+                            className={`flex w-full flex-col px-4 py-2.5 text-left text-sm transition ${
                               productId === s.id
-                                ? "bg-indigo-500/10 font-bold text-indigo-300"
-                                : "hover:bg-muted/50"
+                                ? "bg-[#3b3cfb]/10"
+                                : "hover:bg-slate-50"
                             }`}
                           >
-                            <span className="min-w-0 truncate">{s.service_type}</span>
-                            <span className="shrink-0 tabular-nums text-xs font-semibold text-muted-foreground">
-                              {s.quantity.toLocaleString("en-NG")} · {naira(s.price_ngn)}
+                            <span className="font-semibold text-slate-900">{s.service_type}</span>
+                            <span className="text-xs text-slate-500">
+                              {s.quantity.toLocaleString("en-NG")}–
+                              {"100,000"} ·{" "}
+                              {naira(Math.round((s.price_ngn / Math.max(1, s.quantity)) * 1000))}/1k
                             </span>
                           </button>
                         </li>
@@ -541,168 +538,132 @@ function BoostPage() {
                 </div>
               )}
             </div>
-          )}
-        </section>
+          </div>
 
-        {/* URL */}
-        <section>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Profile / Post / Video / Song URL
-          </label>
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder={urlPlaceholder(platform, selected?.service_type ?? "")}
-            className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-primary"
-          />
-        </section>
-
-        {/* Quantity */}
-        <section>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Quantity
+          {/* URL */}
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Profile / Post / Video / Song URL
             </label>
-            {selected && (
-              <span className="text-[11px] font-medium text-muted-foreground">
-                Min {minQty.toLocaleString("en-NG")} · Max {maxQty.toLocaleString("en-NG")}
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={selected ? urlPlaceholder(selected.platform, selected.service_type) : "https://…"}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none focus:border-[#3b3cfb]"
+            />
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Quantity
+              </label>
+              <span className="text-xs text-slate-400">
+                Min {minQty.toLocaleString("en-NG")} - Max {maxQty.toLocaleString("en-NG")}
               </span>
+            </div>
+            <input
+              type="number"
+              value={qty}
+              onChange={(e) => setQty(Number(e.target.value) || 0)}
+              min={minQty}
+              max={maxQty}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 outline-none focus:border-[#3b3cfb]"
+            />
+          </div>
+
+          {/* Order summary */}
+          <div className="mt-2 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Order Summary
+            </h3>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Service</span>
+              <span className="max-w-[60%] truncate text-right font-medium text-slate-900">
+                {selected
+                  ? `${selected.platform} · ${selected.service_type}`
+                  : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Quantity</span>
+              <span className="font-medium text-slate-900">
+                {qty > 0 ? qty.toLocaleString("en-NG") : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Rate / 1,000</span>
+              <span className="font-medium text-slate-900">
+                {selected ? naira(Math.round(ratePer1000)) : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold text-slate-900">
+              <span>Total</span>
+              <span className="text-[#3b3cfb]">
+                {selected && qty > 0 ? naira(total) : "—"}
+              </span>
+            </div>
+            {selected && !canAfford && qty > 0 && (
+              <p className="pt-1 text-xs font-medium text-red-600">
+                Insufficient balance. Need {naira(Math.ceil(total - balance))} more.
+              </p>
             )}
           </div>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={minQty}
-            max={maxQty}
-            value={qty}
-            onChange={(e) => {
-              const n = Number(e.target.value);
-              if (Number.isFinite(n)) setQty(Math.max(0, Math.floor(n)));
-            }}
-            className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-bold tabular-nums outline-none transition focus:border-primary"
-          />
-        </section>
-
-        {/* Order summary */}
-        <section className="rounded-[20px] border border-border/80 bg-surface p-4 shadow-card-elev">
-          <h3 className="text-[15px] font-black tracking-tight">Order Summary</h3>
-          <dl className="mt-3 space-y-2 text-sm">
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">Service</dt>
-              <dd className="truncate text-right font-semibold">
-                {selected ? `${selected.platform} · ${selected.service_type}` : "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">Quantity</dt>
-              <dd className="font-semibold tabular-nums">{qty.toLocaleString("en-NG")}</dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">Rate / 1,000</dt>
-              <dd className="font-semibold tabular-nums">
-                {selected ? naira(Math.ceil(ratePer1000)) : "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3 border-t border-border pt-2">
-              <dt className="font-bold">Total</dt>
-              <dd className="text-lg font-black tabular-nums text-indigo-400">
-                {naira(total)}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted-foreground">Wallet</dt>
-              <dd
-                className={`font-semibold tabular-nums ${canAfford ? "text-foreground" : "text-destructive"}`}
-              >
-                {naira(Math.round(balance))}
-              </dd>
-            </div>
-          </dl>
-
-          {!canAfford && selected && total > 0 && (
-            <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/25 bg-destructive/5 px-3 py-2.5">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-destructive">Insufficient balance</p>
-                <p className="text-[12px] text-muted-foreground">
-                  You need {naira(Math.ceil(total - balance))} more to place this order.
-                </p>
-              </div>
-              <Link
-                to="/fund"
-                className="shrink-0 rounded-lg brand-gradient px-2.5 py-1.5 text-[11px] font-bold text-white"
-              >
-                Fund
-              </Link>
-            </div>
-          )}
 
           <button
             type="button"
-            onClick={handleOrder}
-            disabled={busy || !selected || qty < minQty}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl brand-gradient py-3.5 text-sm font-black text-white shadow-[0_12px_28px_-14px_rgba(79,70,229,0.45)] transition active:scale-[0.99] disabled:opacity-50"
+            onClick={() => void handleOrder()}
+            disabled={busy || !selected}
+            className="flex w-full items-center justify-center space-x-2 rounded-xl bg-[#3b3cfb] py-3.5 px-4 font-bold text-white shadow-lg transition hover:opacity-95 disabled:opacity-50"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-            Order Boost
+            {busy ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Rocket className="h-5 w-5" />
+            )}
+            <span>{busy ? "Placing order…" : "Order Boost"}</span>
           </button>
-        </section>
+        </div>
 
-        {/* My Orders */}
-        <section className="pt-2">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-base font-black">My Boost Orders</h2>
-            <Link
-              to="/boost-orders"
-              className="rounded-xl border border-border bg-surface px-3 py-1.5 text-[11px] font-bold text-primary"
-            >
-              View All
-            </Link>
+        {/* My orders */}
+        <section className="space-y-3 pb-4">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-sm font-bold text-slate-900">My Orders</h2>
+            {ordersLoading && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
           </div>
-
-          {ordersLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-24" />
-              ))}
-            </div>
-          ) : !orders || orders.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
-              No boost orders yet — place your first order above.
+          {!ordersLoading && (!orders || orders.length === 0) ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500">
+              No boost orders yet
             </div>
           ) : (
-            <ul className="space-y-3">
-              {orders.slice(0, 8).map((o) => {
-                const st = (o.status || "pending").toLowerCase();
-                const b = statusBadge[st] ?? statusBadge.pending;
-                const product = o.boost_products as {
-                  platform?: string;
-                  service_type?: string;
-                } | null;
-                const platformName = product?.platform ?? (o.metadata as { platform?: string })?.platform ?? "Boost";
-                const serviceName =
-                  product?.service_type ??
-                  (o.metadata as { service_type?: string })?.service_type ??
-                  "Service";
+            <ul className="space-y-2">
+              {(orders ?? []).map((o: any) => {
+                const st = String(o.status || "pending").toLowerCase();
+                const badge = statusBadge[st] ?? statusBadge.pending;
+                const platform = o.boost_products?.platform ?? o.platform ?? "Boost";
+                const service = o.boost_products?.service_type ?? o.service_type ?? "";
+                const paid = Number(o.amount_paid ?? o.amount ?? 0);
                 return (
                   <li
                     key={o.id}
-                    className="rounded-2xl border border-border/80 bg-surface p-4 shadow-sm"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate text-[15px] font-bold">
-                          {platformName} · {serviceName}
+                        <p className="truncate text-sm font-bold text-slate-900">
+                          {platform} · {service}
                         </p>
-                        <p className="mt-0.5 text-[12px] text-muted-foreground">
+                        <p className="mt-0.5 text-xs text-slate-500">
                           Qty {Number(o.quantity).toLocaleString("en-NG")} ·{" "}
-                          {naira(Number(o.amount_paid))} · {timeAgo(o.created_at)}
+                          {naira(paid)}
                         </p>
                       </div>
                       <span
-                        className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${b.c}`}
+                        className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${badge.c}`}
                       >
-                        {b.label}
+                        {badge.label}
                       </span>
                     </div>
                     {o.target_url && (
@@ -710,14 +671,14 @@ function BoostPage() {
                         href={o.target_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-2 flex items-center gap-1.5 truncate text-[12px] font-medium text-primary"
+                        className="mt-2 flex items-center gap-1.5 truncate text-[12px] font-medium text-[#3b3cfb]"
                       >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{o.target_url}</span>
                       </a>
                     )}
                     {(st === "pending" || st === "processing" || st === "in_progress") && (
-                      <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                      <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
                         <Clock className="h-3.5 w-3.5" /> Delivery in progress…
                       </p>
                     )}
@@ -727,20 +688,19 @@ function BoostPage() {
             </ul>
           )}
         </section>
-      </div>
+      </main>
 
-      {/* Insufficient funds modal */}
       {showFund && selected && (
-        <div className="fixed inset-0 z-50 grid place-items-end bg-foreground/40 p-4 sm:place-items-center">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-xl">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-destructive/10 text-destructive">
+        <div className="fixed inset-0 z-50 grid place-items-end bg-black/40 p-4 sm:place-items-center">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-red-50 text-red-600">
               <Wallet className="h-5 w-5" />
             </span>
-            <h3 className="mt-3 text-lg font-black">Insufficient balance</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="mt-3 text-lg font-black text-slate-900">Insufficient balance</h3>
+            <p className="mt-1 text-sm text-slate-500">
               This boost costs {naira(total)} but your wallet has {naira(Math.round(balance))}.
               Fund{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-slate-900">
                 {naira(Math.ceil(total - balance))}
               </span>{" "}
               more to continue.
@@ -749,13 +709,13 @@ function BoostPage() {
               <button
                 type="button"
                 onClick={() => setShowFund(false)}
-                className="flex-1 rounded-xl border border-border bg-background py-3 text-sm font-bold"
+                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-800"
               >
                 Cancel
               </button>
               <Link
                 to="/fund"
-                className="flex-1 rounded-xl brand-gradient py-3 text-center text-sm font-black text-white"
+                className="flex-1 rounded-xl bg-[#3b3cfb] py-3 text-center text-sm font-black text-white"
               >
                 Fund wallet
               </Link>
@@ -763,6 +723,6 @@ function BoostPage() {
           </div>
         </div>
       )}
-    </AppShell>
+    </div>
   );
 }
