@@ -20,18 +20,24 @@ type FlwVirtualAccount = {
 };
 
 export function flutterwaveSecretKey(): string | null {
-  // Prefer explicit LIVE key env vars; never use Flutterwave test keys in production.
-  const key =
-    process.env["FLUTTERWAVE_SECRET_KEY"]?.trim() ||
-    process.env["FLW_SECRET_KEY"]?.trim() ||
-    process.env["FLUTTERWAVE_SECRET"]?.trim() ||
-    process.env["FLUTTERWAVE_LIVE_SECRET_KEY"]?.trim() ||
-    "";
-  if (!key) return null;
-  // Block accidental test-mode keys (FLWSECK_TEST...)
-  if (/_TEST/i.test(key) || key.includes("FLWSECK_TEST")) {
+  // LIVE keys only — order prefers explicit live env names.
+  const key = (
+    process.env["FLUTTERWAVE_LIVE_SECRET_KEY"] ||
+    process.env["FLUTTERWAVE_SECRET_KEY"] ||
+    process.env["FLW_SECRET_KEY"] ||
+    process.env["FLUTTERWAVE_SECRET"] ||
+    ""
+  ).trim();
+  if (!key) {
     console.error(
-      "[Flutterwave] TEST secret key detected. Set your LIVE FLUTTERWAVE_SECRET_KEY in Cloudflare.",
+      "[Flutterwave] Missing LIVE secret. Set FLUTTERWAVE_SECRET_KEY (live) in Cloudflare Production.",
+    );
+    return null;
+  }
+  // Reject Flutterwave TEST secrets (FLWSECK_TEST...)
+  if (/TEST/i.test(key) || key.startsWith("FLWPUBK_TEST") || key.startsWith("FLWSECK_TEST")) {
+    console.error(
+      "[Flutterwave] TEST key detected. Replace with your LIVE FLUTTERWAVE_SECRET_KEY in Cloudflare.",
     );
     return null;
   }

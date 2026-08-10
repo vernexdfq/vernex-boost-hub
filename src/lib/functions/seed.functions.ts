@@ -1,11 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/** Demo seeder disabled in production — never invent wallet balances. */
 export const seedDemoActivity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.rpc("seed_demo_activity", { _user_id: userId });
-    return { ok: true };
+  .handler(async () => {
+    return { ok: false, message: "Demo seeding is disabled." };
   });

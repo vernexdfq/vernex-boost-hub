@@ -7,6 +7,8 @@ const dashboardInputSchema = z.object({
 });
 
 export type DashboardSummary = {
+  /** Live wallet balance from the wallets table (NGN). */
+  walletBalance: number;
   transactions: Array<{
     id: string;
     type: "credit" | "debit";
@@ -35,7 +37,7 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
 
     const limit = data.limit;
-    const [txRes, notifRes, countRes] = await Promise.all([
+    const [txRes, notifRes, countRes, walletRes] = await Promise.all([
       supabase
         .from("transactions")
         .select("id, type, status, amount, description, payment_method, reference, created_at")
@@ -53,15 +55,23 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
         .eq("read", false),
+      supabase
+        .from("wallets")
+        .select("balance")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
 
     if (txRes.error) throw new Error(`Failed to load transactions: ${txRes.error.message}`);
     if (notifRes.error) throw new Error(`Failed to load notifications: ${notifRes.error.message}`);
 
+    const walletBalance = Number(walletRes.data?.balance ?? 0);
+
     return {
-      transactions: (txRes.data ?? []).map((t) => ({
-        ...t,
-        amount: Number(t.amount),
+      walletBalance: Number.isFinite(walletBalance) ? walletBalance : 0,
+      transactions: (txRes.data ?? []).map((row) => ({
+        ...row,
+        amount: Number(row.amount),
       })),
       notifications: notifRes.data ?? [],
       unreadCount: countRes.count ?? 0,

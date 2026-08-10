@@ -131,6 +131,10 @@ function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ["dashboard", user.id],
     queryFn: () => fetchSummary({ data: { limit: 5 } }),
+    staleTime: 5_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchInterval: 12_000,
   });
 
 
@@ -138,7 +142,10 @@ function Dashboard() {
     account?.profile?.full_name?.split(" ")[0] ??
     (user.email ? user.email.split("@")[0] : "there");
   const initial = displayName.charAt(0).toUpperCase();
-  const balance = account?.wallet?.balance ?? 0;
+  // Prefer server-fetched DB balance; fall back to client account query — never a hardcoded value
+  const balance = Number(
+    summary?.walletBalance ?? account?.wallet?.balance ?? 0,
+  );
   const g = greeting();
 
   const hasUnread = (summary?.unreadCount ?? 0) > 0;
