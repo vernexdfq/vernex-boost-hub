@@ -489,94 +489,125 @@ function KeypadPanel({
         )}
       </div>
 
-      {/* Dialer card — Call.com style */}
-      <div className="mx-auto w-full max-w-[340px] shrink-0 rounded-[28px] border border-[#E5E7EB] bg-white px-5 pb-6 pt-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
-        {/* Number display */}
-        <div className="mb-5 flex items-center gap-2 rounded-2xl border border-[#E8ECF1] bg-[#F8FAFC] px-3 py-3.5">
-          <button
-            type="button"
-            onClick={() => setShowCountry(true)}
-            className="flex shrink-0 items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white px-2.5 py-2 shadow-sm transition active:scale-[0.98]"
-            aria-label="Select country"
-          >
-            <span className="text-lg leading-none">
-              {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
-            </span>
-            <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8]" />
-          </button>
-          <div className="min-w-0 flex-1 truncate text-center font-mono text-[26px] font-semibold leading-none tracking-[0.04em] text-[#0F172A]">
-            {dialPrefix}
-            {digits || <span className="text-[#CBD5E1]">{""}</span>}
-            {!digits && <span className="text-[#CBD5E1]">• • •</span>}
+      {/* Dialer card — clean white phone dialer */}
+      <div className="mx-auto flex w-full max-w-sm shrink-0 flex-col justify-between rounded-[36px] border border-slate-200 bg-white p-6 shadow-2xl">
+        <div className="mb-6 space-y-4">
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowCountry(true)}
+              className="flex items-center space-x-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
+            >
+              <span className="text-base">
+                {dialPrefix === "+1" ? "🇺🇸" : dialPrefix === "+234" ? "🇳🇬" : "🌍"}
+              </span>
+              <span>
+                {dialPrefix === "+1"
+                  ? "United States"
+                  : dialPrefix === "+234"
+                    ? "Nigeria"
+                    : dialPrefix}
+              </span>
+              <ChevronDown size={14} className="text-slate-500" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={backspace}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[#94A3B8] transition hover:bg-white hover:text-[#0F172A] active:scale-95"
-            aria-label="Backspace"
-          >
-            <Delete className="h-5 w-5" />
-          </button>
+
+          <div className="text-center">
+            <div className="flex min-h-[44px] items-center justify-center text-3xl font-bold tracking-wider text-slate-900">
+              {dialPrefix}
+              {digits || <span className="text-slate-300">•</span>}
+            </div>
+          </div>
         </div>
 
-        {/* Keypad grid */}
-        <div className="mx-auto mb-6 grid max-w-[280px] grid-cols-3 gap-x-4 gap-y-3">
-          {KEYS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => press(k)}
-              className="tap-fast mx-auto flex h-[64px] w-[64px] flex-col items-center justify-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:bg-[#F1F5F9] active:scale-95 active:bg-[#E8EEF5]"
-            >
-              <span className="font-mono text-[22px] font-semibold leading-none text-[#0F172A]">
-                {k}
-              </span>
-              {KEY_LETTERS[k] ? (
-                <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
-                  {KEY_LETTERS[k]}
-                </span>
-              ) : (
-                <span className="mt-1 h-[9px]" />
-              )}
-            </button>
+        <div className="space-y-3.5 px-2">
+          {(
+            [
+              [
+                { num: "1", letters: "" },
+                { num: "2", letters: "ABC" },
+                { num: "3", letters: "DEF" },
+              ],
+              [
+                { num: "4", letters: "GHI" },
+                { num: "5", letters: "JKL" },
+                { num: "6", letters: "MNO" },
+              ],
+              [
+                { num: "7", letters: "PQRS" },
+                { num: "8", letters: "TUV" },
+                { num: "9", letters: "WXYZ" },
+              ],
+              [
+                { num: "*", letters: "" },
+                { num: "0", letters: "+" },
+                { num: "#", letters: "" },
+              ],
+            ] as const
+          ).map((row, rowIndex) => (
+            <div key={rowIndex} className="grid grid-cols-3 gap-4">
+              {row.map((btn) => (
+                <button
+                  key={btn.num}
+                  type="button"
+                  onClick={() => press(btn.num)}
+                  className="group mx-auto flex h-16 w-16 flex-col items-center justify-center rounded-full border border-slate-200/80 bg-slate-50 shadow-[0_2px_4px_rgba(0,0,0,0.04)] transition hover:bg-slate-100 active:scale-95 active:bg-slate-200"
+                >
+                  <span className="text-xl font-semibold leading-none text-slate-900">
+                    {btn.num}
+                  </span>
+                  {btn.letters ? (
+                    <span className="mt-0.5 text-[10px] font-bold tracking-widest text-slate-400">
+                      {btn.letters}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
           ))}
         </div>
 
-        {/* Call actions */}
-        <div className="mx-auto flex max-w-[280px] items-center justify-between px-2">
-          <button
-            type="button"
-            onClick={() =>
-              toast.message("Video", {
-                description: "Video sessions attach to your active rented line.",
-              })
-            }
-            className="tap-fast grid h-14 w-14 place-items-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] text-[#0F172A] transition hover:bg-[#F1F5F9] active:scale-95"
-            aria-label="Video"
-          >
-            <Video className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={call}
-            className="tap-fast grid h-[68px] w-[68px] place-items-center rounded-full bg-[#6366F1] text-white shadow-[0_10px_28px_rgba(79,70,229,0.35)] transition hover:bg-[#4F46E5] active:scale-95"
-            aria-label="Call"
-          >
-            <Phone className="h-7 w-7 fill-current" />
-          </button>
-          <button
-            type="button"
-            onClick={backspace}
-            className="tap-fast grid h-14 w-14 place-items-center rounded-full border border-[#EEF1F5] bg-[#F8FAFC] text-[#0F172A] transition hover:bg-[#F1F5F9] active:scale-95"
-            aria-label="Delete"
-          >
-            <Delete className="h-5 w-5" />
-          </button>
+        <div className="mt-6 grid grid-cols-3 items-center px-2">
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() =>
+                toast.message("Video", {
+                  description: "Video sessions attach to your active rented line.",
+                })
+              }
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 shadow-sm transition hover:bg-slate-100 active:scale-95"
+              aria-label="Video"
+            >
+              <Video size={20} />
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={call}
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-[#16C784] text-white shadow-lg shadow-[#16C784]/30 transition hover:bg-emerald-600 active:scale-95"
+              aria-label="Call"
+            >
+              <Phone size={24} className="fill-current" />
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={backspace}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 shadow-sm transition hover:bg-slate-100 active:scale-95"
+              aria-label="Delete"
+            >
+              <Delete size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 function NumbersPanel({ onBrowse }: { onBrowse: () => void }) {
   const { user } = Route.useRouteContext();
