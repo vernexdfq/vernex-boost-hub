@@ -27,6 +27,7 @@ import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
 import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
 import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
+import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -122,6 +123,11 @@ const AuthenticatedAdminPricingRoute =
     path: '/admin/pricing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiFlutterwaveWebhookRoute = ApiFlutterwaveWebhookRouteImport.update({
+  id: '/api/flutterwave/webhook',
+  path: '/api/flutterwave/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated/reward': typeof AuthenticatedRewardRoute
   '/_authenticated/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
   '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin/pricing'
+    | '/api/flutterwave/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin/pricing'
+    | '/api/flutterwave/webhook'
   id:
     | '__root__'
     | '/'
@@ -241,12 +252,14 @@ export interface FileRouteTypes {
     | '/_authenticated/reward'
     | '/_authenticated/virtual-numbers'
     | '/_authenticated/admin/pricing'
+    | '/api/flutterwave/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiFlutterwaveWebhookRoute: typeof ApiFlutterwaveWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -377,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/flutterwave/webhook': {
+      id: '/api/flutterwave/webhook'
+      path: '/api/flutterwave/webhook'
+      fullPath: '/api/flutterwave/webhook'
+      preLoaderRoute: typeof ApiFlutterwaveWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -423,6 +443,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiFlutterwaveWebhookRoute: ApiFlutterwaveWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
