@@ -25,9 +25,9 @@ export type LiveSmsProduct = {
   stock_count: number;
 };
 
-const MAX_PRODUCTS = 40;
+const MAX_PRODUCTS = 80;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const FETCH_MS = 2500;
+const FETCH_MS = 4000;
 
 const SERVICE_NAMES: Record<string, string> = {
   wa: "WhatsApp",
@@ -66,11 +66,6 @@ function activateBase(provider: SmsProviderId): string {
         process.env.GRIZZLY_API_URL?.trim() ||
         "https://api.grizzlysms.com/stubs/handler_api.php"
       );
-    case "dogesms":
-      return (
-        process.env.DOGESMS_API_URL?.trim() ||
-        "https://api.dogesms.com/stubs/handler_api.php"
-      );
     case "smsbuyz":
       return (
         process.env.SMSBUYZ_API_URL?.trim() ||
@@ -108,6 +103,77 @@ function prioritize(products: LiveSmsProduct[]): LiveSmsProduct[] {
   return list.slice(0, MAX_PRODUCTS);
 }
 
+
+/** DogeSMS uses a modern REST API (not SMS-Activate handler_api). */
+async function fetchDogeSmsCatalog(
+  apiKey: string,
+  countryFilter: "usa" | "all",
+): Promise<LiveSmsProduct[]> {
+  const base = (process.env.DOGESMS_API_URL?.trim() || "https://api.dogesms.com").replace(/\/+$/, "");
+  const countries =
+    countryFilter === "usa"
+      ? ["US"]
+      : ["GB", "CA", "AU", "NG", "IN", "PH", "ID", "BR", "DE", "FR", "NL", "PL"];
+
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    Authorization: `Bearer ${apiKey}`,
+  };
+
+  const out: LiveSmsProduct[] = [];
+  for (const cc of countries) {
+    if (out.length >= MAX_PRODUCTS) break;
+    try {
+      const res = await fetchWithTimeout(
+        `${base}/v1/catalog/prices?country_code=${encodeURIComponent(cc)}`,
+        { headers },
+        FETCH_MS,
+      );
+      if (res.status === 401 || res.status === 403) {
+        console.error("[sms] DogeSMS auth failed — check DOGESMS_API_KEY");
+        return [];
+      }
+      if (!res.ok) continue;
+      const json = (await res.json().catch(() => null)) as unknown;
+      const rows = Array.isArray(json)
+        ? json
+        : Array.isArray((json as { data?: unknown })?.data)
+          ? ((json as { data: unknown[] }).data)
+          : Array.isArray((json as { prices?: unknown })?.prices)
+            ? ((json as { prices: unknown[] }).prices)
+            : [];
+      for (const row of rows) {
+        if (out.length >= MAX_PRODUCTS) break;
+        if (!row || typeof row !== "object") continue;
+        const r = row as Record<string, unknown>;
+        const code = String(r.service_code ?? r.code ?? r.service ?? "").trim();
+        const name = String(r.service_name ?? r.name ?? code).trim();
+        if (!code && !name) continue;
+        // price_cents is USD cents
+        const cents = Number(r.price_cents ?? r.price ?? r.cost ?? 0);
+        const cost = cents > 20 ? cents / 100 : cents; // if already dollars keep small
+        const count = Number(r.available_count ?? r.count ?? r.stock ?? 0);
+        if (!(cost > 0) || !(count > 0)) continue;
+        out.push({
+          id: `live-dogesms-${cc}-${code || name}`,
+          service_key: code || name.toLowerCase().replace(/\s+/g, "_"),
+          service_name: prettyService(name || code),
+          country_code: cc,
+          country_name: cc === "US" ? "United States" : cc,
+          server_id: "",
+          provider: "dogesms",
+          provider_cost_usd: cost,
+          selling_price_ngn: smsSellPriceNgn(cost),
+          stock_count: Math.min(count, 9999),
+        });
+      }
+    } catch (err) {
+      console.error("[sms] DogeSMS catalog", cc, err);
+    }
+  }
+  return out;
+}
+
 async function fetchActivatePrices(
   provider: SmsProviderId,
   apiKey: string,
@@ -122,10 +188,15 @@ async function fetchActivatePrices(
 
   const res = await fetchWithTimeout(url, { headers: { Accept: "application/json" } }, FETCH_MS);
   const text = await res.text();
+  if (/BAD_KEY|BAD_ACTION|error/i.test(text) && text.length < 80) {
+    console.error(`[sms] ${provider} prices error:`, text.slice(0, 120));
+    return [];
+  }
   let json: unknown;
   try {
     json = JSON.parse(text);
   } catch {
+    console.error(`[sms] ${provider} prices non-JSON:`, text.slice(0, 120));
     return [];
   }
   if (!json || typeof json !== "object") return [];
@@ -215,62 +286,76 @@ async function fetchFiveSimPrices(
   apiKey: string,
   countryFilter: "usa" | "all",
 ): Promise<LiveSmsProduct[]> {
-  // Always scope: full global prices JSON is huge and blows Worker CPU/memory
-  const url =
+  // Scope by country — full global dump is too large for Workers
+  const countries =
     countryFilter === "usa"
-      ? "https://5sim.net/v1/guest/prices?country=usa"
-      : "https://5sim.net/v1/guest/prices?country=england"; // small sample for non-US tab; per-country is safer
+      ? ["usa"]
+      : ["england", "canada", "nigeria", "india", "philippines", "indonesia", "brazil", "germany", "france", "netherlands"];
 
-  const res = await fetchWithTimeout(
-    url,
-    {
-      headers: {
-        Accept: "application/json",
-        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-      },
-    },
-    FETCH_MS,
-  );
-  if (!res.ok) return [];
-  const json = (await res.json().catch(() => null)) as Record<
-    string,
-    Record<string, Record<string, { cost?: number; count?: number }>>
-  > | null;
-  if (!json) return [];
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+  };
 
   const out: LiveSmsProduct[] = [];
   let parsed = 0;
-  for (const [country, products] of Object.entries(json)) {
-    if (parsed >= MAX_PRODUCTS) break;
-    const isUs = /usa|united/i.test(country);
-    if (countryFilter === "usa" && !isUs) continue;
-    if (countryFilter === "all" && isUs) continue;
-    if (!products || typeof products !== "object") continue;
 
-    for (const [product, operators] of Object.entries(products)) {
-      if (parsed >= MAX_PRODUCTS) break;
-      if (!operators || typeof operators !== "object") continue;
-      // One listing per operator = multi-tier price options (stock + rate)
-      for (const [operator, op] of Object.entries(operators)) {
+  for (const country of countries) {
+    if (parsed >= MAX_PRODUCTS) break;
+    try {
+      const res = await fetchWithTimeout(
+        `https://5sim.net/v1/guest/prices?country=${encodeURIComponent(country)}`,
+        { headers },
+        FETCH_MS,
+      );
+      if (!res.ok) continue;
+      const json = (await res.json().catch(() => null)) as Record<
+        string,
+        Record<string, Record<string, { cost?: number; count?: number }>>
+      > | null;
+      if (!json) continue;
+
+      for (const [cName, products] of Object.entries(json)) {
         if (parsed >= MAX_PRODUCTS) break;
-        const cost = Number(op?.cost ?? 0);
-        const count = Number(op?.count ?? 0);
-        if (!(count > 0 && cost > 0)) continue;
-        const opLabel = operator && operator !== "any" ? ` · ${operator}` : "";
-        out.push({
-          id: `live-fivesim-${country}-${product}-${operator}`,
-          service_key: product,
-          service_name: `${prettyService(product)}${opLabel}`,
-          country_code: isUs ? "US" : country.slice(0, 3).toUpperCase(),
-          country_name: isUs ? "United States" : country,
-          server_id: "",
-          provider: "fivesim",
-          provider_cost_usd: cost,
-          selling_price_ngn: smsSellPriceNgn(cost),
-          stock_count: Math.min(count, 9999),
-        });
-        parsed++;
+        const isUs = /usa|united/i.test(cName);
+        if (countryFilter === "usa" && !isUs) continue;
+        if (countryFilter === "all" && isUs) continue;
+        if (!products || typeof products !== "object") continue;
+
+        for (const [product, operators] of Object.entries(products)) {
+          if (parsed >= MAX_PRODUCTS) break;
+          if (!operators || typeof operators !== "object") continue;
+          // Prefer cheapest operator with stock (one row per service; more services fit)
+          let bestCost = Infinity;
+          let bestCount = 0;
+          let bestOp = "any";
+          for (const [operator, op] of Object.entries(operators)) {
+            const cost = Number(op?.cost ?? 0);
+            const count = Number(op?.count ?? 0);
+            if (count > 0 && cost > 0 && cost < bestCost) {
+              bestCost = cost;
+              bestCount = count;
+              bestOp = operator;
+            }
+          }
+          if (!Number.isFinite(bestCost) || bestCost === Infinity || bestCount <= 0) continue;
+          out.push({
+            id: `live-fivesim-${cName}-${product}-${bestOp}`,
+            service_key: product,
+            service_name: prettyService(product),
+            country_code: isUs ? "US" : cName.slice(0, 3).toUpperCase(),
+            country_name: isUs ? "United States" : cName,
+            server_id: "",
+            provider: "fivesim",
+            provider_cost_usd: bestCost,
+            selling_price_ngn: smsSellPriceNgn(bestCost),
+            stock_count: Math.min(bestCount, 9999),
+          });
+          parsed++;
+        }
       }
+    } catch (err) {
+      console.error("[sms] 5sim prices", country, err);
     }
   }
   return out;
@@ -350,8 +435,10 @@ export async function listLiveProductsForSlot(slotId: SmsSlotId): Promise<LiveSm
           case "fivesim":
             products = await fetchFiveSimPrices(apiKey, filter);
             break;
-          case "grizzly":
           case "dogesms":
+            products = await fetchDogeSmsCatalog(apiKey, filter);
+            break;
+          case "grizzly":
           case "smsbuyz":
             products = await fetchActivatePrices(meta.provider, apiKey, filter);
             break;
@@ -449,26 +536,74 @@ export async function buyLiveNumber(input: {
       };
     }
 
+    if (meta.provider === "dogesms" && id.startsWith("live-dogesms-")) {
+      const rest = id.slice("live-dogesms-".length);
+      const [cc, ...svcParts] = rest.split("-");
+      const serviceCode = svcParts.join("-");
+      const base = (process.env.DOGESMS_API_URL?.trim() || "https://api.dogesms.com").replace(
+        /\/+$/,
+        "",
+      );
+      const res = await fetchWithTimeout(
+        `${base}/v1/orders`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            country_code: cc,
+            service_code: serviceCode,
+          }),
+        },
+        8000,
+      );
+      const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      const phone = String(body.phone_number ?? body.phone ?? body.number ?? "");
+      const orderId = String(body.id ?? body.order_id ?? "");
+      if (!res.ok || !phone) {
+        return {
+          ok: false,
+          message: String(
+            body.message ?? body.error ?? `DogeSMS order failed (HTTP ${res.status})`,
+          ),
+        };
+      }
+      return {
+        ok: true,
+        phoneNumber: phone,
+        providerOrderId: orderId,
+        provider: "dogesms",
+      };
+    }
+
     if (
-      (meta.provider === "grizzly" ||
-        meta.provider === "dogesms" ||
-        meta.provider === "smsbuyz") &&
+      (meta.provider === "grizzly" || meta.provider === "smsbuyz") &&
       id.startsWith(`live-${meta.provider}-`)
     ) {
       const rest = id.slice(`live-${meta.provider}-`.length);
-      const [countryId, service] = rest.split("-");
+      const parts = rest.split("-");
+      const countryId = parts[0];
+      const service = parts.slice(1).join("-").replace(/·.*$/, "").trim();
+      // service may include tier suffix — take first segment before extra
+      const serviceCode = parts[1] || service;
       const base = activateBase(meta.provider);
-      const url = `${base}?api_key=${encodeURIComponent(apiKey)}&action=getNumber&service=${encodeURIComponent(service)}&country=${encodeURIComponent(countryId)}`;
+      const url = `${base}?api_key=${encodeURIComponent(apiKey)}&action=getNumber&service=${encodeURIComponent(serviceCode)}&country=${encodeURIComponent(countryId)}`;
       const res = await fetchWithTimeout(url, {}, 8000);
       const text = await res.text();
       if (text.startsWith("ACCESS_NUMBER:")) {
-        const parts = text.trim().split(":");
+        const bits = text.trim().split(":");
         return {
           ok: true,
-          phoneNumber: parts[2] || "",
-          providerOrderId: parts[1] || "",
+          phoneNumber: bits[2] || "",
+          providerOrderId: bits[1] || "",
           provider: meta.provider,
         };
+      }
+      if (text.includes("BAD_KEY")) {
+        return { ok: false, message: "Invalid API key for this server — update the key in Cloudflare" };
       }
       return { ok: false, message: text.slice(0, 200) || "Provider rejected getNumber" };
     }

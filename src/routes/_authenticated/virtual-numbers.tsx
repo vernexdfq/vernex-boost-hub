@@ -337,7 +337,9 @@ function VirtualNumbers() {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
               <p className="text-sm font-bold text-slate-900">Server currently offline / try another server</p>
               <p className="mt-1 text-xs text-slate-600">
-                This tab could not load live services. Pick a different server or retry.
+                No live services returned for this tab. Usually this means the Cloudflare API key for
+                this provider is missing, wrong, or the provider rejected the request. Confirm the
+                key in Cloudflare, then retry.
               </p>
               <button
                 type="button"
