@@ -23,6 +23,7 @@ import {
 import { AppShell } from "@/components/app-shell";
 import { fetchAccount } from "@/lib/account";
 import { supabase } from "@/integrations/supabase/client";
+import { copyWithHaptic } from "@/lib/haptic";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -101,12 +102,12 @@ function Profile() {
   );
 
   async function handleCopyReferral() {
-    try {
-      await navigator.clipboard.writeText(referralCode);
+    const ok = await copyWithHaptic(referralCode);
+    if (ok) {
       setCopied(true);
       toast.success("Referral code copied");
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } else {
       toast.error("Could not copy");
     }
   }
@@ -123,9 +124,9 @@ function Profile() {
       <div className="min-h-screen bg-[#0F172A] px-4 pb-8 pt-6 text-slate-100">
         {/* Header card */}
         <div className="relative mb-6 overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 shadow-lg">
-          <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-[#16C784]/10 blur-2xl" />
+          <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/15 blur-2xl" />
           <div className="relative flex items-center space-x-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#16C784] to-emerald-600 text-xl font-bold text-white shadow-md">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-blue-700 text-xl font-bold text-white shadow-md">
               {initials || "V"}
             </div>
             <div>
@@ -148,7 +149,7 @@ function Profile() {
             <InfoRow icon={Phone} label="Phone" value={phone} />
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center space-x-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-[#16C784]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400">
                   <Copy size={18} />
                 </div>
                 <div>
@@ -161,7 +162,7 @@ function Profile() {
               <button
                 type="button"
                 onClick={() => void handleCopyReferral()}
-                className="flex items-center space-x-1.5 rounded-xl bg-[#16C784]/10 px-3 py-1.5 text-xs font-medium text-[#16C784] transition hover:bg-[#16C784]/20"
+                className="tap-fast flex items-center space-x-1.5 rounded-xl bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-400 transition hover:bg-blue-500/20"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 <span>{copied ? "Copied" : "Copy"}</span>
@@ -190,7 +191,7 @@ function Profile() {
             />
             <MenuRow
               icon={FileText}
-              iconClass="bg-indigo-500/10 text-indigo-400"
+              iconClass="bg-blue-500/10 text-blue-400"
               label="Privacy Policy"
               border={false}
               onClick={() => toast.message("Privacy Policy")}
@@ -209,7 +210,7 @@ function Profile() {
               className="flex w-full items-center justify-between border-b border-slate-800/60 p-4 text-left transition hover:bg-slate-800/40"
             >
               <div className="flex items-center space-x-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                   <Bell size={18} />
                 </div>
                 <span className="text-sm font-medium text-white">Notifications</span>
@@ -223,7 +224,7 @@ function Profile() {
               className="flex w-full items-center justify-between border-b border-slate-800/60 p-4 text-left transition hover:bg-slate-800/40"
             >
               <div className="flex items-center space-x-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#16C784]/10 text-[#16C784]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                   <HelpCircle size={18} />
                 </div>
                 <span className="text-sm font-medium text-white">Help & Support</span>
@@ -243,7 +244,7 @@ function Profile() {
               className="flex w-full items-center justify-between p-4 text-left transition hover:bg-slate-800/40"
             >
               <div className="flex items-center space-x-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                   <MessageSquare size={18} />
                 </div>
                 <span className="text-sm font-medium text-white">Feedback</span>
@@ -256,7 +257,7 @@ function Profile() {
         <button
           type="button"
           onClick={() => void signOut()}
-          className="flex w-full items-center justify-center space-x-2 rounded-2xl border border-slate-800 bg-slate-900 py-3.5 font-semibold text-red-400 shadow-sm transition hover:border-red-500/30 hover:bg-red-500/10"
+          className="tap-fast flex w-full items-center justify-center space-x-2 rounded-2xl border border-slate-800 bg-slate-900 py-3.5 font-semibold text-red-400 shadow-sm transition hover:border-red-500/30 hover:bg-red-500/10"
         >
           <LogOut size={18} />
           <span>Log Out</span>
@@ -289,9 +290,9 @@ function Profile() {
                   title="Telegram Support"
                   subtitle="Chat with us instantly via Telegram."
                   icon={<Send size={20} />}
-                  iconClass="bg-sky-500/10 text-sky-400"
+                  iconClass="bg-blue-500/10 text-blue-400"
                   badge="1-4 hrs"
-                  badgeClass="bg-sky-500/20 text-sky-300"
+                  badgeClass="bg-blue-500/20 text-blue-300"
                 />
                 <SupportLink
                   href="https://t.me/VernexOfficial"
@@ -300,14 +301,14 @@ function Profile() {
                   icon={<Send size={20} />}
                   iconClass="bg-blue-500/10 text-blue-400"
                   badge="Community"
-                  badgeClass="bg-emerald-500/20 text-emerald-400"
+                  badgeClass="bg-blue-500/20 text-blue-400"
                 />
                 <SupportLink
                   href="https://wa.me/2348062362896"
                   title="WhatsApp Support"
                   subtitle="Message us directly on WhatsApp."
                   icon={<MessageCircle size={20} />}
-                  iconClass="bg-emerald-500/10 text-emerald-400"
+                  iconClass="bg-blue-500/10 text-blue-400"
                   trailing={<ExternalLink size={16} className="text-slate-400" />}
                 />
                 <SupportLink
@@ -315,16 +316,16 @@ function Profile() {
                   title="Join Our WhatsApp Channel"
                   subtitle="Stay updated via WhatsApp broadcasts."
                   icon={<MessageCircle size={20} />}
-                  iconClass="bg-green-500/10 text-green-400"
+                  iconClass="bg-blue-500/10 text-blue-400"
                   badge="Community"
-                  badgeClass="bg-emerald-500/20 text-emerald-400"
+                  badgeClass="bg-blue-500/20 text-blue-400"
                 />
               </div>
 
               <button
                 type="button"
                 onClick={() => setSupportOpen(false)}
-                className="mt-6 w-full rounded-xl bg-slate-800 py-3 font-medium text-white transition hover:bg-slate-700"
+                className="tap-fast mt-6 w-full rounded-xl bg-slate-800 py-3 font-medium text-white transition hover:bg-slate-700"
               >
                 Close
               </button>
@@ -359,7 +360,7 @@ function InfoRow({
         children
       ) : (
         <div className="flex items-center space-x-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-[#16C784]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400">
             <Icon size={18} />
           </div>
           <div>
@@ -391,7 +392,7 @@ function MenuRow({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center justify-between p-4 text-left transition hover:bg-slate-800/40 ${
+      className={`tap-fast flex w-full items-center justify-between p-4 text-left transition hover:bg-slate-800/40 ${
         border ? "border-b border-slate-800/60" : ""
       }`}
     >
