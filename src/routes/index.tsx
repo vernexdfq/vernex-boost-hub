@@ -53,7 +53,7 @@ const SERVICES = [
     subtitle: "Vernex Instant OTP",
     desc: "Instant OTP numbers for WhatsApp, TikTok, Instagram, Google and 300+ services.",
     href: "/auth",
-    banner: "/banners/banner-otp.jpg",
+    banner: "/banners/banner-otp.png",
     points: ["Instant delivery", "100+ countries", "Secure & private"],
   },
   {
@@ -62,7 +62,7 @@ const SERVICES = [
     subtitle: "Vernex Rentals",
     desc: "Keep a dedicated USA or global number for hours or days — exclusive to you.",
     href: "/auth",
-    banner: "/banners/banner-rentals.jpg",
+    banner: "/banners/banner-rentals.png",
     points: ["Dedicated lines", "Voice & SMS", "Long-term validity"],
   },
   {
@@ -71,7 +71,7 @@ const SERVICES = [
     subtitle: "Social & Music Growth",
     desc: "Grow followers, likes, views and streams with tracked delivery from your Vernex wallet.",
     href: "/auth",
-    banner: "/banners/banner-boost.jpg",
+    banner: "/banners/banner-boost.png",
     points: ["Live order tracking", "Social & music platforms", "Real engagement"],
   },
   {
@@ -80,7 +80,7 @@ const SERVICES = [
     subtitle: "Premium Accounts",
     desc: "Aged and verified social accounts delivered instantly after wallet payment.",
     href: "/auth",
-    banner: "/banners/banner-accounts.jpg",
+    banner: "/banners/banner-accounts.png",
     points: ["Aged profiles", "PVA & ID verified", "Instant delivery"],
   },
 ];
