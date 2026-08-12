@@ -291,7 +291,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Services with floating banners */}
+      {/* Services with full floating banners */}
       <section id="services" className="relative px-5 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-12 max-w-xl text-center">
@@ -305,26 +305,26 @@ function Landing() {
                 key={s.id}
                 type="button"
                 onClick={enter}
-                className={`tap-fast group relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white text-left shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 ${
+                className={`tap-fast group relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white text-left shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 ${
                   i % 2 === 0 ? "animate-float-slow" : "animate-float-fast"
                 }`}
               >
-                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                {/* Full banner — no crop, no overlay */}
+                <div className="w-full overflow-hidden bg-[#0B1220]">
                   <img
                     src={s.banner}
                     alt={s.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-blue-300">
-                      {s.subtitle}
-                    </p>
-                    <h3 className="text-xl font-black text-white sm:text-2xl">{s.title}</h3>
-                  </div>
                 </div>
+
+                {/* Title + description below the full image */}
                 <div className="p-5 sm:p-6">
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-blue-600">
+                    {s.subtitle}
+                  </p>
+                  <h3 className="mb-2 text-lg font-black text-slate-900 sm:text-xl">{s.title}</h3>
                   <p className="mb-4 text-sm leading-relaxed text-slate-600">{s.desc}</p>
                   <div className="flex flex-wrap gap-2">
                     {s.points.map((p) => (
