@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#F4F7FB" },
+      { name: "theme-color", content: "#2563EB" },
       { title: "Vernex — Virtual Numbers, SMM & Wallet" },
       { name: "description", content: "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding." },
       { name: "author", content: "Vernex" },
@@ -149,6 +149,17 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Register PWA service worker — instant home-screen launch, no flash
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    const onLoad = () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    };
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad);
+    return () => window.removeEventListener("load", onLoad);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
