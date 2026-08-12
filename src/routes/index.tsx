@@ -71,7 +71,8 @@ const SERVICES = [
     subtitle: "Social & Music Growth",
     desc: "Grow followers, likes, views and streams with tracked delivery from your Vernex wallet.",
     href: "/auth",
-    banner: "/banners/banner-boost.png",
+    // File on disk for growth/rocket art is banner-accounts.png (upload names were swapped)
+    banner: "/banners/banner-accounts.png",
     points: ["Live order tracking", "Social & music platforms", "Real engagement"],
   },
   {
@@ -80,7 +81,8 @@ const SERVICES = [
     subtitle: "Premium Accounts",
     desc: "Aged and verified social accounts delivered instantly after wallet payment.",
     href: "/auth",
-    banner: "/banners/banner-accounts.png",
+    // File on disk for accounts/logs art is banner-boost.png (upload names were swapped)
+    banner: "/banners/banner-boost.png",
     points: ["Aged profiles", "PVA & ID verified", "Instant delivery"],
   },
 ];
@@ -214,7 +216,7 @@ function Landing() {
           </div>
 
           <h1 className="mb-5 text-4xl font-black leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-            Your second number,{" "}
+            Your second number{" "}
             <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
               anywhere in the world.
             </span>
@@ -314,7 +316,7 @@ function Landing() {
                   <img
                     src={s.banner}
                     alt={s.title}
-                    className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+                    className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
                 </div>
