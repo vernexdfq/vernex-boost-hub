@@ -9,6 +9,10 @@ function normalizeSupabaseUrl(raw: string | undefined): string {
   return url;
 }
 
+/**
+ * Browser client — prefers VITE_* (build-time), also accepts values injected via vite.config
+ * from plain SUPABASE_URL / SUPABASE_ANON_KEY on Northflank.
+ */
 const SUPABASE_URL = normalizeSupabaseUrl(
   (import.meta.env.VITE_SUPABASE_URL as string | undefined) ||
     (import.meta.env.VITE_SUPABASE_PROJECT_URL as string | undefined),
@@ -110,7 +114,7 @@ function createSupabaseClient() {
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error(
-      '[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check Cloudflare Pages environment variables.',
+      '[Supabase] Missing URL or anon key. Set SUPABASE_URL + SUPABASE_ANON_KEY (and/or VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY) on Northflank, then redeploy.',
     );
     return createClient<Database>(
       SUPABASE_URL || 'https://placeholder.supabase.co',
