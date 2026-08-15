@@ -35,16 +35,18 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
-  // Prefer non-VITE names for server; fall back to VITE_ names if that's all Cloudflare has
+  // Prefer non-VITE names for server; fall back to VITE_ names if that's all the host has
   const SUPABASE_URL = normalizeSupabaseUrl(
     process.env['SUPABASE_URL'] ||
       process.env['VITE_SUPABASE_URL'] ||
-      process.env['SUPABASE_PROJECT_URL'],
+      process.env['SUPABASE_PROJECT_URL'] ||
+      process.env['VITE_SUPABASE_PROJECT_URL'],
   );
 
   const SUPABASE_SERVICE_ROLE_KEY = (
     process.env['SUPABASE_SERVICE_ROLE_KEY'] ||
     process.env['SUPABASE_SECRET_KEY'] ||
+    process.env['SUPABASE_SERVICE_KEY'] ||
     ''
   ).trim();
 
@@ -53,7 +55,7 @@ function createSupabaseAdminClient() {
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
     ];
-    const message = `Missing server Supabase env: ${missing.join(', ')}. Set them in Cloudflare Pages → Settings → Environment variables (Production).`;
+    const message = `Missing server Supabase env: ${missing.join(', ')}. Set them on Northflank → Environment variables, then redeploy.`;
     console.error(`[Supabase Admin] ${message}`);
     throw new Error(message);
   }
