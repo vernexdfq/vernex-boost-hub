@@ -2,14 +2,14 @@
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time public env (Vite only embeds VITE_* / our define mapping)
+# Build-time public env (Vite embeds these into the client bundle)
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ARG SUPABASE_URL
@@ -28,7 +28,6 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Nitro output + package metadata
 COPY --from=build /app/.output ./.output
 COPY --from=build /app/package.json ./package.json
 
