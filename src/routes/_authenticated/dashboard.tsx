@@ -61,7 +61,7 @@ const quickActions = [
     label: "Rent Number",
     icon: PhoneForwarded,
     tint: "bg-sky-500/10 text-sky-500 border-sky-500/20",
-    to: "/rent-number",
+    to: "/rental/calls",
   },
   {
     label: "Get Affiliate Website",
@@ -130,7 +130,6 @@ function Dashboard() {
     refetchInterval: 15_000,
   });
 
-  // Live wallet balance: subscribe to DB changes for this user
   useEffect(() => {
     const channel = supabase
       .channel(`wallet-${user.id}`)
@@ -166,7 +165,6 @@ function Dashboard() {
     };
   }, [user.id, queryClient]);
 
-
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ["dashboard", user.id],
     queryFn: () => fetchSummary({ data: { limit: 5 } }),
@@ -176,12 +174,10 @@ function Dashboard() {
     refetchInterval: 12_000,
   });
 
-
   const displayName =
     account?.profile?.full_name?.split(" ")[0] ??
     (user.email ? user.email.split("@")[0] : "there");
   const initial = displayName.charAt(0).toUpperCase();
-  // Prefer server-fetched DB balance; fall back to client account query — never a hardcoded value
   const balance = Number(
     summary?.walletBalance ?? account?.wallet?.balance ?? 0,
   );
