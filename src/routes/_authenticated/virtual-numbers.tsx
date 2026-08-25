@@ -155,6 +155,7 @@ function VirtualNumbers() {
 
   const balance = account?.wallet?.balance ?? 0;
   const activeSlot = SERVER_SLOTS.find((s) => s.id === serverId) ?? SERVER_SLOTS[0];
+  const isUsaSlot = activeSlot.group === "usa";
 
   const slotProducts = useMemo(() => {
     if (!Array.isArray(products)) return [] as NumberProduct[];
@@ -204,20 +205,29 @@ function VirtualNumbers() {
     setServiceOpen(false);
   }, [serverId]);
 
+  // USA slots: lock country to US (no picker). All Countries: pick first / US if present.
   useEffect(() => {
+    if (isUsaSlot) {
+      const us = countries.find((c) => c.key === "US" || /united|usa/i.test(c.name));
+      setCountryKey(us?.key ?? "US");
+      return;
+    }
     if (!countryKey && countries.length) {
       const us = countries.find((c) => c.key === "US" || /united|usa/i.test(c.name));
       setCountryKey((us ?? countries[0]).key);
     }
-  }, [countries, countryKey]);
+  }, [countries, countryKey, isUsaSlot]);
 
   const countryProducts = useMemo(() => {
+    // USA server tabs: show all products from that slot (already USA-scoped by API)
+    if (isUsaSlot) return slotProducts;
     if (!countryKey) return slotProducts;
     return slotProducts.filter(
-      (p) => (p.country_code || p.country_name || "").toUpperCase() === countryKey
-        || (p.country_code || "").toUpperCase() === countryKey,
+      (p) =>
+        (p.country_code || p.country_name || "").toUpperCase() === countryKey ||
+        (p.country_code || "").toUpperCase() === countryKey,
     );
-  }, [slotProducts, countryKey]);
+  }, [slotProducts, countryKey, isUsaSlot]);
 
   const services = useMemo(() => {
     const map = new Map<string, { key: string; name: string; count: number }>();
@@ -356,9 +366,9 @@ function VirtualNumbers() {
         </Link>
       </header>
 
-      <section className="mx-auto max-w-4xl px-4 py-6 sm:px-5">
-        {/* Server selector — fixed slots for Cloudflare API mapping */}
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="mx-auto max-w-4xl px-4 py-5 sm:px-5">
+        {/* Compact server chips — Primex-style */}
+        <div className="mb-5 flex flex-wrap gap-1.5">
           {SERVER_SLOTS.map((slot) => {
             const active = slot.id === serverId;
             return (
@@ -366,38 +376,31 @@ function VirtualNumbers() {
                 key={slot.id}
                 type="button"
                 onClick={() => setServerId(slot.id)}
-                className={`tap-fast flex items-center space-x-2 rounded-2xl p-3 text-left text-sm font-bold transition-all ${
+                className={`tap-fast inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-bold transition-all sm:text-xs ${
                   active
-                    ? "border-2 border-indigo-600 bg-indigo-600 text-white shadow-md"
-                    : "border border-slate-200 bg-white text-slate-800 hover:border-indigo-300"
-                } ${slot.id === "ALL-S5" ? "col-span-2 sm:col-span-1" : ""}`}
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-300"
+                }`}
               >
-                <span className="text-lg">{slot.flag}</span>
-                <span className="min-w-0 flex-1 leading-tight">
-                  {slot.label}
-                  {active && !productsLoading && (
-                    <span className="mt-0.5 block text-[10px] font-semibold text-white/80">
-                      {products?.length ?? 0} services
-                    </span>
-                  )}
-                </span>
+                <span className="text-sm leading-none">{slot.flag}</span>
+                <span className="leading-none">{slot.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Order card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xl shadow-slate-200/50 sm:p-6">
-          <h2 className="mb-1 text-lg font-black text-slate-900">Order a Number</h2>
-          <p className="mb-5 text-xs font-medium text-slate-400">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-200/50 sm:p-5">
+          <h2 className="mb-0.5 text-base font-black text-slate-900">Order a Number</h2>
+          <p className="mb-4 text-[11px] font-medium text-slate-400">
             {activeSlot.label} · live provider catalog
           </p>
 
           {productsLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-14" />
-              <Skeleton className="h-14" />
-              <Skeleton className="h-28" />
+            <div className="space-y-3">
+              <Skeleton className="h-12" />
+              <Skeleton className="h-12" />
+              <Skeleton className="h-24" />
             </div>
           ) : productsError || (!productsLoading && slotProducts.length === 0) ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
@@ -418,54 +421,58 @@ function VirtualNumbers() {
             </div>
           ) : (
             <>
-              {/* Country */}
-              <div className="relative mb-4" ref={countryRef}>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Country ({countries.length} available)
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCountryOpen((v) => !v);
-                    setServiceOpen(false);
-                  }}
-                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-left transition hover:border-indigo-300"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
-                      🌐
+              {/* Country — only for All Countries servers (like Primex) */}
+              {!isUsaSlot && (
+                <div className="relative mb-3" ref={countryRef}>
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Country ({countries.length} available)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCountryOpen((v) => !v);
+                      setServiceOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3 text-left transition hover:border-indigo-300"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <span className="grid h-8 w-8 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                        🌐
+                      </span>
+                      <span className="text-sm font-bold text-slate-800">
+                        {activeCountry?.name ?? "Search & select a country"}
+                      </span>
                     </span>
-                    <span className="text-sm font-bold text-slate-800">
-                      {activeCountry?.name ?? "Select country"}
-                    </span>
-                  </span>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
-                </button>
-                {countryOpen && (
-                  <div className="absolute left-0 right-0 z-30 mt-2 max-h-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
-                    {countries.map((c) => (
-                      <button
-                        key={c.key}
-                        type="button"
-                        onClick={() => {
-                          setCountryKey(c.key);
-                          setCountryOpen(false);
-                        }}
-                        className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
-                          c.key === countryKey ? "bg-indigo-50 font-bold text-indigo-700" : "text-slate-800"
-                        }`}
-                      >
-                        <span>{c.name}</span>
-                        <span className="text-xs text-slate-400">{c.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                  </button>
+                  {countryOpen && (
+                    <div className="absolute left-0 right-0 z-30 mt-2 max-h-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
+                      {countries.map((c) => (
+                        <button
+                          key={c.key}
+                          type="button"
+                          onClick={() => {
+                            setCountryKey(c.key);
+                            setCountryOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
+                            c.key === countryKey
+                              ? "bg-indigo-50 font-bold text-indigo-700"
+                              : "text-slate-800"
+                          }`}
+                        >
+                          <span>{c.name}</span>
+                          <span className="text-xs text-slate-400">{c.count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Service */}
-              <div className="relative mb-5" ref={serviceRef}>
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="relative mb-4" ref={serviceRef}>
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   Service ({services.length} available)
                 </p>
                 <button
@@ -474,14 +481,14 @@ function VirtualNumbers() {
                     setServiceOpen((v) => !v);
                     setCountryOpen(false);
                   }}
-                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 text-left transition hover:border-indigo-300"
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 p-3 text-left transition hover:border-indigo-300"
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                  <span className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
                       <Smartphone className="h-4 w-4" />
                     </span>
                     <span className="text-sm font-bold text-slate-800">
-                      {activeService?.name ?? "Select service"}
+                      {activeService?.name ?? "Search & select a service"}
                     </span>
                   </span>
                   <ChevronDown className="h-4 w-4 text-slate-400" />
@@ -513,7 +520,9 @@ function VirtualNumbers() {
                                 setQuery("");
                               }}
                               className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-50 ${
-                                s.key === serviceKey ? "bg-indigo-50 font-bold text-indigo-700" : "text-slate-800"
+                                s.key === serviceKey
+                                  ? "bg-indigo-50 font-bold text-indigo-700"
+                                  : "text-slate-800"
                               }`}
                             >
                               <span>{s.name}</span>
@@ -528,11 +537,11 @@ function VirtualNumbers() {
               </div>
 
               {/* Operators / price board */}
-              <div className="mb-5">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="mb-4">
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   Select operator
                 </p>
-                <div className="mb-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3.5 py-2.5 text-[11px] leading-relaxed text-slate-600">
+                <div className="mb-2.5 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
                   <span className="font-semibold text-indigo-700">Info: </span>
                   Each operator has different pricing and delivery success rates. Higher % = more
                   likely to receive OTP.
@@ -547,20 +556,19 @@ function VirtualNumbers() {
                     {operators.map((op) => {
                       const active = op.id === productId;
                       const label =
-                        op.operator ||
-                        (op.provider ? `${op.provider}` : "default");
+                        op.operator || (op.provider ? `${op.provider}` : "default");
                       return (
                         <button
                           key={op.id}
                           type="button"
                           onClick={() => setProductId(op.id)}
-                          className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition ${
+                          className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition ${
                             active
                               ? "border-indigo-500 bg-indigo-50/40 shadow-sm"
                               : "border-slate-200 bg-white hover:border-indigo-200"
                           }`}
                         >
-                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
                             <Smartphone className="h-4 w-4" />
                           </span>
                           <span className="min-w-0 flex-1">
@@ -587,9 +595,9 @@ function VirtualNumbers() {
               </div>
 
               {selected && (
-                <div className="mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="mb-4 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5">
                   <div>
-                    <div className="text-2xl font-black text-indigo-600">
+                    <div className="text-xl font-black text-indigo-600">
                       {naira(selected.selling_price_ngn)}
                     </div>
                     <div className="mt-0.5 text-xs font-semibold text-slate-400">
@@ -604,7 +612,7 @@ function VirtualNumbers() {
               )}
 
               {showFund && (
-                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                   Not enough balance.{" "}
                   <Link to="/fund" className="font-bold text-indigo-600 underline">
                     Fund wallet
@@ -616,7 +624,7 @@ function VirtualNumbers() {
                 type="button"
                 onClick={handleOrder}
                 disabled={busy || !selected || selected.stock_count <= 0}
-                className="tap-fast flex w-full items-center justify-center space-x-2 rounded-2xl bg-indigo-600 py-4 font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="tap-fast flex w-full items-center justify-center space-x-2 rounded-2xl bg-indigo-600 py-3.5 font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -630,7 +638,7 @@ function VirtualNumbers() {
         </div>
 
         {/* Recent orders */}
-        <div className="mt-8">
+        <div className="mt-7">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-base font-black text-slate-900">Recent Orders</h2>
             <Link
