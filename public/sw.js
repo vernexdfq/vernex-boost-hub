@@ -1,21 +1,17 @@
 /* Vernex Service Worker — cache-first app shell, network-first API */
-const CACHE = "vernex-v3";
+const CACHE = "vernex-v4-logo";
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
-  "/icon-192.png",
-  "/icon-512.png",
-  "/apple-touch-icon.png",
   "/logo.png",
+  "/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
       Promise.all(
-        PRECACHE.map((url) =>
-          cache.add(url).catch(() => undefined)
-        )
+        PRECACHE.map((url) => cache.add(url).catch(() => undefined))
       )
     ).then(() => self.skipWaiting())
   );
