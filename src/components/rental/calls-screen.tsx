@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   Phone, Grid3X3, Clock, Users, Plus, Filter, MoreVertical,
   PhoneOutgoing, PhoneMissed, User, Search, ChevronDown,
-  Delete, Loader2, Hash,
+  Delete, Loader2, Hash, ArrowLeft,
 } from "lucide-react";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NumberCatalog } from "@/components/rental/number-catalog";
