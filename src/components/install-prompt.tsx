@@ -88,8 +88,8 @@ export function InstallPrompt() {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[80] flex justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_40px_rgba(15,23,42,0.18)]">
         <div className="flex items-start gap-3 p-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50 ring-1 ring-blue-100">
-            <img src="/logo.png" alt="Vernex" className="h-10 w-10 object-contain" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600 ring-1 ring-blue-700/20">
+            <img src="/vnxlogo.png" alt="Vernex" className="h-10 w-10 object-contain" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-bold text-slate-900">Install Vernex</p>
