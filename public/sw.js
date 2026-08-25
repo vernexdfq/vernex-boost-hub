@@ -1,10 +1,8 @@
 /* Vernex Service Worker — cache-first app shell, network-first API */
-const CACHE = "vernex-v2";
+const CACHE = "vernex-v3";
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
-  "/favicon.png",
-  "/favicon-32x32.png",
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
@@ -13,7 +11,13 @@ const PRECACHE = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((cache) =>
+      Promise.all(
+        PRECACHE.map((url) =>
+          cache.add(url).catch(() => undefined)
+        )
+      )
+    ).then(() => self.skipWaiting())
   );
 });
 
@@ -31,7 +35,6 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Never cache API / auth / realtime
   if (
     url.pathname.startsWith("/api") ||
     url.hostname.includes("supabase") ||
@@ -40,7 +43,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigation: network-first, fallback to cache (no blank flash)
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -54,7 +56,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: cache-first
   if (
     url.pathname.match(/\.(js|css|png|jpg|jpeg|webp|svg|woff2?|ico)$/) ||
     url.pathname.startsWith("/banners/") ||
