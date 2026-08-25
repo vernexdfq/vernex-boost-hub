@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
-  Check,
   Delete,
   Eye,
   EyeOff,
@@ -23,6 +22,9 @@ import {
   signInWithPin,
   signUpWithPin,
 } from "@/lib/functions/auth.functions";
+
+const LAST_ID_KEY = "vernex_last_identifier";
+const LAST_TAB_KEY = "vernex_last_tab";
 
 function AuthError({ error, reset }: { error: Error; reset: () => void }) {
   console.error("[auth]", error);
@@ -74,10 +76,6 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-/* ------------------------------------------------------------------ */
-/* validation                                                          */
-/* ------------------------------------------------------------------ */
-
 const emailSchema = z.string().trim().email("Enter a valid email address").max(255);
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
 const nameSchema = z.string().trim().min(2, "This field is required").max(40);
@@ -104,24 +102,50 @@ function formatPhone(value: string) {
   return d.replace(/(\d{4})(\d{3})(\d{0,4}).*/, "$1 $2 $3").trim() || d;
 }
 
+function isStandalonePwa() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 type Screen = "signin" | "pin" | "signup";
 type SignInTab = "phone" | "email";
-
-/* ------------------------------------------------------------------ */
-/* logo mark (inline — no asset load risk)                             */
-/* ------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------ */
-/* page                                                                */
-/* ------------------------------------------------------------------ */
 
 function AuthPage() {
   const navigate = useNavigate();
   const [screen, setScreen] = useState<Screen>("signin");
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<SignInTab>("phone");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Only redirect AFTER a successful login in this page session.
-  // Do NOT restore / skip login from any stored session (shared-phone safety).
+  // Restore last identifier when opening from installed PWA → jump to PIN if possible
+  useEffect(() => {
+    try {
+      const lastId = localStorage.getItem(LAST_ID_KEY);
+      const lastTab = (localStorage.getItem(LAST_TAB_KEY) as SignInTab | null) ?? "phone";
+      if (lastId && isStandalonePwa()) {
+        setTab(lastTab === "email" ? "email" : "phone");
+        if (lastTab === "email") setEmail(lastId);
+        else setPhone(lastId);
+        setScreen("pin");
+      } else if (lastId) {
+        setTab(lastTab === "email" ? "email" : "phone");
+        if (lastTab === "email") setEmail(lastId);
+        else setPhone(lastId);
+      }
+    } catch {
+      /* ignore */
+    }
+    setHydrated(true);
+  }, []);
+
   useEffect(() => {
     try {
       const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
@@ -142,14 +166,6 @@ function AuthPage() {
     }
   }, [navigate]);
 
-  /* sign-in state */
-  const [tab, setTab] = useState<SignInTab>("phone");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [pin, setPin] = useState("");
-  const [pinError, setPinError] = useState<string | null>(null);
-  const [fieldError, setFieldError] = useState<string | null>(null);
-
   const identifier = tab === "phone" ? phone : email.trim();
   const continueEnabled = tab === "phone" ? isValidPhone(phone) : isValidEmail(email);
 
@@ -167,6 +183,12 @@ function AuthPage() {
             : "We couldn't find an account with that email.",
         );
         return;
+      }
+      try {
+        localStorage.setItem(LAST_ID_KEY, identifier);
+        localStorage.setItem(LAST_TAB_KEY, tab);
+      } catch {
+        /* ignore */
       }
       setPin("");
       setPinError(null);
@@ -190,15 +212,20 @@ function AuthPage() {
         type: "email",
       });
       if (error) throw error;
+      try {
+        localStorage.setItem(LAST_ID_KEY, identifier);
+        localStorage.setItem(LAST_TAB_KEY, tab);
+      } catch {
+        /* ignore */
+      }
       toast.success("Welcome back to Vernex");
-    } catch (err) {
+    } catch {
       setPin("");
-      setPinError(err instanceof Error ? err.message : "Incorrect PIN");
+      setPinError("Invalid phone number or PIN.");
     } finally {
       setBusy(false);
     }
   }
-
 
   function pressKey(key: string) {
     if (busy) return;
@@ -215,6 +242,14 @@ function AuthPage() {
     });
   }
 
+  if (!hydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col justify-between bg-white px-4 py-6 text-slate-900 antialiased">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
@@ -222,7 +257,11 @@ function AuthPage() {
           {screen === "pin" ? (
             <button
               type="button"
-              onClick={() => setScreen("signin")}
+              onClick={() => {
+                setScreen("signin");
+                setPin("");
+                setPinError(null);
+              }}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
               aria-label="Back"
             >
@@ -242,15 +281,16 @@ function AuthPage() {
 
         <main className="my-auto w-full space-y-5 py-4">
           {screen === "pin" ? (
-            <div>
-              <h1 className="flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-                <span>Enter your PIN</span>
-                <span className="text-xl" aria-hidden>
-                  🔒
-                </span>
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                Enter your PIN{" "}
+                <span aria-hidden>🔒</span>
               </h1>
-              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
-                Authorise your login with your 4-digit Vernex PIN
+              <p className="mt-1 text-sm text-slate-500">
+                Logging in as{" "}
+                <span className="font-semibold text-indigo-600">
+                  {tab === "phone" ? formatPhone(phone) || phone : email.trim()}
+                </span>
               </p>
             </div>
           ) : (
@@ -288,12 +328,15 @@ function AuthPage() {
 
             {screen === "pin" && (
               <PinScreen
-                identifier={tab === "phone" ? formatPhone(phone) || phone : email.trim()}
                 pin={pin}
                 busy={busy}
                 error={pinError}
                 onKey={pressKey}
-                onChangeNumber={() => setScreen("signin")}
+                onChangeNumber={() => {
+                  setScreen("signin");
+                  setPin("");
+                  setPinError(null);
+                }}
               />
             )}
 
@@ -323,10 +366,6 @@ function AuthPage() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* header                                                              */
-/* ------------------------------------------------------------------ */
-
 function BrandHeading({ screen }: { screen: Screen }) {
   if (screen === "signup") {
     return (
@@ -347,7 +386,6 @@ function BrandHeading({ screen }: { screen: Screen }) {
     );
   }
 
-  // signin (default welcome)
   return (
     <div>
       <h1 className="flex items-center space-x-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
@@ -379,7 +417,6 @@ function SignInScreen(props: {
 
   return (
     <div className="space-y-4">
-      {/* Phone / Email tabs */}
       <div className="flex rounded-2xl bg-slate-100 p-1">
         <button
           type="button"
@@ -480,7 +517,6 @@ function SignInScreen(props: {
 }
 
 function PinScreen(props: {
-  identifier: string;
   pin: string;
   busy: boolean;
   error: string | null;
@@ -488,41 +524,51 @@ function PinScreen(props: {
   onChangeNumber: () => void;
 }) {
   const keys = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"], []);
+  const hasError = Boolean(props.error);
 
   return (
-    <div className="space-y-4">
-      <p className="text-xs font-medium text-slate-600">
-        Signing in as <span className="font-bold text-slate-900">{props.identifier}</span>
-      </p>
+    <div className="space-y-5">
+      {/* Primex-style error banner */}
+      {hasError && (
+        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
+            !
+          </span>
+          <span>{props.error}</span>
+        </div>
+      )}
 
-      {/* PIN dots */}
-      <div className="flex items-center justify-center gap-4 py-2" aria-label="PIN entry">
+      <p className="text-center text-sm font-medium text-slate-600">Enter your 4-digit PIN</p>
+
+      {/* Large square boxes like Primex */}
+      <div className="flex items-center justify-center gap-3" aria-label="PIN entry">
         {[0, 1, 2, 3].map((i) => {
           const filled = props.pin.length > i;
           return (
             <span
               key={i}
-              className={`h-4 w-4 rounded-full transition-all ${
-                filled
-                  ? "bg-indigo-600"
-                  : "border-2 border-slate-300 bg-transparent"
+              className={`flex h-14 w-14 items-center justify-center rounded-2xl border-2 text-xl font-black transition-all ${
+                hasError
+                  ? "border-red-400 bg-red-50 text-red-600"
+                  : filled
+                    ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                    : "border-slate-200 bg-slate-50 text-slate-300"
               }`}
-            />
+            >
+              {filled ? "•" : ""}
+            </span>
           );
         })}
       </div>
 
-      <div className="min-h-[1.1rem] text-center">
+      <div className="min-h-[1.25rem] text-center">
         {props.busy ? (
           <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" /> Verifying…
           </span>
-        ) : props.error ? (
-          <span className="text-xs font-semibold text-red-600">{props.error}</span>
         ) : null}
       </div>
 
-      {/* Keypad */}
       <div className="grid grid-cols-3 gap-2.5">
         {keys.map((key, index) =>
           key === "" ? (
@@ -558,27 +604,25 @@ function PinScreen(props: {
           onClick={props.onChangeNumber}
           className="text-slate-600 transition-colors hover:text-indigo-600"
         >
-          ← Change number / email
+          ← Change number
         </button>
         <button
           type="button"
           disabled={props.busy}
-          onClick={async () => {
-            const email = props.identifier.includes("@") ? props.identifier : null;
-            if (!email) {
-              toast.info("Go back and continue with your email address to reset your PIN.");
-              return;
-            }
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/auth`,
-            });
-            if (error) toast.error(error.message);
-            else toast.success(`We sent recovery instructions to ${email}`);
+          onClick={() => {
+            toast.info("Go back and continue with your email address to reset your PIN.");
           }}
           className="text-indigo-600 hover:underline disabled:opacity-50"
         >
           Forgot PIN?
         </button>
+      </div>
+
+      <div className="pt-2 text-center text-xs text-slate-500">
+        <span>Don&apos;t have an account? </span>
+        <Link to="/auth" className="font-bold text-indigo-600 hover:underline">
+          Create one free
+        </Link>
       </div>
     </div>
   );
@@ -653,7 +697,6 @@ function SignUpScreen(props: {
 
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-5">
-      {/* Full Name */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Full Name
@@ -673,7 +716,6 @@ function SignUpScreen(props: {
         </div>
       </div>
 
-      {/* Username */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Username
@@ -696,7 +738,6 @@ function SignUpScreen(props: {
         </p>
       </div>
 
-      {/* Phone */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Phone Number
@@ -716,7 +757,6 @@ function SignUpScreen(props: {
         </div>
       </div>
 
-      {/* Email */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Email Address
@@ -737,7 +777,6 @@ function SignUpScreen(props: {
         </div>
       </div>
 
-      {/* Password */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Password
@@ -767,7 +806,6 @@ function SignUpScreen(props: {
         <p className="pl-1 text-[11px] text-slate-400">Minimum of 8 characters</p>
       </div>
 
-      {/* PIN */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           4-Digit Transaction PIN
@@ -791,7 +829,6 @@ function SignUpScreen(props: {
         </p>
       </div>
 
-      {/* Referral */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
           Referral Code (Optional)
@@ -843,50 +880,6 @@ function SignUpScreen(props: {
           </button>
         </p>
       </div>
-
-      <div className="pt-4 text-center">
-        <div className="inline-flex items-center space-x-2 rounded-full border border-slate-200/60 bg-white/60 px-4 py-2 text-xs font-medium text-slate-500 shadow-sm backdrop-blur-sm">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <span>Bank-grade encryption · NDPR compliant</span>
-        </div>
-      </div>
     </form>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* shared bits                                                         */
-/* ------------------------------------------------------------------ */
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-      {children}
-    </p>
-  );
-}
-
-function Field({
-  icon: Icon,
-  label,
-  hint,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block rounded-2xl border border-border bg-surface px-4 py-3 shadow-card-elev transition-colors focus-within:border-primary/60">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </span>
-      <span className="mt-1.5 flex items-center gap-2.5">
-        <Icon className="h-4 w-4 shrink-0 text-primary" />
-        {children}
-      </span>
-      {hint && <span className="mt-1.5 block text-[11px] text-muted-foreground">{hint}</span>}
-    </label>
   );
 }

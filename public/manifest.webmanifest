@@ -2,7 +2,7 @@
   "name": "Vernex",
   "short_name": "Vernex",
   "description": "Virtual numbers, OTP verification, SMM growth and wallet — Vernex.",
-  "start_url": "/",
+  "start_url": "/auth",
   "scope": "/",
   "id": "/",
   "display": "standalone",
