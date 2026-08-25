@@ -1,10 +1,8 @@
-import logo from "@/assets/logo.png";
-
 /** Official Vernex mark (square) — used in headers, auth, and compact UI. */
 export function VernexMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <img
-      src={logo}
+      src="/logo.png"
       alt="Vernex"
       width={512}
       height={512}
@@ -18,7 +16,7 @@ export function VernexMark({ className = "h-9 w-9" }: { className?: string }) {
 export function VernexLogo({ className = "h-9" }: { className?: string }) {
   return (
     <img
-      src={logo}
+      src="/logo.png"
       alt="Vernex — Connect, Verify, Grow"
       width={512}
       height={512}
