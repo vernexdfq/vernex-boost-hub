@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -19,6 +19,11 @@ import {
   Send,
   MessageCircle,
   ExternalLink,
+  Delete,
+  Eye,
+  EyeOff,
+  Loader2,
+  X,
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { fetchAccount } from "@/lib/account";
@@ -67,12 +72,22 @@ function formatMemberSince(iso?: string | null) {
   }
 }
 
+async function hashPin(pin: string): Promise<string> {
+  const data = new TextEncoder().encode(`vernex-pin:${pin}`);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function Profile() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["account", user.id],
@@ -85,6 +100,7 @@ function Profile() {
     "Vernex user";
   const email = data?.profile?.email ?? user.email ?? "—";
   const phone = data?.profile?.phone ?? "—";
+  const pinSet = Boolean(data?.profile?.pin_set);
   const initials = name
     .split(/\s+/)
     .filter(Boolean)
@@ -180,22 +196,27 @@ function Profile() {
             <MenuRow
               icon={Lock}
               iconClass="bg-amber-500/10 text-amber-500"
-              label="Change PIN"
-              onClick={() => toast.message("Open Change PIN from Security soon.")}
+              label={pinSet ? "Change PIN" : "Set PIN"}
+              onClick={() => setPinOpen(true)}
             />
             <MenuRow
               icon={Shield}
               iconClass="bg-primary/10 text-primary"
               label="Change Password"
-              onClick={() => toast.message("Password change coming soon.")}
+              onClick={() => setPasswordOpen(true)}
             />
-            <MenuRow
-              icon={FileText}
-              iconClass="bg-primary/10 text-primary"
-              label="Privacy Policy"
-              border={false}
-              onClick={() => toast.message("Privacy Policy")}
-            />
+            <Link
+              to="/privacy-policy"
+              className="tap-fast flex w-full items-center justify-between p-4 text-left transition hover:bg-muted/50"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <FileText size={18} />
+                </div>
+                <span className="text-sm font-medium text-foreground">Privacy Policy</span>
+              </div>
+              <ChevronRight size={18} className="text-muted-foreground" />
+            </Link>
           </div>
         </div>
 
@@ -232,15 +253,8 @@ function Profile() {
               <ChevronRight size={18} className="text-muted-foreground" />
             </button>
 
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  "https://t.me/vernex_support",
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
+            <Link
+              to="/feedback"
               className="flex w-full items-center justify-between p-4 text-left transition hover:bg-muted/50"
             >
               <div className="flex items-center space-x-3">
@@ -250,7 +264,7 @@ function Profile() {
                 <span className="text-sm font-medium text-foreground">Feedback</span>
               </div>
               <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -280,7 +294,7 @@ function Profile() {
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
                   aria-label="Close"
                 >
-                  ✕
+                  <X size={16} />
                 </button>
               </div>
 
@@ -290,25 +304,25 @@ function Profile() {
                   title="Telegram Support"
                   subtitle="Chat with us instantly via Telegram."
                   icon={<Send size={20} />}
-                  iconClass="bg-primary/10 text-primary"
-                  badge="1-4 hrs"
-                  badgeClass="bg-primary/15 text-primary"
+                  iconClass="bg-[#2563EB]/10 text-[#2563EB]"
+                  badge="1–4 hrs"
+                  badgeClass="bg-[#2563EB]/15 text-[#2563EB]"
                 />
                 <SupportLink
                   href="https://t.me/VernexOfficial"
                   title="Join Our Telegram Channel"
                   subtitle="Get announcements, tips, and updates."
                   icon={<Send size={20} />}
-                  iconClass="bg-primary/10 text-primary"
+                  iconClass="bg-[#2563EB]/10 text-[#2563EB]"
                   badge="Community"
-                  badgeClass="bg-primary/15 text-primary"
+                  badgeClass="bg-[#2563EB]/15 text-[#2563EB]"
                 />
                 <SupportLink
                   href="https://wa.me/2348062362896"
                   title="WhatsApp Support"
                   subtitle="Message us directly on WhatsApp."
                   icon={<MessageCircle size={20} />}
-                  iconClass="bg-primary/10 text-primary"
+                  iconClass="bg-[#16A34A]/10 text-[#16A34A]"
                   trailing={<ExternalLink size={16} className="text-muted-foreground" />}
                 />
                 <SupportLink
@@ -316,9 +330,9 @@ function Profile() {
                   title="Join Our WhatsApp Channel"
                   subtitle="Stay updated via WhatsApp broadcasts."
                   icon={<MessageCircle size={20} />}
-                  iconClass="bg-primary/10 text-primary"
+                  iconClass="bg-[#16A34A]/10 text-[#16A34A]"
                   badge="Community"
-                  badgeClass="bg-primary/15 text-primary"
+                  badgeClass="bg-[#16A34A]/15 text-[#16A34A]"
                 />
               </div>
 
@@ -332,8 +346,355 @@ function Profile() {
             </div>
           </div>
         )}
+
+        {pinOpen && (
+          <ChangePinSheet
+            email={user.email ?? ""}
+            userId={user.id}
+            pinSet={pinSet}
+            onClose={() => setPinOpen(false)}
+            onSuccess={() => {
+              void queryClient.invalidateQueries({ queryKey: ["account", user.id] });
+              setPinOpen(false);
+            }}
+          />
+        )}
+
+        {passwordOpen && (
+          <ChangePasswordSheet
+            email={user.email ?? ""}
+            onClose={() => setPasswordOpen(false)}
+          />
+        )}
       </div>
     </AppShell>
+  );
+}
+
+/* ─── Change PIN sheet (Primex-style) ─────────────────────────────── */
+
+function ChangePinSheet({
+  email,
+  userId,
+  pinSet,
+  onClose,
+  onSuccess,
+}: {
+  email: string;
+  userId: string;
+  pinSet: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [step, setStep] = useState<"password" | "pin" | "confirm">("password");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const activeValue = step === "pin" ? pin : confirmPin;
+  const setActiveValue = step === "pin" ? setPin : setConfirmPin;
+
+  async function verifyPassword() {
+    if (!password.trim()) {
+      toast.error("Enter your account password");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        toast.error("Incorrect password");
+        return;
+      }
+      setStep("pin");
+    } catch {
+      toast.error("Could not verify password");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const pressDigit = useCallback(
+    (d: string) => {
+      if (activeValue.length >= 4) return;
+      const next = activeValue + d;
+      setActiveValue(next);
+      if (next.length === 4) {
+        if (step === "pin") {
+          setTimeout(() => setStep("confirm"), 180);
+        }
+      }
+    },
+    [activeValue, setActiveValue, step],
+  );
+
+  function pressDelete() {
+    setActiveValue((v) => v.slice(0, -1));
+  }
+
+  async function savePin() {
+    if (pin.length !== 4 || confirmPin.length !== 4) return;
+    if (pin !== confirmPin) {
+      toast.error("PINs do not match");
+      setConfirmPin("");
+      return;
+    }
+    setBusy(true);
+    try {
+      const pin_hash = await hashPin(pin);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ pin_hash, pin_set: true, updated_at: new Date().toISOString() })
+        .eq("id", userId);
+      if (error) throw error;
+      toast.success(pinSet ? "PIN updated successfully" : "PIN set successfully");
+      onSuccess();
+    } catch {
+      toast.error("Could not save PIN. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Auto-submit when confirm PIN is complete
+  if (step === "confirm" && confirmPin.length === 4 && !busy) {
+    // handled via button to avoid render-side effects
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="w-full max-w-md rounded-t-3xl border border-border bg-surface p-6 shadow-2xl sm:rounded-2xl">
+        <div className="mb-1 flex items-center justify-between">
+          <div className="mx-auto h-1 w-10 rounded-full bg-muted" />
+        </div>
+        <div className="mb-5 flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">
+              {step === "password"
+                ? pinSet
+                  ? "Change PIN"
+                  : "Set PIN"
+                : step === "pin"
+                  ? "Enter new 4-digit PIN"
+                  : "Confirm your PIN"}
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {step === "password"
+                ? "Enter your account password to continue"
+                : step === "pin"
+                  ? "Choose a 4-digit PIN for quick security"
+                  : "Re-enter the same 4 digits"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {step === "password" ? (
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Account password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your account password"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-3.5 pr-11 text-sm outline-none ring-primary focus:ring-2"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void verifyPassword();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                >
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void verifyPassword()}
+              className="tap-fast flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {busy ? "Verifying…" : "Continue"}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <div className="flex justify-center gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <span
+                  key={i}
+                  className={`h-3.5 w-3.5 rounded-full border-2 transition ${
+                    i < activeValue.length
+                      ? "border-primary bg-primary"
+                      : "border-border bg-transparent"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="mx-auto grid max-w-[280px] grid-cols-3 gap-3">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"].map(
+                (key) => {
+                  if (key === "") return <div key="empty" />;
+                  if (key === "del") {
+                    return (
+                      <button
+                        key="del"
+                        type="button"
+                        onClick={pressDelete}
+                        className="tap-fast flex h-14 items-center justify-center rounded-2xl border border-border bg-background text-foreground transition active:scale-95"
+                        aria-label="Delete"
+                      >
+                        <Delete size={20} />
+                      </button>
+                    );
+                  }
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => pressDigit(key)}
+                      className="tap-fast flex h-14 items-center justify-center rounded-2xl border border-border bg-background text-xl font-semibold text-foreground transition active:scale-95"
+                    >
+                      {key}
+                    </button>
+                  );
+                },
+              )}
+            </div>
+
+            {step === "confirm" && (
+              <button
+                type="button"
+                disabled={busy || confirmPin.length !== 4}
+                onClick={() => void savePin()}
+                className="tap-fast flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+              >
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {busy ? "Saving…" : "Save PIN"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Change Password sheet ───────────────────────────────────────── */
+
+function ChangePasswordSheet({
+  email,
+  onClose,
+}: {
+  email: string;
+  onClose: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  async function sendReset() {
+    if (!email) {
+      toast.error("No email on this account");
+      return;
+    }
+    setBusy(true);
+    try {
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "https://vernex.com.ng";
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/auth`,
+      });
+      if (error) throw error;
+      setSent(true);
+      toast.success("Reset link sent to your email");
+    } catch {
+      toast.error("Could not send reset email. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="w-full max-w-md rounded-t-3xl border border-border bg-surface p-6 shadow-2xl sm:rounded-2xl">
+        <div className="mb-5 flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Change Password</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              We'll send a secure reset link to your email
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {sent ? (
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Mail size={24} />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Check <span className="font-semibold text-foreground">{email}</span> for a
+              password reset link. It may take a minute to arrive.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="tap-fast w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-border bg-background px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Email
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-foreground">{email || "—"}</p>
+            </div>
+            <button
+              type="button"
+              disabled={busy || !email}
+              onClick={() => void sendReset()}
+              className="tap-fast flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail size={16} />}
+              {busy ? "Sending…" : "Send reset link"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
