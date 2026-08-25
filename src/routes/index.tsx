@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { VernexMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { InstallPrompt } from "@/components/install-prompt";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -447,6 +448,8 @@ function Landing() {
           </div>
         </div>
       </footer>
+
+      <InstallPrompt />
     </div>
   );
 }
