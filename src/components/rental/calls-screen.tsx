@@ -8,7 +8,6 @@ import {
   PhoneOutgoing, PhoneMissed, User, Search, ChevronDown,
   Delete, Loader2, Hash, ArrowLeft,
 } from "lucide-react";
-import { InstallPrompt } from "@/components/install-prompt";
 import { NumberCatalog } from "@/components/rental/number-catalog";
 import { CallsSheets } from "@/components/rental/calls-sheets";
 import {
@@ -126,9 +125,7 @@ export function RentNumberApp() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white pb-[120px] text-slate-900 antialiased">
-      {/* One-time Vernex install dropdown on rental page */}
-      <InstallPrompt variant="dropdown" />
+    <div className="min-h-[100dvh] bg-white pb-[140px] text-slate-900 antialiased">
       <header className="sticky top-0 z-40 bg-white">
         <div className="mx-auto flex h-12 max-w-lg items-center justify-between px-4">
           <Link
@@ -370,7 +367,7 @@ export function RentNumberApp() {
         )}
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex justify-center">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+max(0.5rem,env(safe-area-inset-bottom)))] z-40 flex justify-center">
         <div className="pointer-events-auto flex items-center overflow-hidden rounded-full border border-slate-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.14)]">
           {(
             [
