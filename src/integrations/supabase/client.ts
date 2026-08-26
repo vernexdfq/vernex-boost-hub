@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { AUTH_STORAGE_KEY, createCookieStorage } from '@/lib/session-idle';
 
 function normalizeSupabaseUrl(raw: string | undefined): string {
   if (!raw) return '';
@@ -48,65 +49,16 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 /**
- * In-memory auth storage only.
- * - Login is kept while the user navigates inside the open tab
- * - Refresh / close tab / new visit = must enter phone + PIN again
- * - Nothing is written to localStorage or sessionStorage (shared-phone safe)
+ * Persisted auth (cookie + localStorage mirror):
+ * - Refresh keeps the user inside the app
+ * - Idle > 2 minutes (see session-idle.ts) forces /auth on return
  */
-function createMemoryStorage(): Storage {
-  let store: Record<string, string> = {};
-  return {
-    get length() {
-      return Object.keys(store).length;
-    },
-    clear() {
-      store = {};
-    },
-    getItem(key: string) {
-      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
-    },
-    key(index: number) {
-      return Object.keys(store)[index] ?? null;
-    },
-    removeItem(key: string) {
-      delete store[key];
-    },
-    setItem(key: string, value: string) {
-      store[key] = String(value);
-    },
-  };
-}
-
-const memoryStorage = createMemoryStorage();
-
-// One-time cleanup of any old disk-based sessions so accounts cannot stay open
-if (typeof window !== 'undefined') {
-  try {
-    for (const store of [window.localStorage, window.sessionStorage]) {
-      const keys: string[] = [];
-      for (let i = 0; i < store.length; i += 1) {
-        const k = store.key(i);
-        if (
-          k &&
-          (k.includes('supabase') ||
-            k.includes('sb-') ||
-            k.startsWith('vernex-auth') ||
-            k.includes('auth-token'))
-        ) {
-          keys.push(k);
-        }
-      }
-      keys.forEach((k) => store.removeItem(k));
-    }
-  } catch {
-    // ignore
-  }
-}
+const persistedStorage = createCookieStorage();
 
 function createSupabaseClient() {
   const authOptions = {
-    storage: memoryStorage,
-    storageKey: 'vernex-auth-memory',
+    storage: persistedStorage,
+    storageKey: AUTH_STORAGE_KEY,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: false,
