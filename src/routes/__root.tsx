@@ -14,7 +14,11 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeBoot } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-
+import {
+  clearSessionActivity,
+  isSessionIdle,
+  touchSessionActivity,
+} from "@/lib/session-idle";
 
 function NotFoundComponent() {
   return (
@@ -122,7 +126,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-                <script
+        <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('vernex-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}
@@ -143,12 +147,61 @@ function RootComponent() {
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        touchSessionActivity();
+      }
+      if (event === "SIGNED_OUT") {
+        clearSessionActivity();
+      }
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Keep last-active cookie fresh while the user is interacting with the app
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let lastTouch = 0;
+    const throttleMs = 15_000;
+
+    const mark = () => {
+      const now = Date.now();
+      if (now - lastTouch < throttleMs) return;
+      lastTouch = now;
+      touchSessionActivity();
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        // Returning after leave: authenticated routes will enforce idle → /auth
+        if (isSessionIdle()) {
+          // Let route guards handle redirect; still clear activity if already idle
+          return;
+        }
+        mark();
+      }
+    };
+
+    const events: Array<keyof WindowEventMap> = [
+      "pointerdown",
+      "keydown",
+      "touchstart",
+      "scroll",
+    ];
+    events.forEach((e) => window.addEventListener(e, mark, { passive: true }));
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // Initial touch if a session may already exist
+    mark();
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, mark));
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   // Register PWA service worker — instant home-screen launch, no flash
   useEffect(() => {
