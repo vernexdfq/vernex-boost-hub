@@ -21,18 +21,6 @@ export function PinScreen(props: {
 
   return (
     <div className="space-y-5">
-      {props.loginTab === "phone" && (
-        <div className="flex items-start gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-left text-xs text-sky-800">
-          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
-            i
-          </span>
-          <span>
-            Prefer email? Go back and continue with your email address, or use{" "}
-            <strong>Forgot PIN?</strong> below with your account password.
-          </span>
-        </div>
-      )}
-
       {hasError && (
         <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
@@ -120,7 +108,7 @@ export function PinScreen(props: {
       </div>
 
       <div className="pt-2 text-center text-xs text-slate-500">
-        <span>Don&apos;t have an account? </span>
+        <span>Don't have an account? </span>
         <Link to="/auth" className="font-bold text-indigo-600 hover:underline">
           Create one free
         </Link>
