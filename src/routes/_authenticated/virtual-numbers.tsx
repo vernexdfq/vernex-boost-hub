@@ -367,8 +367,8 @@ function VirtualNumbers() {
       </header>
 
       <section className="mx-auto max-w-4xl px-4 py-5 sm:px-5">
-        {/* Compact server chips — Primex-style */}
-        <div className="mb-5 flex flex-wrap gap-1.5">
+        {/* Server chips — slightly larger for better tap targets */}
+        <div className="mb-5 flex flex-wrap gap-2">
           {SERVER_SLOTS.map((slot) => {
             const active = slot.id === serverId;
             return (
@@ -376,13 +376,13 @@ function VirtualNumbers() {
                 key={slot.id}
                 type="button"
                 onClick={() => setServerId(slot.id)}
-                className={`tap-fast inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-bold transition-all sm:text-xs ${
+                className={`tap-fast inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all ${
                   active
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-300"
                 }`}
               >
-                <span className="text-sm leading-none">{slot.flag}</span>
+                <span className="text-base leading-none">{slot.flag}</span>
                 <span className="leading-none">{slot.label}</span>
               </button>
             );
