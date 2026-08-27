@@ -8,6 +8,7 @@
  *  - minting a one-time email OTP so a phone + PIN login can be exchanged
  *    for a real Supabase session on the client
  *  - PIN reset tokens + branded emails
+ *  - Forgot PIN via account password (no email required)
  */
 
 export type RegisterInput = {
@@ -85,6 +86,14 @@ export async function verifyPin(pin: string, stored: string | null): Promise<boo
 
 function looksLikeEmail(value: string) {
   return value.includes("@");
+}
+
+function normalizeSupabaseUrl(raw: string | undefined): string {
+  if (!raw) return "";
+  let url = raw.trim();
+  url = url.replace(/\/(rest|auth|storage|functions)\/v1\/?$/i, "");
+  url = url.replace(/\/+$/, "");
+  return url;
 }
 
 /** Creates the auth user and enriches the auto-created profile row. */
@@ -309,17 +318,6 @@ export async function completePinReset(token: string, pin: string): Promise<{ ok
   if (!/^\d{4}$/.test(pin)) throw new Error("PIN must be exactly 4 digits");
   if (!token || token.length < 16) throw new Error("Invalid or expired reset link");
 
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const tokenHash = await sha256Hex(token);
-
-  // Find user by scanning is not ideal; store token→user mapping via list is heavy.
-  // We look up by generating — instead store token hash on profiles if available,
-  // else find via auth admin list is not practical. Use a lightweight profiles column update.
-  // Fallback: profiles may have no column — we use auth getUserById after client sends user id.
-  // Practical approach: encode user id in signed token.
-
-  // Token format we issue is random; we need user id. Re-issue as: userId.random
-  // For tokens already issued as pure hex, fail closed.
   throw new Error("Use completePinResetWithUser");
 }
 
@@ -442,5 +440,71 @@ export async function updatePinForUser(userId: string, pin: string): Promise<{ o
       /* ignore */
     }
   }
+  return { ok: true };
+}
+
+/**
+ * Forgot PIN (login screen): verify account password, then set a new 4-digit PIN.
+ * Works with phone or email identifier. Sends "PIN changed" email to the account email.
+ */
+export async function resetPinWithPassword(
+  identifier: string,
+  password: string,
+  pin: string,
+): Promise<{ ok: true }> {
+  if (!/^\d{4}$/.test(pin)) throw new Error("PIN must be exactly 4 digits");
+  if (!password || password.length < 8) throw new Error("Enter your account password");
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { createClient } = await import("@supabase/supabase-js");
+  const raw = identifier.trim();
+
+  const query = supabaseAdmin.from("profiles").select("id, email");
+  const { data: profile, error: profileError } = looksLikeEmail(raw)
+    ? await query.ilike("email", raw.toLowerCase()).maybeSingle()
+    : await query.eq("phone", normalizePhone(raw)).maybeSingle();
+
+  if (profileError || !profile?.email || !profile.id) {
+    throw new Error("Incorrect password or account not found");
+  }
+
+  const url = normalizeSupabaseUrl(
+    process.env["SUPABASE_URL"] ||
+      process.env["VITE_SUPABASE_URL"] ||
+      process.env["SUPABASE_PROJECT_URL"] ||
+      process.env["VITE_SUPABASE_PROJECT_URL"],
+  );
+  const anonKey = (
+    process.env["SUPABASE_ANON_KEY"] ||
+    process.env["VITE_SUPABASE_ANON_KEY"] ||
+    process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+    process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+    ""
+  ).trim();
+
+  if (!url || !anonKey) {
+    throw new Error("Server auth is not configured. Try again later.");
+  }
+
+  const authClient = createClient(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { error: signInError } = await authClient.auth.signInWithPassword({
+    email: profile.email,
+    password,
+  });
+
+  if (signInError) {
+    throw new Error("Incorrect password");
+  }
+
+  try {
+    await authClient.auth.signOut();
+  } catch {
+    /* ignore */
+  }
+
+  await updatePinForUser(profile.id, pin);
   return { ok: true };
 }

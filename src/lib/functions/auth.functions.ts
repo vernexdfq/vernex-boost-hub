@@ -9,6 +9,7 @@ import {
   requestPinResetV2,
   completePinResetV2,
   updatePinForUser,
+  resetPinWithPassword,
   type PhoneLoginTicket,
 } from "@/lib/auth.server";
 
@@ -87,3 +88,18 @@ export const saveUserPin = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), pin: pinSchema }).parse(data),
   )
   .handler(async ({ data }) => updatePinForUser(data.userId, data.pin));
+
+/** Forgot PIN on login: password + new 4-digit PIN (no email link). */
+export const forgotPinWithPassword = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        identifier: identifierSchema,
+        password: z.string().min(8).max(72),
+        pin: pinSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) =>
+    resetPinWithPassword(data.identifier, data.password, data.pin),
+  );
