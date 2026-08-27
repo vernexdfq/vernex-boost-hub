@@ -258,7 +258,7 @@ function Profile() {
                   <span className="text-sm font-semibold">Telegram Support</span>
                 </a>
                 <a
-                  href="https://wa.me/2348062362896"
+                  href="https://wa.me/2348141620644"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 rounded-xl border border-border bg-background p-4"

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Send, MessageCircle } from "lucide-react";
 
 const TELEGRAM_URL = "https://t.me/VernexOfficial";
-const WHATSAPP_URL = "https://whatsapp.com/channel/0029Vb9BSNW9Bb5tm67fvH3B";
+const WHATSAPP_URL = "https://whatsapp.com/channel/0029VbE6zLAEQIag3m2Lvf1H";
 
 /**
  * Community modal — shows each time the dashboard (Home) mounts.
