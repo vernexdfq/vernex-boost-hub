@@ -6,6 +6,9 @@ import {
   issuePhonePinTicket,
   phoneExists,
   registerAccount,
+  requestPinResetV2,
+  completePinResetV2,
+  updatePinForUser,
   type PhoneLoginTicket,
 } from "@/lib/auth.server";
 
@@ -68,3 +71,19 @@ export const signInWithPhonePin = createServerFn({ method: "POST" })
 export const signInWithPin = createServerFn({ method: "POST" })
   .inputValidator((data) => identifierPinSchema.parse(data))
   .handler(async ({ data }): Promise<PhoneLoginTicket> => issueIdentifierPinTicket(data));
+
+export const requestPinReset = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ identifier: identifierSchema }).parse(data))
+  .handler(async ({ data }) => requestPinResetV2(data.identifier));
+
+export const completePinReset = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z.object({ token: z.string().min(16), pin: pinSchema }).parse(data),
+  )
+  .handler(async ({ data }) => completePinResetV2(data.token, data.pin));
+
+export const saveUserPin = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z.object({ userId: z.string().uuid(), pin: pinSchema }).parse(data),
+  )
+  .handler(async ({ data }) => updatePinForUser(data.userId, data.pin));
