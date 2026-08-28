@@ -28,20 +28,17 @@ const identifierSchema = z
   .min(5, "Enter your phone number or email")
   .max(255, "Enter your phone number or email");
 
-const usernameSchema = z
-  .string()
-  .trim()
-  .min(3, "Username must be at least 3 characters")
-  .max(20, "Username must be 20 characters or less")
-  .regex(/^[a-zA-Z0-9_]+$/, "Use letters, numbers and underscores only");
-
 const registerSchema = z.object({
-  firstName: z.string().trim().min(2, "Enter your first name").max(40),
-  lastName: z.string().trim().min(2, "Enter your last name").max(40),
-  username: usernameSchema,
+  fullName: z.string().trim().min(2, "Enter your full name").max(100),
   phone: phoneSchema,
   email: z.string().trim().email("Enter a valid email address").max(255),
-  password: z.string().min(8, "Password must be at least 8 characters").max(72),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(72)
+    .regex(/[A-Z]/, "Password must include an uppercase letter")
+    .regex(/[a-z]/, "Password must include a lowercase letter")
+    .regex(/\d/, "Password must include a number"),
   pin: pinSchema,
   referralCode: z.string().trim().max(24).optional(),
 });
