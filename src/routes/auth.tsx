@@ -14,9 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   checkIdentifierRegistered,
   signInWithPin,
-  signUpWithPin,
 } from "@/lib/functions/auth.functions";
 import { PinScreen } from "@/components/auth/pin-screen";
+import { SignupScreen } from "@/components/auth/signup-screen";
 
 const LAST_ID_KEY = "vernex_last_identifier";
 const LAST_TAB_KEY = "vernex_last_tab";
@@ -239,15 +239,20 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col justify-between bg-white px-4 py-6 text-slate-900 antialiased">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <header className="flex w-full items-center justify-between">
-          {screen === "pin" ? (
+          {screen !== "signin" ? (
             <button
               type="button"
               onClick={() => {
-                setScreen("signin");
-                setPin("");
-                setPinError(null);
+                if (screen === "pin") {
+                  setScreen("signin");
+                  setPin("");
+                  setPinError(null);
+                } else {
+                  setScreen("signin");
+                  setFieldError(null);
+                }
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
               aria-label="Back"
             >
               <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
@@ -255,7 +260,7 @@ function AuthPage() {
           ) : (
             <Link
               to="/"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
               aria-label="Back"
             >
               <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
@@ -264,7 +269,7 @@ function AuthPage() {
           <VernexMark className="h-8 w-8 rounded-full" />
         </header>
 
-        <main className="my-auto w-full space-y-5 py-4">
+        <main className={`my-auto w-full ${screen === "signup" ? "py-6" : "space-y-5 py-4"}`}>
           {screen === "pin" ? (
             <div className="text-center sm:text-left">
               <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
@@ -279,13 +284,13 @@ function AuthPage() {
               </p>
             </div>
           ) : (
-            <div>
+            <div className={screen === "signup" ? "mb-5" : ""}>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-                {screen === "signup" ? "Create your account" : "Welcome back 👋"}
+                {screen === "signup" ? "Create your account 🚀" : "Welcome back 👋"}
               </h1>
               <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 {screen === "signup"
-                  ? "Fill in your details below to get started"
+                  ? "Fill in your details below to get started for free"
                   : "Sign in to your Vernex account"}
               </p>
             </div>
@@ -337,16 +342,20 @@ function AuthPage() {
             )}
 
             {screen === "signup" && (
-              <p className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600">
-                Account creation UI is loading. Please refresh if this stays empty.{" "}
-                <button
-                  type="button"
-                  className="font-bold text-indigo-600"
-                  onClick={() => setScreen("signin")}
-                >
-                  Back to sign in
-                </button>
-              </p>
+              <SignupScreen
+                busy={busy}
+                onSuccess={(createdEmail) => {
+                  setEmail(createdEmail);
+                  setTab("email");
+                  setFieldError(null);
+                  setScreen("signin");
+                  toast.success("Account created successfully");
+                }}
+                onBack={() => {
+                  setFieldError(null);
+                  setScreen("signin");
+                }}
+              />
             )}
           </div>
         </main>
