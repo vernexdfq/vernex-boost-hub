@@ -40,6 +40,15 @@ function formatPhone(value: string) {
   return d.replace(/(\d{4})(\d{3})(\d{0,4}).*/, "$1 $2 $3").trim() || d;
 }
 
+function buildRegistrationIdentity(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] ?? "Vernex";
+  const lastName = parts.slice(1).join(" ") || "User";
+  const base = fullName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "vernexuser";
+  const username = `${base}${Date.now().toString().slice(-5)}`.slice(0, 20);
+  return { firstName, lastName, username };
+}
+
 export function SignupScreen({ busy, onSuccess, onBack }: Props) {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -85,9 +94,10 @@ export function SignupScreen({ busy, onSuccess, onBack }: Props) {
     setSubmitting(true);
 
     try {
+      const identity = buildRegistrationIdentity(fullName);
       const result = await signUpWithPin({
         data: {
-          fullName: fullName.trim(),
+          ...identity,
           phone,
           email: email.trim().toLowerCase(),
           password,
