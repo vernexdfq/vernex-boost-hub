@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Delete, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,6 +13,7 @@ export function PinScreen(props: {
   loginTab: SignInTab;
   onKey: (key: string) => void;
   onChangeNumber: () => void;
+  onCreateAccount: () => void;
 }) {
   const keys = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"], []);
   const hasError = Boolean(props.error);
@@ -108,10 +108,14 @@ export function PinScreen(props: {
       </div>
 
       <div className="pt-2 text-center text-xs text-slate-500">
-        <span>Don't have an account? </span>
-        <Link to="/auth" className="font-bold text-indigo-600 hover:underline">
+        <span>Don&apos;t have an account? </span>
+        <button
+          type="button"
+          onClick={props.onCreateAccount}
+          className="font-bold text-indigo-600 hover:underline"
+        >
           Create one free
-        </Link>
+        </button>
       </div>
 
       {forgotOpen && (

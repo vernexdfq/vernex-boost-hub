@@ -338,6 +338,12 @@ function AuthPage() {
                   setPin("");
                   setPinError(null);
                 }}
+                onCreateAccount={() => {
+                  setPin("");
+                  setPinError(null);
+                  setFieldError(null);
+                  setScreen("signup");
+                }}
               />
             )}
 
