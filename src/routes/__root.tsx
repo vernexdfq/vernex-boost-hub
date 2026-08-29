@@ -86,14 +86,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0A1F44" },
-      { title: "Vernex — Virtual Numbers, SMM & Wallet" },
+      { title: "Verxor — Virtual Numbers, SMM & Wallet" },
       {
         name: "description",
         content:
           "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding.",
       },
-      { name: "author", content: "Vernex" },
-      { property: "og:title", content: "Vernex — Virtual Numbers, SMM & Wallet" },
+      { name: "author", content: "Verxor" },
+      { property: "og:title", content: "Verxor — Virtual Numbers, SMM & Wallet" },
       {
         property: "og:description",
         content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place.",
@@ -104,8 +104,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-      { name: "apple-mobile-web-app-title", content: "Vernex" },
-      { name: "application-name", content: "Vernex" },
+      { name: "apple-mobile-web-app-title", content: "Verxor" },
+      { name: "application-name", content: "Verxor" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "msapplication-TileColor", content: "#0A1F44" },
       { name: "msapplication-TileImage", content: "/mylogo.png" },
@@ -140,7 +140,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('vernex-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('verxor-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}
         />
         <HeadContent />
@@ -172,7 +172,6 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
-  // Keep last-active cookie fresh while the user is interacting with the app
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -212,7 +211,6 @@ function RootComponent() {
     };
   }, []);
 
-  // Register PWA service worker — instant home-screen launch, no flash
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     const onLoad = () => {
