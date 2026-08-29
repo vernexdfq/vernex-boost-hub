@@ -1,10 +1,10 @@
-/** Official Vernex mark — used in landing page header, auth, and compact UI.
+/** Official Verxor mark — used in landing page header, auth, and compact UI.
  *  Uses mylogo.png as the official brand mark. */
-export function VernexMark({ className = "h-9 w-9" }: { className?: string }) {
+export function VerxorMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <img
       src="/mylogo.png"
-      alt="Vernex"
+      alt="Verxor"
       width={512}
       height={512}
       className={`${className} object-contain`}
@@ -13,12 +13,12 @@ export function VernexMark({ className = "h-9 w-9" }: { className?: string }) {
   );
 }
 
-/** Official Vernex logo — flexible width for wider placements on the site. */
-export function VernexLogo({ className = "h-9" }: { className?: string }) {
+/** Official Verxor logo — flexible width for wider placements on the site. */
+export function VerxorLogo({ className = "h-9" }: { className?: string }) {
   return (
     <img
       src="/mylogo.png"
-      alt="Vernex — Your complete digital ecosystem"
+      alt="Verxor — Your complete digital ecosystem"
       width={512}
       height={512}
       className={`${className} w-auto object-contain`}
@@ -26,3 +26,8 @@ export function VernexLogo({ className = "h-9" }: { className?: string }) {
     />
   );
 }
+
+/** @deprecated Use VerxorMark */
+export const VernexMark = VerxorMark;
+/** @deprecated Use VerxorLogo */
+export const VernexLogo = VerxorLogo;

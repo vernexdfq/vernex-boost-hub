@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Send, MessageCircle } from "lucide-react";
 
-const TELEGRAM_URL = "https://t.me/VernexOfficial";
+const TELEGRAM_URL = "https://t.me/VerxorOfficial";
 const WHATSAPP_URL = "https://whatsapp.com/channel/0029VbE6zLAEQIag3m2Lvf1H";
 
 /**
@@ -52,7 +52,7 @@ export function TelegramModal() {
           Stay in the Loop
         </h3>
         <p className="mb-6 px-1 text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
-          Join Vernex on Telegram or WhatsApp for promotions, announcements, and exclusive offers.
+          Join Verxor on Telegram or WhatsApp for promotions, announcements, and exclusive offers.
         </p>
 
         <div className="space-y-2.5">

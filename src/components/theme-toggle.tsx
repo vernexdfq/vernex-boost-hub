@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
-const STORAGE_KEY = "vernex-theme";
+const STORAGE_KEY = "verxor-theme";
 
 export type ThemeMode = "light" | "dark";
 
