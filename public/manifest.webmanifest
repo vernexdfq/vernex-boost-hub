@@ -1,52 +1,52 @@
 {
   "name": "Vernex",
   "short_name": "Vernex",
-  "description": "Virtual numbers, OTP verification, SMM growth and wallet — Vernex.",
+  "description": "Your complete digital ecosystem — virtual numbers, OTP verification, SMM growth and wallet.",
   "start_url": "/auth",
   "scope": "/",
   "id": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#2563EB",
-  "theme_color": "#2563EB",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0A1F44",
   "lang": "en",
   "categories": ["finance", "utilities", "business"],
   "icons": [
     {
-      "src": "/vnxlogo.png",
+      "src": "/mylogo.png",
       "sizes": "1254x1254",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/vnxlogo.png",
+      "src": "/mylogo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/vnxlogo.png",
+      "src": "/mylogo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/vnxlogo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/vnxlogo.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/vnxlogo.png",
+      "src": "/mylogo.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/mylogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/mylogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

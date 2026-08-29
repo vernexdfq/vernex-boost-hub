@@ -85,28 +85,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#2563EB" },
+      { name: "theme-color", content: "#0A1F44" },
       { title: "Vernex — Virtual Numbers, SMM & Wallet" },
-      { name: "description", content: "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding." },
+      {
+        name: "description",
+        content:
+          "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding.",
+      },
       { name: "author", content: "Vernex" },
       { property: "og:title", content: "Vernex — Virtual Numbers, SMM & Wallet" },
-      { property: "og:description", content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place." },
+      {
+        property: "og:description",
+        content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place.",
+      },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/vernexlogo.png" },
-      { name: "twitter:image", content: "/vernexlogo.png" },
+      { property: "og:image", content: "/mylogo.png" },
+      { name: "twitter:image", content: "/mylogo.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Vernex" },
       { name: "application-name", content: "Vernex" },
       { name: "mobile-web-app-capable", content: "yes" },
+      { name: "msapplication-TileColor", content: "#0A1F44" },
+      { name: "msapplication-TileImage", content: "/mylogo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/vnxlogo.png", type: "image/png" },
-      { rel: "icon", href: "/vnxlogo.png", type: "image/png", sizes: "192x192" },
-      { rel: "apple-touch-icon", href: "/vnxlogo.png", sizes: "180x180" },
-      { rel: "shortcut icon", href: "/vnxlogo.png" },
+      { rel: "icon", href: "/mylogo.png", type: "image/png" },
+      { rel: "icon", href: "/mylogo.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/mylogo.png", type: "image/png", sizes: "192x192" },
+      { rel: "icon", href: "/mylogo.png", type: "image/png", sizes: "512x512" },
+      { rel: "apple-touch-icon", href: "/mylogo.png", sizes: "180x180" },
+      { rel: "apple-touch-icon", href: "/mylogo.png" },
+      { rel: "shortcut icon", href: "/mylogo.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -176,9 +188,7 @@ function RootComponent() {
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
-        // Returning after leave: authenticated routes will enforce idle → /auth
         if (isSessionIdle()) {
-          // Let route guards handle redirect; still clear activity if already idle
           return;
         }
         mark();
@@ -194,7 +204,6 @@ function RootComponent() {
     events.forEach((e) => window.addEventListener(e, mark, { passive: true }));
     document.addEventListener("visibilitychange", onVisibility);
 
-    // Initial touch if a session may already exist
     mark();
 
     return () => {
