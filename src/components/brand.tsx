@@ -26,8 +26,3 @@ export function VerxorLogo({ className = "h-9" }: { className?: string }) {
     />
   );
 }
-
-/** @deprecated Use VerxorMark */
-export const VernexMark = VerxorMark;
-/** @deprecated Use VerxorLogo */
-export const VernexLogo = VerxorLogo;
