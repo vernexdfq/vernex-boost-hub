@@ -1,10 +1,9 @@
-/* Vernex Service Worker — cache-first app shell, network-first API */
-const CACHE = "vernex-v4-logo";
+/* Verxor Service Worker — cache-first app shell, network-first API */
+const CACHE = "verxor-v4-logo";
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
-  "/logo.png",
-  "/apple-touch-icon.png",
+  "/mylogo.png",
 ];
 
 self.addEventListener("install", (event) => {

@@ -10,9 +10,9 @@ import { getDashboardSummary, markNotificationsRead } from "@/lib/functions/dash
 export const Route = createFileRoute("/_authenticated/alerts")({
   head: () => ({
     meta: [
-      { title: "Alerts — Vernex" },
-      { name: "description", content: "System notifications, order updates and product announcements from Vernex." },
-      { property: "og:title", content: "Vernex Alerts" },
+      { title: "Alerts — Verxor" },
+      { name: "description", content: "System notifications, order updates and product announcements from Verxor." },
+      { property: "og:title", content: "Verxor Alerts" },
       { property: "og:description", content: "Stay updated on your orders, refunds and new services." },
     ],
   }),
