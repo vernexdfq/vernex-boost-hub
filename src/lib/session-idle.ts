@@ -1,5 +1,5 @@
 /**
- * Vernex session idle control
+ * Verxor session idle control
  *
  * - Session itself is persisted (survives refresh)
  * - If the user leaves for more than IDLE_MS and returns, force /auth (not landing)
@@ -7,8 +7,8 @@
  */
 
 export const IDLE_MS = 2 * 60 * 1000; // 2 minutes
-export const LAST_ACTIVE_COOKIE = "vernex_last_active";
-export const AUTH_STORAGE_KEY = "vernex-auth";
+export const LAST_ACTIVE_COOKIE = "verxor_last_active";
+export const AUTH_STORAGE_KEY = "verxor-auth";
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -67,7 +67,7 @@ export function clearSessionActivity() {
  */
 export function createCookieStorage(): Storage {
   const COOKIE_PREFIX = "sb.";
-  const LS_PREFIX = "vernex-sb-";
+  const LS_PREFIX = "verxor-sb-";
 
   function cookieName(key: string) {
     return COOKIE_PREFIX + key;
