@@ -8,7 +8,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { VernexMark } from "@/components/brand";
+import { VerxorMark } from "@/components/brand";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,8 +18,8 @@ import {
 import { PinScreen } from "@/components/auth/pin-screen";
 import { SignupScreen } from "@/components/auth/signup-screen";
 
-const LAST_ID_KEY = "vernex_last_identifier";
-const LAST_TAB_KEY = "vernex_last_tab";
+const LAST_ID_KEY = "verxor_last_identifier";
+const LAST_TAB_KEY = "verxor_last_tab";
 
 function AuthError({ error, reset }: { error: Error; reset: () => void }) {
   console.error("[auth]", error);
@@ -53,11 +53,11 @@ export const Route = createFileRoute("/auth")({
   errorComponent: AuthError,
   head: () => ({
     meta: [
-      { title: "Sign In or Create Account — Vernex" },
+      { title: "Sign In or Create Account — Verxor" },
       {
         name: "description",
         content:
-          "Access your Vernex wallet, virtual numbers and SMM orders. Sign in with your phone number and PIN, or create a free account in seconds.",
+          "Access your Verxor wallet, virtual numbers and SMM orders. Sign in with your phone number and PIN, or create a free account in seconds.",
       },
     ],
   }),
@@ -203,7 +203,7 @@ function AuthPage() {
       } catch {
         /* ignore */
       }
-      toast.success("Welcome back to Vernex");
+      toast.success("Welcome back to Verxor");
     } catch {
       setPin("");
       setPinError("Invalid phone number or PIN.");
@@ -266,7 +266,7 @@ function AuthPage() {
               <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
             </Link>
           )}
-          <VernexMark className="h-8 w-8 rounded-full" />
+          <VerxorMark className="h-8 w-8 rounded-full" />
         </header>
 
         <main className={`my-auto w-full ${screen === "signup" ? "py-6" : "space-y-5 py-4"}`}>
@@ -291,7 +291,7 @@ function AuthPage() {
               <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 {screen === "signup"
                   ? "Fill in your details below to get started for free"
-                  : "Sign in to your Vernex account"}
+                  : "Sign in to your Verxor account"}
               </p>
             </div>
           )}
