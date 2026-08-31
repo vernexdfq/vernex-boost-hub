@@ -10,15 +10,15 @@ export function AppShell({
   showThemeToggle?: boolean;
 }) {
   return (
-    <div className="verxor-app-shell min-h-screen w-full bg-background text-foreground">
+    <div className="verxor-app-shell min-h-screen min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-background text-foreground">
       {showThemeToggle && (
-        <div className="pointer-events-none fixed right-3 top-3 z-50 md:right-[max(0.75rem,calc((100vw-28rem)/2+0.75rem))]">
-          <div className="pointer-events-auto">
+        <div className="pointer-events-none fixed right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50">
+          <div className="pointer-events-auto rounded-full border border-border/80 bg-surface/95 shadow-sm backdrop-blur">
             <ThemeToggle />
           </div>
         </div>
       )}
-      <main className="verxor-app-content mx-auto min-h-screen w-full max-w-md min-w-0 pb-28">
+      <main className="verxor-app-content mx-auto min-h-[100dvh] w-full max-w-md min-w-0 overflow-x-hidden pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         {children}
       </main>
       <BottomNav />
