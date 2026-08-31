@@ -42,20 +42,20 @@
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
-/* Verxor production palette: restrained surfaces, strong navy, electric blue. */
+/* Verxor palette: navy #0f1332 + electric blue #2563eb */
 :root {
   --radius: 0.75rem;
 
   --background: #f6f8fc;
-  --foreground: #111827;
+  --foreground: #0f1332;
 
   --surface: #ffffff;
   --surface-2: #f8fafc;
 
   --card: #ffffff;
-  --card-foreground: #111827;
+  --card-foreground: #0f1332;
   --popover: #ffffff;
-  --popover-foreground: #111827;
+  --popover-foreground: #0f1332;
 
   --brand: #2563eb;
   --brand-glow: #3b82f6;
@@ -63,7 +63,7 @@
   --primary-foreground: #ffffff;
 
   --secondary: #f1f5f9;
-  --secondary-foreground: #111827;
+  --secondary-foreground: #0f1332;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #eff6ff;
@@ -81,19 +81,19 @@
   --ring: #2563eb;
 
   --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #101b36 58%, #0b1220 100%);
-  --shadow-wallet: 0 18px 42px -22px rgba(4, 17, 62, 0.5);
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -18px rgba(15, 23, 42, 0.2);
+  --gradient-wallet: linear-gradient(145deg, #0f1332 0%, #151a3d 55%, #0b0e24 100%);
+  --shadow-wallet: 0 18px 42px -22px rgba(15, 19, 50, 0.55);
+  --shadow-card: 0 1px 2px rgba(15, 19, 50, 0.04), 0 8px 24px -18px rgba(15, 19, 50, 0.18);
 }
 
 .dark {
-  --background: #080d18;
+  --background: #080a14;
   --foreground: #f8fafc;
-  --surface: #0f1726;
-  --surface-2: #131d2e;
-  --card: #0f1726;
+  --surface: #0f1332;
+  --surface-2: #151a3d;
+  --card: #0f1332;
   --card-foreground: #f8fafc;
-  --popover: #0f1726;
+  --popover: #0f1332;
   --popover-foreground: #f8fafc;
 
   --brand: #3b82f6;
@@ -101,9 +101,9 @@
   --primary: #3b82f6;
   --primary-foreground: #ffffff;
 
-  --secondary: #172235;
+  --secondary: #151a3d;
   --secondary-foreground: #e5e7eb;
-  --muted: #172235;
+  --muted: #151a3d;
   --muted-foreground: #94a3b8;
   --accent: #142342;
   --accent-foreground: #bfdbfe;
@@ -115,12 +115,12 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --border: #1e293b;
-  --input: #1e293b;
+  --border: #1e2444;
+  --input: #1e2444;
   --ring: #3b82f6;
 
   --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #111c35 58%, #080d18 100%);
+  --gradient-wallet: linear-gradient(145deg, #0f1332 0%, #151a3d 55%, #080a14 100%);
   --shadow-wallet: 0 18px 44px -22px rgba(37, 99, 235, 0.38);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 28px -22px rgba(0, 0, 0, 0.65);
 }
@@ -128,6 +128,7 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    box-sizing: border-box;
   }
 
   html,
@@ -141,13 +142,23 @@
 
   html {
     width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
   }
 
   body {
     width: 100%;
+    max-width: 100%;
     min-width: 320px;
     margin: 0;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #root,
+  #app {
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
   }
 
@@ -173,12 +184,13 @@
   }
 }
 
-/* The product shell is deliberately rigid: no perspective, skew, or accidental
-   horizontal drift. Decorative transforms belong to individual components only. */
+/* Rigid shell — no skew, no accidental horizontal drift */
 .verxor-app-shell {
   position: relative;
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   overflow-x: clip;
   transform: none !important;
@@ -192,6 +204,7 @@
   max-width: 28rem;
   min-width: 0;
   margin-inline: auto;
+  overflow-x: hidden;
   transform: none !important;
   perspective: none !important;
   transform-style: flat !important;
@@ -242,7 +255,6 @@
   color: #60a5fa;
 }
 
-/* Interaction is responsive, not decorative. Keep motion short and purposeful. */
 html {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -258,7 +270,8 @@ input[type="button"] {
 }
 
 .tap-fast {
-  transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease,
+    background-color 160ms ease, border-color 160ms ease;
 }
 
 .tap-fast:active {
@@ -274,14 +287,13 @@ input[type="button"] {
   transform: scale(0.99);
 }
 
-/* Loading state: quiet and stable rather than flashy. */
 .skeleton {
   background: #e9eef5;
   border-radius: 0.5rem;
 }
 
 .dark .skeleton {
-  background: #182235;
+  background: #151a3d;
 }
 
 img,
@@ -292,8 +304,6 @@ svg {
   display: block;
 }
 
-/* Existing animation utility names remain supported, but the product UI is intentionally still.
-   This removes the floating-card / pulsing-orb look that reads as generated template decoration. */
 .animate-float-slow,
 .animate-float-fast,
 .animate-pulse-glow {
@@ -311,7 +321,6 @@ svg {
   }
 }
 
-/* Native-feeling scrollbars on desktop without changing mobile behavior. */
 @media (min-width: 768px) {
   * {
     scrollbar-width: thin;
@@ -323,10 +332,13 @@ svg {
   }
 }
 
-/* Keep the marquee available for places that intentionally use it. */
 @keyframes verxor-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 .verxor-marquee-track {
