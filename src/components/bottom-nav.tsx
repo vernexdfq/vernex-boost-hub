@@ -21,11 +21,8 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <nav
-      aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-surface/98 shadow-[0_-8px_24px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl"
-    >
-      <ul className="mx-auto grid max-w-md grid-cols-6 gap-1 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2">
+    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface">
+      <ul className="mx-auto grid max-w-md grid-cols-6 px-1 pb-[max(env(safe-area-inset-bottom),0.375rem)] pt-1.5">
         {items.map((item) => {
           const active = pathname === item.to;
           const Icon = item.icon;
@@ -34,19 +31,12 @@ export function BottomNav() {
               <Link
                 to={item.to}
                 aria-current={active ? "page" : undefined}
-                className={`tap-fast group flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium tracking-tight transition-colors ${
-                  active
-                    ? "bg-primary/8 text-primary"
-                    : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+                className={`tap-fast flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[10px] font-medium ${
+                  active ? "bg-accent text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
-                <Icon
-                  className={`h-[21px] w-[21px] transition-colors ${
-                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                  }`}
-                  strokeWidth={active ? 2.5 : 2}
-                />
-                <span className={active ? "font-semibold text-primary" : ""}>{item.label}</span>
+                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
+                <span className={active ? "font-semibold" : ""}>{item.label}</span>
               </Link>
             </li>
           );
