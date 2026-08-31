@@ -1,4 +1,4 @@
-# Vernex — production image for Northflank / Node
+# Verxor — production image for Northflank / Node
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./

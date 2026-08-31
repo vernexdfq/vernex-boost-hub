@@ -17,9 +17,9 @@ import {
 export const Route = createFileRoute("/_authenticated/admin/pricing")({
   head: () => ({
     meta: [
-      { title: "Admin — Pricing Settings — Vernex" },
+      { title: "Admin — Pricing Settings — Verxor" },
       { name: "description", content: "Configure USD_TO_NGN_RATE, MARKUP_PERCENTAGE and FIXED_NGN_MARKUP per provider server." },
-      { property: "og:title", content: "Vernex Admin — Pricing" },
+      { property: "og:title", content: "Verxor Admin — Pricing" },
       { property: "og:description", content: "Flexible exchange rate and per-server markup configuration." },
     ],
   }),

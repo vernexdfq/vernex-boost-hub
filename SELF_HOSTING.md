@@ -1,4 +1,4 @@
-# Vernex — self-hosting on your own domain (vernex.com.ng)
+# Verxor — self-hosting on your own domain (verxor.com)
 
 The "Missing Supabase environment variable(s)" error means your host is running the
 app without backend credentials. Fix it by setting the variables below in your
@@ -65,12 +65,12 @@ PIN login, virtual-account provisioning and the Flutterwave webhook.
 Webhook URL to register with Flutterwave:
 
 ```
-https://vernex.com.ng/api/public/webhooks/flutterwave
+https://verxor.com/api/public/webhooks/flutterwave
 ```
 
 ## 5. Verify
 
-After redeploying, open `https://vernex.com.ng/auth` and enter a phone number.
+After redeploying, open `https://verxor.com/auth` and enter a phone number.
 The red "Missing Supabase environment variable(s)" banner should be gone. If it
 persists, the host is still building with the old environment — trigger a clean
 rebuild rather than a cached redeploy.

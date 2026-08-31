@@ -20,12 +20,12 @@ import { fetchAccount } from "@/lib/account";
 export const Route = createFileRoute("/_authenticated/reward")({
   head: () => ({
     meta: [
-      { title: "Rewards & Referrals — Vernex" },
+      { title: "Rewards & Referrals — Verxor" },
       {
         name: "description",
-        content: "Earn commissions when your friends fund their Vernex wallet.",
+        content: "Earn commissions when your friends fund their Verxor wallet.",
       },
-      { property: "og:title", content: "Vernex Rewards" },
+      { property: "og:title", content: "Verxor Rewards" },
     ],
   }),
   component: Reward,
@@ -44,7 +44,7 @@ function buildReferralCode(fullName: string | null | undefined, userId: string):
       ?.toUpperCase()
       .replace(/[^A-Z0-9]/g, "") || "USER";
   const tail = userId.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `VERNEX-${base}${tail ? `-${tail}` : ""}`.slice(0, 24);
+  return `VERXOR-${base}${tail ? `-${tail}` : ""}`.slice(0, 24);
 }
 
 function Reward() {
@@ -63,7 +63,7 @@ function Reward() {
   );
 
   const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://vernex.com.ng";
+    typeof window !== "undefined" ? window.location.origin : "https://verxor.com";
   const referralLink = `${origin}/auth?ref=${encodeURIComponent(code)}`;
 
   // Live stats — wire to referral tables when available; safe zeros for now
@@ -86,7 +86,7 @@ function Reward() {
 
   function shareWhatsApp() {
     const text = encodeURIComponent(
-      `Join me on Vernex — virtual numbers, OTP & growth tools.\nUse my code ${code}\n${referralLink}`,
+      `Join me on Verxor — virtual numbers, OTP & growth tools.\nUse my code ${code}\n${referralLink}`,
     );
     window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
   }
@@ -95,8 +95,8 @@ function Reward() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Join Vernex",
-          text: `Use my Vernex referral code ${code}`,
+          title: "Join Verxor",
+          text: `Use my Verxor referral code ${code}`,
           url: referralLink,
         });
         return;
@@ -227,7 +227,7 @@ function Reward() {
             </p>
             <p className="mt-1 text-3xl font-black tabular-nums">{naira(available)}</p>
             <p className="mt-1 text-[12px] text-white/70">
-              {available > 0 ? "Ready for your Vernex wallet" : "Refer friends to start earning"}
+              {available > 0 ? "Ready for your Verxor wallet" : "Refer friends to start earning"}
             </p>
           </div>
 
@@ -339,11 +339,11 @@ function Reward() {
             {[
               {
                 t: "Share your referral link",
-                d: "Copy your Vernex code or link and share via WhatsApp, SMS, or social media.",
+                d: "Copy your Verxor code or link and share via WhatsApp, SMS, or social media.",
               },
               {
                 t: "Friend registers",
-                d: "They create a Vernex account using your link or code.",
+                d: "They create a Verxor account using your link or code.",
               },
               {
                 t: "Earn your reward",
@@ -351,7 +351,7 @@ function Reward() {
               },
               {
                 t: "Withdraw to your wallet",
-                d: "Move referral earnings into your Vernex wallet anytime and spend on numbers, boosts, and more.",
+                d: "Move referral earnings into your Verxor wallet anytime and spend on numbers, boosts, and more.",
               },
             ].map((step, i) => (
               <li key={step.t} className="flex gap-3">
@@ -382,7 +382,7 @@ function Reward() {
             <Coins className="h-10 w-10 text-muted-foreground/40" />
             <p className="mt-3 text-sm font-semibold">No earnings yet</p>
             <p className="mt-1 max-w-[240px] text-[12px] text-muted-foreground">
-              Share your referral link to start earning commissions on Vernex.
+              Share your referral link to start earning commissions on Verxor.
             </p>
           </div>
         </section>

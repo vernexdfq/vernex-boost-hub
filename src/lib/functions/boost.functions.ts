@@ -119,7 +119,7 @@ export const createBoostOrder = createServerFn({ method: "POST" })
       throw new Error("Insufficient wallet balance");
     }
 
-    const reference = `VNX-BST-${Date.now().toString(36).toUpperCase()}`;
+    const reference = `VXR-BST-${Date.now().toString(36).toUpperCase()}`;
 
     // Debit wallet first
     await supabaseAdmin.rpc("record_wallet_transaction", {

@@ -18,9 +18,9 @@ import { listAccountOrders } from "@/lib/functions/accounts.functions";
 export const Route = createFileRoute("/_authenticated/log-history")({
   head: () => ({
     meta: [
-      { title: "Log History — Vernex" },
+      { title: "Log History — Verxor" },
       { name: "description", content: "Your account log purchase history." },
-      { property: "og:title", content: "Vernex — Log History" },
+      { property: "og:title", content: "Verxor — Log History" },
       {
         property: "og:description",
         content: "Track all your aged account and log purchases.",

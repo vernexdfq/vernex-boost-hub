@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 /**
  * Flutterwave webhook (live).
- * URL: https://vernex.com.ng/api/flutterwave/webhook
+ * URL: https://verxor.com/api/flutterwave/webhook
  * Requires FLUTTERWAVE_SECRET_HASH — must match Flutterwave dashboard secret hash
  * (sent as the verif-hash request header).
  */
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/api/flutterwave/webhook")({
           JSON.stringify({
             ok: true,
             service: "flutterwave-webhook",
-            url: "https://vernex.com.ng/api/flutterwave/webhook",
+            url: "https://verxor.com/api/flutterwave/webhook",
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         ),

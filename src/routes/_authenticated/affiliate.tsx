@@ -28,13 +28,13 @@ import {
 export const Route = createFileRoute("/_authenticated/affiliate")({
   head: () => ({
     meta: [
-      { title: "Get Affiliate Website — Vernex" },
+      { title: "Get Affiliate Website — Verxor" },
       {
         name: "description",
         content:
-          "Own your own Vernex reseller platform. Sell virtual numbers, SMM boosts, and social logs under your brand.",
+          "Own your own Verxor reseller platform. Sell virtual numbers, SMM boosts, and social logs under your brand.",
       },
-      { property: "og:title", content: "Own Your Own Vernex Platform" },
+      { property: "og:title", content: "Own Your Own Verxor Platform" },
       {
         property: "og:description",
         content: "Full reseller website with admin panel and profit dashboard.",
@@ -205,7 +205,7 @@ function Affiliate() {
               <span>Affiliate Website Program</span>
             </div>
             <h2 className="mb-2 text-2xl font-black leading-tight tracking-tight text-white">
-              Own Your Own Platform. Sell Every Vernex Product.
+              Own Your Own Platform. Sell Every Verxor Product.
             </h2>
             <p className="mb-5 text-xs leading-relaxed text-slate-400">
               Launch a fully branded reseller site with our complete product catalog under

@@ -2,17 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Loader2, Lock, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { VernexMark } from "@/components/brand";
+import { VerxorMark } from "@/components/brand";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Reset Password — Vernex" },
+      { title: "Reset Password — Verxor" },
       {
         name: "description",
-        content: "Choose a new password for your Vernex account.",
+        content: "Choose a new password for your Verxor account.",
       },
     ],
   }),
@@ -152,7 +152,7 @@ function ResetPasswordPage() {
   if (invalid) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
-        <VernexMark className="mb-6 h-12 w-12 rounded-full" />
+        <VerxorMark className="mb-6 h-12 w-12 rounded-full" />
         <h1 className="text-xl font-black text-slate-900">Link expired or invalid</h1>
         <p className="mt-2 max-w-sm text-sm text-slate-500">
           This password reset link is no longer valid. Request a new one from the app.
@@ -183,7 +183,7 @@ function ResetPasswordPage() {
         </div>
         <h1 className="text-xl font-black text-slate-900">Password changed</h1>
         <p className="mt-2 max-w-sm text-sm text-slate-500">
-          Your Vernex password was updated. Redirecting you to sign in…
+          Your Verxor password was updated. Redirecting you to sign in…
         </p>
       </div>
     );
@@ -199,12 +199,12 @@ function ResetPasswordPage() {
           >
             ← Sign in
           </Link>
-          <VernexMark className="h-9 w-9 rounded-full" />
+          <VerxorMark className="h-9 w-9 rounded-full" />
         </div>
 
         <h1 className="text-2xl font-black tracking-tight text-slate-900">Set a new password</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Choose a strong password for your Vernex account. Minimum 8 characters.
+          Choose a strong password for your Verxor account. Minimum 8 characters.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">

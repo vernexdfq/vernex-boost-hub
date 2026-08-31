@@ -9,9 +9,9 @@ import { listBoostOrders } from "@/lib/functions/boost.functions";
 export const Route = createFileRoute("/_authenticated/boost-orders")({
   head: () => ({
     meta: [
-      { title: "Boost Orders — Vernex" },
+      { title: "Boost Orders — Verxor" },
       { name: "description", content: "Track your active SMM boost orders." },
-      { property: "og:title", content: "Vernex — Boost Orders" },
+      { property: "og:title", content: "Verxor — Boost Orders" },
       { property: "og:description", content: "Live progress on every social boost order." },
     ],
   }),

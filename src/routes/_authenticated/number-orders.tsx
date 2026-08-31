@@ -9,9 +9,9 @@ import { listNumberOrders } from "@/lib/functions/numbers.functions";
 export const Route = createFileRoute("/_authenticated/number-orders")({
   head: () => ({
     meta: [
-      { title: "Number Orders — Vernex" },
+      { title: "Number Orders — Verxor" },
       { name: "description", content: "Your OTP virtual number order history." },
-      { property: "og:title", content: "Vernex — OTP Order History" },
+      { property: "og:title", content: "Verxor — OTP Order History" },
       { property: "og:description", content: "Review every OTP order and status." },
     ],
   }),

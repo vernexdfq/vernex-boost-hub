@@ -39,11 +39,11 @@ export function RentalBottomNav() {
               <Icon
                 size={22}
                 strokeWidth={active ? 2.4 : 1.75}
-                className={active ? "text-teal-700" : "text-slate-400"}
+                className={active ? "text-[#2563EB]" : "text-slate-400"}
               />
               <span
                 className={`text-[10px] font-medium ${
-                  active ? "text-teal-700" : "text-slate-400"
+                  active ? "text-[#2563EB]" : "text-slate-400"
                 }`}
               >
                 {label}

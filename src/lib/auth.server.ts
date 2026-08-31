@@ -1,5 +1,5 @@
 /**
- * Server-only authentication helpers for Vernex.
+ * Server-only authentication helpers for Verxor.
  *
  * Responsibilities:
  *  - normalising Nigerian / international phone numbers into E.164
@@ -174,14 +174,14 @@ export async function registerAccount(input: RegisterInput): Promise<{ email: st
       phone,
     });
   } catch (error) {
-    console.error("[Vernex] virtual account provisioning failed at signup", error);
+    console.error("[Verxor] virtual account provisioning failed at signup", error);
   }
 
   try {
     const { sendWelcomeEmail } = await import("@/lib/email.server");
     await sendWelcomeEmail(email, input.firstName.trim());
   } catch (error) {
-    console.error("[Vernex] welcome email failed", error);
+    console.error("[Verxor] welcome email failed", error);
   }
 
   return { email };
@@ -307,7 +307,7 @@ export async function requestPinReset(identifier: string): Promise<{ ok: true; m
     const { sendPinResetEmail } = await import("@/lib/email.server");
     await sendPinResetEmail(profile.email, token);
   } catch (e) {
-    console.error("[Vernex] pin reset email failed", e);
+    console.error("[Verxor] pin reset email failed", e);
   }
 
   return { ok: true, message: generic };
@@ -357,7 +357,7 @@ export async function requestPinResetV2(
     const { sendPinResetEmail } = await import("@/lib/email.server");
     await sendPinResetEmail(profile.email, token);
   } catch (e) {
-    console.error("[Vernex] pin reset email failed", e);
+    console.error("[Verxor] pin reset email failed", e);
   }
 
   return { ok: true, message: generic };
@@ -408,7 +408,7 @@ export async function completePinResetV2(token: string, pin: string): Promise<{ 
       const { sendPinChangedEmail } = await import("@/lib/email.server");
       await sendPinChangedEmail(email);
     } catch (e) {
-      console.error("[Vernex] pin changed email failed", e);
+      console.error("[Verxor] pin changed email failed", e);
     }
   }
 

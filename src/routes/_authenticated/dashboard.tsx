@@ -29,9 +29,9 @@ import { getDashboardSummary, markNotificationsRead } from "@/lib/functions/dash
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Vernex" },
-      { name: "description", content: "Your Vernex dashboard: wallet, virtual numbers, SMM boosts, and account tools." },
-      { property: "og:title", content: "Vernex Dashboard" },
+      { title: "Dashboard — Verxor" },
+      { name: "description", content: "Your Verxor dashboard: wallet, virtual numbers, SMM boosts, and account tools." },
+      { property: "og:title", content: "Verxor Dashboard" },
       { property: "og:description", content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place." },
     ],
   }),
@@ -217,7 +217,7 @@ function Dashboard() {
           <h1 className="truncate text-[17px] font-bold leading-tight">
             {g.text}, {displayName}
           </h1>
-          <p className="truncate text-xs text-muted-foreground">Your Vernex Dashboard</p>
+          <p className="truncate text-xs text-muted-foreground">Your Verxor Dashboard</p>
         </div>
         <Link
           to="/alerts"

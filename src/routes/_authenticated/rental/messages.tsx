@@ -3,7 +3,7 @@ import { PenSquare, Search, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/rental/messages")({
   head: () => ({
-    meta: [{ title: "Messages — Vernex" }],
+    meta: [{ title: "Messages — Verxor" }],
   }),
   component: MessagesPage,
 });
@@ -20,7 +20,7 @@ function MessagesPage() {
             className="flex h-9 w-9 items-center justify-center rounded-full active:bg-slate-100"
             aria-label="New message"
           >
-            <PenSquare size={20} className="text-teal-700" strokeWidth={2} />
+            <PenSquare size={20} className="text-[#2563EB]" strokeWidth={2} />
           </button>
         </div>
       </header>
@@ -31,7 +31,7 @@ function MessagesPage() {
           <input
             type="search"
             placeholder="Search"
-            className="h-10 w-full rounded-xl border-0 bg-slate-100 pl-10 pr-3 text-[14px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+            className="h-10 w-full rounded-xl border-0 bg-slate-100 pl-10 pr-3 text-[14px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
 

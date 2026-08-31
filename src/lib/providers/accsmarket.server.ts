@@ -77,7 +77,7 @@ async function amFetch(
   if (!headers.has("User-Agent")) {
     headers.set(
       "User-Agent",
-      "Mozilla/5.0 (compatible; VernexBot/1.0; +https://vernex.com.ng)",
+      "Mozilla/5.0 (compatible; VerxorBot/1.0; +https://verxor.com)",
     );
   }
   const res = await fetch(url, { ...init, headers, redirect: "manual" });

@@ -1,5 +1,5 @@
 /**
- * Vernex pricing engine.
+ * Verxor pricing engine.
  *
  * Admin-configurable keys (mirrored to the backend config table when Cloud is enabled):
  *   USD_TO_NGN_RATE   — default 1600
@@ -24,7 +24,7 @@ export type PricingConfig = {
   servers: ServerConfig[];
 };
 
-export const PRICING_KEY = "vernex-pricing-config";
+export const PRICING_KEY = "verxor-pricing-config";
 
 export const DEFAULT_PRICING: PricingConfig = {
   USD_TO_NGN_RATE: 1600,

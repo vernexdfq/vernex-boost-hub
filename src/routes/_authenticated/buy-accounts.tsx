@@ -28,12 +28,12 @@ import {
 export const Route = createFileRoute("/_authenticated/buy-accounts")({
   head: () => ({
     meta: [
-      { title: "Buy Logs & Aged Accounts — Vernex" },
+      { title: "Buy Logs & Aged Accounts — Verxor" },
       {
         name: "description",
         content: "Verified aged social media accounts and SMS logs — ready to use.",
       },
-      { property: "og:title", content: "Vernex — Buy Aged Accounts" },
+      { property: "og:title", content: "Verxor — Buy Aged Accounts" },
       {
         property: "og:description",
         content: "Instagram, Facebook, Gmail and more. Verified & delivered instantly.",

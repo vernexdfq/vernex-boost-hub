@@ -7,8 +7,8 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 /** Permanent dismiss keys — prompt shows only once per context. */
-const KEY_SITE = "vernex-install-dismissed-site";
-const KEY_RENTAL = "vernex-install-dismissed-rental";
+const KEY_SITE = "verxor-install-dismissed-site";
+const KEY_RENTAL = "verxor-install-dismissed-rental";
 
 type Variant = "sheet" | "dropdown";
 
@@ -37,7 +37,7 @@ function markDismissed(key: string) {
 }
 
 /**
- * Vernex install prompt.
+ * Verxor install prompt.
  * - variant="sheet"  → bottom card on the marketing site (once only)
  * - variant="dropdown" → top bar on the rental page (once only)
  * Always captures beforeinstallprompt so the browser native bar does not reappear.
@@ -119,16 +119,16 @@ export function InstallPrompt({ variant = "sheet" }: { variant?: Variant }) {
     (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
-  /* ── Top dropdown (rental page) — Chrome-style bar, Vernex only ── */
+  /* ── Top dropdown (rental page) — Chrome-style bar, Verxor only ── */
   if (variant === "dropdown") {
     return (
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[90] flex justify-center px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="pointer-events-auto flex w-full max-w-lg items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/95 px-3 py-2.5 shadow-[0_8px_30px_rgba(15,23,42,0.14)] backdrop-blur-md">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600">
-            <img src="/vnxlogo.png" alt="Vernex" className="h-9 w-9 object-contain" />
+            <img src="/mylogo.png" alt="Verxor" className="h-9 w-9 object-contain" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-bold leading-tight text-slate-900">Install Vernex</p>
+            <p className="text-[14px] font-bold leading-tight text-slate-900">Install Verxor</p>
             <p className="truncate text-[12px] text-slate-500">Faster access · full-screen app</p>
           </div>
           {deferred ? (
@@ -162,10 +162,10 @@ export function InstallPrompt({ variant = "sheet" }: { variant?: Variant }) {
       <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_40px_rgba(15,23,42,0.18)]">
         <div className="flex items-start gap-3 p-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600 ring-1 ring-blue-700/20">
-            <img src="/vnxlogo.png" alt="Vernex" className="h-10 w-10 object-contain" />
+            <img src="/mylogo.png" alt="Verxor" className="h-10 w-10 object-contain" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-bold text-slate-900">Install Vernex</p>
+            <p className="text-[15px] font-bold text-slate-900">Install Verxor</p>
             <p className="mt-0.5 text-[13px] leading-snug text-slate-500">
               {isIOS && !deferred
                 ? "Add to Home Screen for a faster, app-like experience."

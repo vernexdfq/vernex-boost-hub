@@ -54,15 +54,16 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
         .eq("id", userId)
         .maybeSingle();
 
-      const accountName = profile?.full_name
-        ? `VERNEX / ${profile.full_name.toUpperCase()}`
-        : "VERNEX / CUSTOMER";
+      const accountName = (profile?.full_name
+        ? `VERXOR / ${profile.full_name.toUpperCase()}`
+        : "VERXOR / CUSTOMER"
+      ).replace(/VERNEX/gi, "VERXOR");
 
       let accountNumber = wallet?.virtual_account_number ?? null;
       let bankName = wallet?.virtual_bank_name ?? "Wema Bank";
       let reference =
         wallet?.virtual_account_reference ??
-        `VNX-${userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+        `VXR-${userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
       let message: string | null = null;
       let permanent = Boolean(accountNumber);
 
@@ -78,8 +79,8 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
             userId,
             email:
               profile?.email ??
-              `${userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`,
-            fullName: profile?.full_name ?? "Vernex Customer",
+              `${userId.replace(/-/g, "").slice(0, 12)}@users.verxor.com`,
+            fullName: profile?.full_name ?? "Verxor Customer",
             phone: profile?.phone ?? null,
             force: force || !accountNumber,
           });
@@ -125,7 +126,7 @@ export const getWalletFundingDetails = createServerFn({ method: "GET" })
       return {
         bankName: "Wema Bank",
         accountNumber: null,
-        accountName: "VERNEX / CUSTOMER",
+        accountName: "VERXOR / CUSTOMER",
         reference: "",
         pending: true,
         configured: false,
@@ -188,6 +189,6 @@ export const confirmWalletDeposit = createServerFn({ method: "POST" })
       totalAmount: 0,
       balance,
       message:
-        "No new deposit found yet. Bank transfers can take a few minutes — tap again shortly. Ensure you transferred to your Vernex virtual account.",
+        "No new deposit found yet. Bank transfers can take a few minutes — tap again shortly. Ensure you transferred to your Verxor virtual account.",
     };
   });

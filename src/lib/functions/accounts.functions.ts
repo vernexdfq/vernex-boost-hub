@@ -227,7 +227,7 @@ function demoCredentials(product: AccountProduct, index: number) {
   return {
     username: `${slug}_user_${Date.now().toString(36)}_${index}`,
     password: `Vx$${Math.random().toString(36).slice(2, 10)}!`,
-    email: `${slug}.${Date.now().toString(36)}@delivered.vernex`,
+    email: `${slug}.${Date.now().toString(36)}@delivered.verxor`,
     extra: product.instant
       ? "Delivered instantly. Change password after login."
       : "Manual delivery — credentials may arrive within a few minutes.",
@@ -260,7 +260,7 @@ export const purchaseAccount = createServerFn({ method: "POST" })
     if (walletError || !wallet) throw new Error("Wallet not found");
     if (Number(wallet.balance) < expected) throw new Error("Insufficient wallet balance");
 
-    const reference = `VNX-LOG-${Date.now().toString(36).toUpperCase()}`;
+    const reference = `VXR-LOG-${Date.now().toString(36).toUpperCase()}`;
     const creds = Array.from({ length: data.quantity }, (_, i) =>
       demoCredentials(product, i + 1),
     );

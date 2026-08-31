@@ -69,7 +69,7 @@ export function CallsSheets(props: Props) {
                       <p className="text-[15px] font-medium text-slate-900">{line.label}</p>
                       <p className="text-[13px] text-slate-500">{line.number}</p>
                     </div>
-                    {fromLine.id === line.id && <Check size={18} className="shrink-0 text-teal-700" />}
+                    {fromLine.id === line.id && <Check size={18} className="shrink-0 text-[#2563EB]" />}
                   </button>
                 </li>
               ))}
@@ -113,7 +113,7 @@ export function CallsSheets(props: Props) {
                   value={countrySearch}
                   onChange={(e) => setCountrySearch(e.target.value)}
                   placeholder="Search country"
-                  className="h-10 w-full rounded-xl bg-slate-100 pl-9 pr-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                  className="h-10 w-full rounded-xl bg-slate-100 pl-9 pr-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                   autoFocus
                 />
               </div>
@@ -121,7 +121,7 @@ export function CallsSheets(props: Props) {
             <ul className="flex-1 overflow-y-auto">
               {countriesLoading ? (
                 <li className="flex justify-center py-10">
-                  <Loader2 className="h-5 w-5 animate-spin text-teal-700" />
+                  <Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" />
                 </li>
               ) : filteredCountries.length === 0 ? (
                 <li className="px-4 py-10 text-center text-sm text-slate-500">No countries match</li>
@@ -156,7 +156,7 @@ export function CallsSheets(props: Props) {
                       </div>
                       <span className="text-[14px] text-slate-500">{c.dial}</span>
                       {dialCountry.code === c.code && !browseMode && (
-                        <Check size={18} className="shrink-0 text-teal-700" />
+                        <Check size={18} className="shrink-0 text-[#2563EB]" />
                       )}
                     </button>
                   </li>

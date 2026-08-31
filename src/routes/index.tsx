@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
-import { VernexMark } from "@/components/brand";
+import { VerxorMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { InstallPrompt } from "@/components/install-prompt";
 
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "Vernex - Connect | Verify | Grow",
+        title: "Verxor - Connect | Verify | Grow",
       },
       {
         name: "description",
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "Vernex - Connect | Verify | Grow",
+        content: "Verxor - Connect | Verify | Grow",
       },
     ],
   }),
@@ -51,7 +51,7 @@ const SERVICES = [
   {
     id: "otp",
     title: "Virtual Numbers",
-    subtitle: "Vernex Instant OTP",
+    subtitle: "Verxor Instant OTP",
     desc: "Instant OTP numbers for WhatsApp, TikTok, Instagram, Google and 300+ services.",
     href: "/auth",
     banner: "/banners/banner-otp.png",
@@ -60,7 +60,7 @@ const SERVICES = [
   {
     id: "rentals",
     title: "Rent a Line",
-    subtitle: "Vernex Rentals",
+    subtitle: "Verxor Rentals",
     desc: "Keep a dedicated USA or global number for hours or days — exclusive to you.",
     href: "/auth",
     banner: "/banners/banner-rentals.png",
@@ -70,7 +70,7 @@ const SERVICES = [
     id: "boost",
     title: "SMM Boost",
     subtitle: "Social & Music Growth",
-    desc: "Grow followers, likes, views and streams with tracked delivery from your Vernex wallet.",
+    desc: "Grow followers, likes, views and streams with tracked delivery from your Verxor wallet.",
     href: "/auth",
     // File on disk for growth/rocket art is banner-accounts.png (upload names were swapped)
     banner: "/banners/banner-accounts.png",
@@ -94,7 +94,7 @@ const FAQS = [
     a: "Virtual Numbers are temporary lines for OTP verification (about 20 minutes). Rent gives you a dedicated number for hours or days that stays exclusively yours.",
   },
   {
-    q: "Which platforms can I verify with Vernex?",
+    q: "Which platforms can I verify with Verxor?",
     a: "You can verify WhatsApp, Telegram, Google, Instagram, Twitter/X, TikTok, and over 300+ other online platforms seamlessly.",
   },
   {
@@ -136,9 +136,9 @@ function Landing() {
       <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-18 sm:px-6">
           <Link to="/" className="flex items-center space-x-3">
-            <VernexMark className="h-9 w-9 rounded-xl shadow-md shadow-blue-500/15" />
+            <VerxorMark className="h-9 w-9 rounded-xl shadow-md shadow-blue-500/15" />
             <span className="text-lg font-black tracking-tight text-slate-900 sm:text-xl">
-              Vernex<span className="text-blue-600">.</span>com.ng
+              Verxor<span className="text-blue-600">.</span>com
             </span>
           </Link>
 
@@ -441,10 +441,10 @@ function Landing() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
               V
             </div>
-            <span className="font-bold text-white">Vernex.com.ng</span>
+            <span className="font-bold text-white">Verxor.com</span>
           </div>
           <div className="text-center text-sm sm:text-left">
-            © {new Date().getFullYear()} Vernex.com.ng — Connect · Verify · Grow
+            © {new Date().getFullYear()} Verxor.com — Connect · Verify · Grow
           </div>
         </div>
       </footer>

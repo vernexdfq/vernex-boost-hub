@@ -1,14 +1,14 @@
-# Vernex Fintech Hub
+# Verxor Fintech Hub
 
 I hear you completely. You don't want a generic, cookie-cutter "AI looking" prototype with placeholder boxes. You want a production-grade web web app that looks like an authentic, highly polished, commercial fintech platform—exactly like Primex.ng and the commercial CodeCanyon scripts, right down to the mobile bottom navigation bar, Telegram community pop-ups, real-time OTP copy buttons, and affiliate web system.
 
-If I were standing in your shoes as the owner launching Vernex, here is the exact master prompt I would feed into the AI to build something that feels 100% human-designed and commercially operational.
+If I were standing in your shoes as the owner launching Verxor, here is the exact master prompt I would feed into the AI to build something that feels 100% human-designed and commercially operational.
 
-Master Website Prompt for Vernex
+Master Website Prompt for Verxor
 
 Copy and paste this into Bolt.new or Lovable.dev:
 
-> "Build a commercial, production-ready web application called Vernex. It must look and feel like a real fintech & virtual telecom platform (reference: Primex.ng), optimized primarily for a mobile web experience with zero 'AI-generated' appearance.
+> "Build a commercial, production-ready web application called Verxor. It must look and feel like a real fintech & virtual telecom platform (reference: Primex.ng), optimized primarily for a mobile web experience with zero 'AI-generated' appearance.
 
 > 1. Brand Aesthetics & Visual Design System
 
@@ -26,7 +26,7 @@ Copy and paste this into Bolt.new or Lovable.dev:
 
 > 2. Dashboard Home Page (/dashboard)
 
->  * Greeting Header: "Good Evening, User 👋 - Your Vernex Dashboard"
+>  * Greeting Header: "Good Evening, User 👋 - Your Verxor Dashboard"
 
 >  * Wallet Card: Displays available balance in Naira (₦), eye icon to hide/show balance, + Fund Wallet button, and History shortcut button.
 
@@ -74,7 +74,7 @@ Copy and paste this into Bolt.new or Lovable.dev:
 
 > 5. Monetization & Reseller Feature (/use/affiliate-website)
 
->  * 'Own Your Platform' Reseller Sales Page: Allows users to buy their own automated child-panel / affiliate website (e.g., ₦150,000 custom domain setup) pre-loaded with Vernex APIs.
+>  * 'Own Your Platform' Reseller Sales Page: Allows users to buy their own automated child-panel / affiliate website (e.g., ₦150,000 custom domain setup) pre-loaded with Verxor APIs.
 
 > 6. Authentication & Security Flow
 
@@ -92,7 +92,7 @@ What Makes This Prompt Different?
 
 lity that real commercial panel scripts use.
 
-Act as a Principal Frontend & Full-Stack Engineer. Build a high-converting, web-based SaaS platform named Vernex (a competitor to Primex.ng). 
+Act as a Principal Frontend & Full-Stack Engineer. Build a high-converting, web-based SaaS platform named Verxor (a competitor to Primex.ng). 
 
 
 
@@ -108,7 +108,7 @@ Core Website Features & Page Layouts:
 
 1. GLOBAL NAVIGATION & HEADER:
 
-- Top bar with Vernex logo, Live Naira Wallet Balance pill (₦0.00), Notifications icon with badge, and User Avatar menu.
+- Top bar with Verxor logo, Live Naira Wallet Balance pill (₦0.00), Notifications icon with badge, and User Avatar menu.
 
 - Bottom navigation bar (Mobile-optimized): Home, History, Fund Wallet, Services, Profile.
 
@@ -140,11 +140,11 @@ Core Website Features & Page Layouts:
 
 - Dedicated Funding Card: Display a permanent, auto-generated Nigerian Virtual Bank Account assigned to the logged-in user.
 
-- Include Bank Name (e.g., Paga, Wema Bank, or Monnify), Account Number, and Account Name (e.g., "Vernex / [User Name]").
+- Include Bank Name (e.g., Paga, Wema Bank, or Monnify), Account Number, and Account Name (e.g., "Verxor / [User Name]").
 
 - Provide a one-tap [ Copy Account Number ] button with toast notifications upon copying.
 
-- Display instant funding instructions: "Transfer any amount to this account number to automatically credit your Vernex wallet instantly."
+- Display instant funding instructions: "Transfer any amount to this account number to automatically credit your Verxor wallet instantly."
 
 
 

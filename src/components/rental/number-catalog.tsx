@@ -72,7 +72,7 @@ export function NumberCatalog({ country, onBack, userId }: { country: RentalCoun
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-teal-700" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" />
           </div>
         ) : numbers.length === 0 ? (
           <p className="py-12 text-center text-sm text-slate-500">No numbers available right now.</p>
@@ -84,7 +84,7 @@ export function NumberCatalog({ country, onBack, userId }: { country: RentalCoun
                   type="button"
                   onClick={() => setPicked(n)}
                   className={`flex w-full items-center justify-between rounded-2xl border px-3.5 py-3.5 text-left ${
-                    picked?.id === n.id ? "border-teal-600/40 bg-teal-50" : "border-slate-100 bg-slate-50"
+                    picked?.id === n.id ? "border-[#2563EB]/40 bg-blue-50" : "border-slate-100 bg-slate-50"
                   }`}
                 >
                   <div>
@@ -95,7 +95,7 @@ export function NumberCatalog({ country, onBack, userId }: { country: RentalCoun
                       </p>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-teal-700">
+                  <span className="text-sm font-bold text-[#2563EB]">
                     {naira(Math.round(Number(n.monthly_price_ngn || 0)))}
                   </span>
                 </button>
@@ -114,19 +114,19 @@ export function NumberCatalog({ country, onBack, userId }: { country: RentalCoun
                 type="button"
                 onClick={() => setPlan(p)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  plan === p ? "bg-teal-700 text-white" : "border border-slate-200 text-slate-700"
+                  plan === p ? "bg-[#2563EB] text-white" : "border border-slate-200 text-slate-700"
                 }`}
               >
                 {p}
               </button>
             ))}
           </div>
-          <p className="mt-3 text-2xl font-bold tabular-nums text-teal-700">{naira(price)}</p>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-[#2563EB]">{naira(price)}</p>
           <button
             type="button"
             disabled={rent.isPending}
             onClick={() => rent.mutate()}
-            className="mt-3 w-full rounded-2xl bg-teal-700 py-3.5 text-sm font-bold text-white disabled:opacity-60"
+            className="mt-3 w-full rounded-2xl bg-[#2563EB] py-3.5 text-sm font-bold text-white disabled:opacity-60"
           >
             {rent.isPending ? "Processing…" : "Rent this number"}
           </button>

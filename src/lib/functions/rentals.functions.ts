@@ -396,7 +396,7 @@ export const createRental = createServerFn({ method: "POST" })
       };
     }
 
-    const reference = `VNX-RNT-${Date.now().toString(36).toUpperCase()}`;
+    const reference = `VXR-RNT-${Date.now().toString(36).toUpperCase()}`;
     const phoneNumber = provisioned.phoneNumber || number.phone_number;
 
     try {

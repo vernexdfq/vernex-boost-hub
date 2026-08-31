@@ -3,7 +3,7 @@ import { Wallet, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/rental/credit")({
   head: () => ({
-    meta: [{ title: "Credit — Vernex" }],
+    meta: [{ title: "Credit — Verxor" }],
   }),
   component: CreditPage,
 });
@@ -25,8 +25,8 @@ function CreditPage() {
       </header>
 
       <div className="mx-auto max-w-lg px-4 pt-6">
-        <div className="mb-6 rounded-2xl bg-gradient-to-br from-teal-700 to-teal-900 p-5 text-white shadow-lg shadow-teal-700/20">
-          <p className="text-[13px] font-medium text-teal-100">Available credit</p>
+        <div className="mb-6 rounded-2xl bg-gradient-to-br from-[#0F1332] to-[#2563EB] p-5 text-white shadow-lg shadow-blue-600/20">
+          <p className="text-[13px] font-medium text-blue-100">Available credit</p>
           <p className="mt-1 text-3xl font-bold tabular-nums">₦0.00</p>
           <Link
             to="/fund"
@@ -48,7 +48,7 @@ function CreditPage() {
                   <p className="text-[15px] font-semibold text-slate-900">{p.amount}</p>
                   <p className="text-[12px] text-slate-500">Wallet credit</p>
                 </div>
-                <span className="flex items-center gap-1 text-sm font-bold text-teal-700">
+                <span className="flex items-center gap-1 text-sm font-bold text-[#2563EB]">
                   {p.price}
                   <ChevronRight size={16} className="text-slate-300" />
                 </span>

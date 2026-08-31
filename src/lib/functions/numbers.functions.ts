@@ -173,7 +173,7 @@ export const createNumberOrder = createServerFn({ method: "POST" })
       if (walletError || !wallet) throw new Error("Wallet not found");
       if (Number(wallet.balance) < price) throw new Error("Insufficient wallet balance");
 
-      const reference = `VNX-NUM-${Date.now().toString(36).toUpperCase()}`;
+      const reference = `VXR-NUM-${Date.now().toString(36).toUpperCase()}`;
 
       await supabaseAdmin.rpc("record_wallet_transaction", {
         _user_id: userId,
@@ -292,7 +292,7 @@ export const createNumberOrder = createServerFn({ method: "POST" })
       throw new Error("Product is out of stock");
     }
 
-    const reference = `VNX-NUM-${Date.now().toString(36).toUpperCase()}`;
+    const reference = `VXR-NUM-${Date.now().toString(36).toUpperCase()}`;
 
     const { data: wallet, error: walletError } = await supabaseAdmin
       .from("wallets")

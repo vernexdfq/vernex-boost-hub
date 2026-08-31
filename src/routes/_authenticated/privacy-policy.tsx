@@ -18,10 +18,10 @@ import { AppShell } from "@/components/app-shell";
 export const Route = createFileRoute("/_authenticated/privacy-policy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Vernex" },
+      { title: "Privacy Policy — Verxor" },
       {
         name: "description",
-        content: "How Vernex collects, uses, and protects your personal data.",
+        content: "How Verxor collects, uses, and protects your personal data.",
       },
     ],
   }),
@@ -120,7 +120,7 @@ function PrivacyPolicy() {
           <div className="flex gap-3">
             <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <p className="text-[13px] leading-relaxed text-muted-foreground">
-              At Vernex, your privacy and trust are our top priorities. This policy describes how we collect,
+              At Verxor, your privacy and trust are our top priorities. This policy describes how we collect,
               use, and protect your personal data when you use our{" "}
               <span className="font-semibold text-foreground">Virtual Numbers, rentals, or Boosting Services</span>.
             </p>
@@ -173,11 +173,11 @@ function PrivacyPolicy() {
             If you have concerns about our Privacy Policy or how your data is handled, our support team is here to help.
           </p>
           <a
-            href="mailto:help@vernex.com.ng"
+            href="mailto:help@verxor.com"
             className="tap-fast mt-4 inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-sm"
           >
             <Mail className="h-4 w-4" />
-            help@vernex.com.ng
+            help@verxor.com
           </a>
         </div>
       </div>

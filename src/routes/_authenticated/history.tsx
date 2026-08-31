@@ -9,9 +9,9 @@ import { getDashboardSummary } from "@/lib/functions/dashboard.functions";
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
     meta: [
-      { title: "Transaction History — Vernex" },
-      { name: "description", content: "Review your Vernex wallet transactions, orders, and refunds." },
-      { property: "og:title", content: "Vernex — Transaction History" },
+      { title: "Transaction History — Verxor" },
+      { name: "description", content: "Review your Verxor wallet transactions, orders, and refunds." },
+      { property: "og:title", content: "Verxor — Transaction History" },
       { property: "og:description", content: "Every wallet movement, order, and refund in one clean feed." },
     ],
   }),

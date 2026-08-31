@@ -7,7 +7,7 @@ import { flagOf, formatDate } from "@/components/rental/calls-helpers";
 
 export const Route = createFileRoute("/_authenticated/rental/numbers")({
   head: () => ({
-    meta: [{ title: "Numbers — Vernex" }],
+    meta: [{ title: "Numbers — Verxor" }],
   }),
   component: NumbersPage,
 });
@@ -50,7 +50,7 @@ function NumbersPage() {
             className="flex h-9 w-9 items-center justify-center rounded-full active:bg-slate-100"
             aria-label="Add number"
           >
-            <Plus size={22} className="text-teal-700" strokeWidth={2.2} />
+            <Plus size={22} className="text-[#2563EB]" strokeWidth={2.2} />
           </Link>
         </div>
       </header>
@@ -58,7 +58,7 @@ function NumbersPage() {
       <div className="mx-auto max-w-lg px-4 pt-4">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-700" />
+            <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
           </div>
         ) : rows.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-20 text-center">
@@ -69,7 +69,7 @@ function NumbersPage() {
             </p>
             <Link
               to="/rental/calls"
-              className="mt-5 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white"
+              className="mt-5 rounded-full bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white"
             >
               Rent a number
             </Link>

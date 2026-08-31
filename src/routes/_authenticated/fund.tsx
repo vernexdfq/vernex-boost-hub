@@ -22,10 +22,10 @@ import { getWalletFundingDetails } from "@/lib/functions/fund.functions";
 export const Route = createFileRoute("/_authenticated/fund")({
   head: () => ({
     meta: [
-      { title: "Fund Wallet — Vernex" },
+      { title: "Fund Wallet — Verxor" },
       {
         name: "description",
-        content: "Fund your Vernex wallet via bank transfer to your virtual account.",
+        content: "Fund your Verxor wallet via bank transfer to your virtual account.",
       },
     ],
   }),
@@ -72,12 +72,13 @@ function FundPage() {
   const reference =
     funding?.reference ??
     account?.wallet?.virtual_account_reference ??
-    `VNX-${user.id.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
-  const accountName =
+    `VXR-${user.id.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+  const accountName = (
     funding?.accountName ||
     (account?.profile?.full_name
-      ? `VERNEX / ${account.profile.full_name.toUpperCase()}`
-      : "VERNEX / CUSTOMER");
+      ? `VERXOR / ${account.profile.full_name.toUpperCase()}`
+      : "VERXOR / CUSTOMER")
+  ).replace(/VERNEX/gi, "VERXOR");
 
   const pending = !accountNumber;
   const statusMessage =

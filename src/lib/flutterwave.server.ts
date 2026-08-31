@@ -1,5 +1,5 @@
 /**
- * Server-only Flutterwave helpers for Vernex (LIVE mode only — test keys are rejected).
+ * Server-only Flutterwave helpers for Verxor (LIVE mode only — test keys are rejected).
  * Endpoint: POST https://api.flutterwave.com/v3/virtual-account-numbers
  *
  * Static (permanent) NGN accounts use is_permanent: true and amount: 0.
@@ -76,7 +76,7 @@ export type CreateVirtualAccountInput = {
 
 function splitName(fullName: string): { firstname: string; lastname: string } {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return { firstname: "Vernex", lastname: "Customer" };
+  if (parts.length === 0) return { firstname: "Verxor", lastname: "Customer" };
   if (parts.length === 1) return { firstname: parts[0], lastname: "Customer" };
   return { firstname: parts[0], lastname: parts.slice(1).join(" ") };
 }
@@ -219,13 +219,13 @@ export async function provisionVirtualAccount(
 
     const reference =
       wallet?.virtual_account_reference ??
-      `VNX-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+      `VXR-${input.userId.replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 
-    const { firstname, lastname } = splitName(input.fullName || "Vernex Customer");
-    const accountLabel = `VERNEX / ${firstname} ${lastname}`.toUpperCase().slice(0, 100);
+    const { firstname, lastname } = splitName(input.fullName || "Verxor Customer");
+    const accountLabel = `VERXOR / ${firstname} ${lastname}`.toUpperCase().replace(/VERNEX/gi, "VERXOR").slice(0, 100);
     const email =
       (input.email || "").trim() ||
-      `${input.userId.replace(/-/g, "").slice(0, 12)}@users.vernex.com.ng`;
+      `${input.userId.replace(/-/g, "").slice(0, 12)}@users.verxor.com`;
     const phonenumber = normalizeNgPhone(input.phone);
 
     // Cloudflare FLUTTERWAVE_BVN is preferred for permanent static accounts
@@ -276,7 +276,7 @@ export async function provisionVirtualAccount(
         console.error("[Flutterwave] static VA rejected:", lastError);
 
         // Retry once with a unique tx_ref (Flutterwave may reject duplicate refs)
-        const retryRef = `VNX-${input.userId.replace(/-/g, "").slice(0, 10)}-${Date.now().toString(36).toUpperCase()}`;
+        const retryRef = `VXR-${input.userId.replace(/-/g, "").slice(0, 10)}-${Date.now().toString(36).toUpperCase()}`;
         const retryPayload: Record<string, unknown> = {
           ...basePayload,
           tx_ref: retryRef,

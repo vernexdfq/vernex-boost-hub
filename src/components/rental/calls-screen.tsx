@@ -153,7 +153,7 @@ export function RentNumberApp() {
               className="flex h-9 w-9 items-center justify-center rounded-full active:bg-slate-100"
               aria-label="Rent number"
             >
-              <Plus size={24} className="text-teal-700" strokeWidth={2.2} />
+              <Plus size={24} className="text-[#2563EB]" strokeWidth={2.2} />
             </button>
           </div>
         </div>
@@ -178,13 +178,13 @@ export function RentNumberApp() {
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-[15px] font-semibold text-slate-900">Recents</h2>
               <div className="flex items-center gap-0.5">
-                <button type="button" className="p-2 text-teal-700 active:opacity-60"><Filter size={18} /></button>
-                <button type="button" className="p-2 text-teal-700 active:opacity-60"><MoreVertical size={18} /></button>
+                <button type="button" className="p-2 text-[#2563EB] active:opacity-60"><Filter size={18} /></button>
+                <button type="button" className="p-2 text-[#2563EB] active:opacity-60"><MoreVertical size={18} /></button>
               </div>
             </div>
             {rentalsLoading ? (
               <div className="flex justify-center py-16">
-                <Loader2 className="h-5 w-5 animate-spin text-teal-700" />
+                <Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" />
               </div>
             ) : recentRows.length === 0 ? (
               <div className="flex flex-col items-center px-6 py-16 text-center">
@@ -197,7 +197,7 @@ export function RentNumberApp() {
                     setBrowseMode(true);
                     setShowCountrySheet(true);
                   }}
-                  className="mt-4 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white"
+                  className="mt-4 rounded-full bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   Rent a number
                 </button>
@@ -237,7 +237,7 @@ export function RentNumberApp() {
                 value={contactSearch}
                 onChange={(e) => setContactSearch(e.target.value)}
                 placeholder="Search contacts"
-                className="h-10 w-full rounded-xl border-0 bg-slate-100 pl-10 pr-3 text-[14px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                className="h-10 w-full rounded-xl border-0 bg-slate-100 pl-10 pr-3 text-[14px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
               />
             </div>
             {outboundLines.filter((l) => l.type === "rented").length === 0 ? (
@@ -257,7 +257,7 @@ export function RentNumberApp() {
                   )
                   .map((c) => (
                     <li key={c.id} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-3 active:bg-slate-50">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-50 text-[15px] font-semibold text-teal-800">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[15px] font-semibold text-blue-800">
                         {c.label.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -270,9 +270,9 @@ export function RentNumberApp() {
                           setFromLineId(c.id);
                           setSubTab("keypad");
                         }}
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 active:bg-teal-100"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 active:bg-blue-100"
                       >
-                        <Phone size={18} className="text-teal-700" />
+                        <Phone size={18} className="text-[#2563EB]" />
                       </button>
                     </li>
                   ))}
@@ -339,7 +339,7 @@ export function RentNumberApp() {
                     description: `From ${fromLine.label} (${fromLine.number})`,
                   });
                 }}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-700 shadow-lg shadow-teal-700/30 active:bg-teal-800"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2563EB] shadow-lg shadow-blue-600/30 active:bg-blue-700"
               >
                 <Phone size={28} className="text-white" fill="white" strokeWidth={0} />
               </button>
@@ -359,7 +359,7 @@ export function RentNumberApp() {
                 setBrowseMode(true);
                 setShowCountrySheet(true);
               }}
-              className="mt-8 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-[13px] font-semibold text-teal-800"
+              className="mt-8 inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-[13px] font-semibold text-blue-800"
             >
               <Hash size={14} /> Browse & rent numbers
             </button>

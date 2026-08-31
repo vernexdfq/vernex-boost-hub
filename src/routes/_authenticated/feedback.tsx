@@ -8,10 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/feedback")({
   head: () => ({
     meta: [
-      { title: "Feedback — Vernex" },
+      { title: "Feedback — Verxor" },
       {
         name: "description",
-        content: "Share feedback, report bugs, or suggest features for Vernex.",
+        content: "Share feedback, report bugs, or suggest features for Verxor.",
       },
     ],
   }),
@@ -65,9 +65,9 @@ function Feedback() {
     } catch {
       // Fallback: open Telegram support if insert fails (RLS / schema)
       const text = encodeURIComponent(
-        `[Vernex Feedback]\nType: ${type}\nSubject: ${subject}\n\n${message}\n\nFrom: ${user.email ?? user.id}`,
+        `[Verxor Feedback]\nType: ${type}\nSubject: ${subject}\n\n${message}\n\nFrom: ${user.email ?? user.id}`,
       );
-      window.open(`https://t.me/vernex_support?text=${text}`, "_blank", "noopener,noreferrer");
+      window.open(`https://t.me/verxor_support?text=${text}`, "_blank", "noopener,noreferrer");
       toast.message("Opening Telegram support…");
     } finally {
       setSending(false);
@@ -98,7 +98,7 @@ function Feedback() {
               We're listening, {firstName} 👋
             </h2>
             <p className="mt-2 text-[13px] leading-relaxed text-white/85">
-              Your feedback genuinely shapes where we take Vernex next. Suggest a feature, flag a
+              Your feedback genuinely shapes where we take Verxor next. Suggest a feature, flag a
               bug, tell us where we fell short, or just say what you like — every message reaches
               our team.
             </p>
