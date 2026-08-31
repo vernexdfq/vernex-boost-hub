@@ -18,7 +18,7 @@ export function AppShell({
           </div>
         </div>
       )}
-      <div className="mx-auto min-h-screen max-w-md pb-28">{children}</div>
+      <main className="mx-auto min-h-screen w-full max-w-md pb-24">{children}</main>
       <BottomNav />
     </div>
   );
