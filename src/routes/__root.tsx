@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeBoot } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -45,9 +44,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -90,13 +86,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Nigerian fintech & virtual telecom platform for OTP numbers, SMM boosting and instant wallet funding.",
+          "Global digital platform for virtual numbers, SMM services and wallet funding.",
       },
       { name: "author", content: "Verxor" },
       { property: "og:title", content: "Verxor — Virtual Numbers, SMM & Wallet" },
       {
         property: "og:description",
-        content: "Fund your wallet, buy virtual numbers, and grow your socials — all in one place.",
+        content: "Fund your wallet, buy virtual numbers, and manage your digital services — all in one place.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "/mylogo.png" },
