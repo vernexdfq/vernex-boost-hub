@@ -33,13 +33,13 @@ import {
 export const Route = createFileRoute("/_authenticated/virtual-numbers")({
   head: () => ({
     meta: [
-      { title: "Virtual Numbers — Vernex" },
+      { title: "Virtual Numbers — Verxor" },
       {
         name: "description",
         content:
           "Buy a temporary phone number to receive OTP codes from WhatsApp, Telegram, OpenAI and 300+ services.",
       },
-      { property: "og:title", content: "Vernex Virtual Numbers" },
+      { property: "og:title", content: "Verxor Virtual Numbers" },
     ],
   }),
   component: VirtualNumbers,
@@ -408,8 +408,7 @@ function VirtualNumbers() {
                 Server currently offline / try another server
               </p>
               <p className="mt-1 text-xs text-slate-600">
-                No live services for this tab. Check the Cloudflare API key for this provider,
-                then retry.
+                No live services for this tab. Check the provider API configuration, then retry.
               </p>
               <button
                 type="button"
@@ -421,7 +420,7 @@ function VirtualNumbers() {
             </div>
           ) : (
             <>
-              {/* Country — only for All Countries servers (like Primex) */}
+              {/* Country selector for multi-country server catalogs */}
               {!isUsaSlot && (
                 <div className="relative mb-3" ref={countryRef}>
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
