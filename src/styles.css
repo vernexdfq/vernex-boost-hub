@@ -139,8 +139,16 @@
     text-rendering: optimizeLegibility;
   }
 
+  html {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
+    width: 100%;
     min-width: 320px;
+    margin: 0;
+    overflow-x: hidden;
   }
 
   h1,
@@ -162,6 +170,37 @@
   :focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
+  }
+}
+
+/* The product shell is deliberately rigid: no perspective, skew, or accidental
+   horizontal drift. Decorative transforms belong to individual components only. */
+.verxor-app-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: clip;
+  transform: none !important;
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+.verxor-app-content {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  min-width: 0;
+  margin-inline: auto;
+  transform: none !important;
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+@media (max-width: 767px) {
+  .verxor-app-content {
+    max-width: 100%;
+    padding-inline: 0;
   }
 }
 
