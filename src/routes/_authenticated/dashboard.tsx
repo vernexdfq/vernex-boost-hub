@@ -64,7 +64,7 @@ const quickActions = [
     to: "/rental/calls",
   },
   {
-    label: "Get Affiliate Website",
+    label: "Affiliate",
     icon: Globe,
     tint: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
     to: "/affiliate",
@@ -209,12 +209,12 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <header className="flex items-center gap-3 px-5 pt-6">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.3)]">
+      <header className="flex items-center gap-3 px-4 pt-5 sm:px-5 sm:pt-6">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.35)]">
           {initial}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] font-bold leading-tight">
+          <h1 className="truncate text-[17px] font-bold leading-tight text-[#0f1332] dark:text-foreground">
             {g.text}, {displayName}
           </h1>
           <p className="truncate text-xs text-muted-foreground">Your Verxor Dashboard</p>
@@ -223,7 +223,7 @@ function Dashboard() {
           to="/alerts"
           onClick={handleOpenAlerts}
           aria-label="Notifications"
-          className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border bg-surface text-foreground/90 hover:bg-surface-2 transition"
+          className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border bg-surface text-foreground/90 transition hover:bg-surface-2"
         >
           <Bell className="h-5 w-5" />
           {hasUnread && (
@@ -232,62 +232,69 @@ function Dashboard() {
         </Link>
       </header>
 
-      <section className="px-5 pt-5">
-        <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 shadow-wallet">
+      <section className="px-4 pt-4 sm:px-5 sm:pt-5">
+        <div className="relative overflow-hidden rounded-2xl wallet-gradient p-4 shadow-wallet sm:p-5">
           <div className="absolute inset-0 dotted-bg opacity-40" />
           <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full border border-white/10" />
-          <div className="relative flex items-start justify-between">
+          <div className="relative flex items-start justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
               Available Balance
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/30 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-400/10 px-2.5 py-1 text-[11px] font-semibold text-blue-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
               Active
             </span>
           </div>
-          <div className="relative mt-3 flex items-center gap-3">
-            <span className="text-[38px] font-black tracking-tight text-white tabular-nums">
+          <div className="relative mt-3 flex min-w-0 items-center gap-2.5">
+            <span className="truncate text-[32px] font-black tracking-tight text-white tabular-nums sm:text-[38px]">
               {hidden ? "₦••••" : formatNaira(balance)}
             </span>
             <button
+              type="button"
               onClick={() => setHidden((v) => !v)}
               aria-label={hidden ? "Show balance" : "Hide balance"}
-              className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20"
             >
               {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <div className="relative mt-5 grid grid-cols-2 gap-3">
-            <Link to="/fund" className="flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-[#0F172A] hover:brightness-95 transition">
+          <div className="relative mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
+            <Link
+              to="/fund"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-[#0f1332] transition hover:brightness-95"
+            >
               <Plus className="h-4 w-4" strokeWidth={2.6} /> Fund Wallet
             </Link>
-            <Link to="/history" className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
+            <Link
+              to="/history"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+            >
               <History className="h-4 w-4" /> History
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="px-5 pt-7">
+      <section className="px-4 pt-6 sm:px-5 sm:pt-7">
         <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Quick Actions
         </h2>
-        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev backdrop-blur-md">
-          <div className="grid grid-cols-4 gap-3">
+        <div className="rounded-3xl border border-border bg-surface p-2.5 shadow-card-elev sm:p-3">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3">
             {quickActions.map((a) => {
               const Icon = a.icon;
               return (
                 <Link
                   key={a.label}
                   to={a.to}
-                  className="group flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-background/40 p-3 text-center transition hover:bg-accent/60 active:scale-[0.97]"
+                  className="group flex min-h-[92px] flex-col items-center justify-start rounded-2xl border border-border/60 bg-background/40 px-1.5 py-2.5 text-center transition hover:bg-accent/60 active:scale-[0.97] sm:min-h-[100px] sm:px-2 sm:py-3"
                 >
                   <span
-                    className={`mb-2 flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition group-hover:scale-105 ${a.tint}`}
+                    className={`mb-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border shadow-sm transition group-hover:scale-105 sm:h-12 sm:w-12 ${a.tint}`}
                   >
-                    <Icon size={22} strokeWidth={2.1} />
+                    <Icon size={20} strokeWidth={2.1} className="sm:h-[22px] sm:w-[22px]" />
                   </span>
-                  <span className="text-[11px] font-medium leading-tight text-foreground">
+                  <span className="line-clamp-2 w-full text-[10px] font-medium leading-tight text-[#0f1332] dark:text-foreground sm:text-[11px]">
                     {a.label}
                   </span>
                 </Link>
@@ -297,9 +304,11 @@ function Dashboard() {
         </div>
       </section>
 
-      <section className="px-5 pt-7">
+      <section className="px-4 pt-6 sm:px-5 sm:pt-7">
         <div className="mb-3 flex items-center gap-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Recent Activity</h2>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Recent Activity
+          </h2>
           <div className="h-px flex-1 bg-border" />
           <Link to="/history" className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
             View all <ChevronRight className="h-3.5 w-3.5" />
@@ -320,7 +329,10 @@ function Dashboard() {
               const Icon = row.icon;
               const positive = row.amount >= 0;
               return (
-                <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
+                <li
+                  key={row.id}
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev"
+                >
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${row.tint}`}>
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>
@@ -328,7 +340,11 @@ function Dashboard() {
                     <p className="truncate text-sm font-semibold">{row.label}</p>
                     <p className="truncate text-xs text-muted-foreground">{row.subtitle}</p>
                   </div>
-                  <span className={`shrink-0 text-sm font-bold tabular-nums ${positive ? "text-primary" : "text-destructive"}`}>
+                  <span
+                    className={`shrink-0 text-sm font-bold tabular-nums ${
+                      positive ? "text-primary" : "text-destructive"
+                    }`}
+                  >
                     {positive ? "+" : "-"}
                     {formatNaira(Math.abs(row.amount))}
                   </span>
@@ -340,20 +356,29 @@ function Dashboard() {
       </section>
 
       {notifications.length > 0 && (
-        <section className="px-5 pt-7">
+        <section className="px-4 pt-6 sm:px-5 sm:pt-7">
           <div className="mb-3 flex items-center gap-3">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Notifications</h2>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Notifications
+            </h2>
             <div className="h-px flex-1 bg-border" />
           </div>
           <ul className="space-y-2">
             {notifications.slice(0, 3).map((n) => (
-              <li key={n.id} className={`rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev ${n.read ? "opacity-70" : ""}`}>
+              <li
+                key={n.id}
+                className={`rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev ${
+                  n.read ? "opacity-70" : ""
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold">{n.title}</p>
                     <p className="text-xs text-muted-foreground">{n.body}</p>
                   </div>
-                  <span className="shrink-0 text-[10px] text-muted-foreground">{relativeTime(n.created_at)}</span>
+                  <span className="shrink-0 text-[10px] text-muted-foreground">
+                    {relativeTime(n.created_at)}
+                  </span>
                 </div>
               </li>
             ))}
