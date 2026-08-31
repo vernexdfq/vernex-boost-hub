@@ -12,17 +12,17 @@ export function PageHeader({
   right?: ReactNode;
 }) {
   return (
-    <header className="flex items-center gap-3 px-5 pt-6">
+    <header className="flex items-center gap-3 border-b border-border/70 px-5 py-4">
       <Link
         to="/dashboard"
         aria-label="Back"
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface hover:bg-surface-2 transition"
+        className="tap-fast grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-border bg-surface text-foreground hover:bg-surface-2"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-4 w-4" />
       </Link>
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[17px] font-bold leading-tight">{title}</h1>
-        {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
+        <h1 className="truncate text-base font-bold leading-tight tracking-tight">{title}</h1>
+        {subtitle && <p className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       {right}
     </header>
