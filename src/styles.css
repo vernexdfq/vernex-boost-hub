@@ -237,6 +237,20 @@
   border-radius: 1.25rem;
 }
 
+/* The landing page has two legacy pixel radii; keep their intended surfaces consistent. */
+[class~="rounded-[20px]"],
+[class~="rounded-[28px]"] {
+  overflow: hidden;
+  border-radius: 1.25rem;
+}
+
+/* Keep card interiors aligned and compact on narrow mobile screens. */
+@media (max-width: 639px) {
+  [class~="shadow-card-elev"] {
+    padding: 1rem;
+  }
+}
+
 /* Interaction is responsive, not decorative. Keep motion short and purposeful. */
 html {
   -webkit-tap-highlight-color: transparent;
