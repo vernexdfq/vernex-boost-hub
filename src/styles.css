@@ -231,24 +231,31 @@
   border-top: 1px solid var(--border);
 }
 
-/* Normalize shared card primitives without affecting controls or page logic. */
+/* Normalize shared card primitives without injecting padding into arbitrary layouts. */
 [class~="shadow-card-elev"] {
   overflow: hidden;
   border-radius: 1.25rem;
 }
 
-/* The landing page has two legacy pixel radii; keep their intended surfaces consistent. */
+/* Keep legacy landing-page surfaces on the same outer radius system. */
 [class~="rounded-[20px]"],
 [class~="rounded-[28px]"] {
   overflow: hidden;
   border-radius: 1.25rem;
 }
 
-/* Keep card interiors aligned and compact on narrow mobile screens. */
-@media (max-width: 639px) {
-  [class~="shadow-card-elev"] {
-    padding: 1rem;
-  }
+/* SVGs must keep their explicit Tailwind dimensions. A global height:auto rule makes
+   icon boxes inherit intrinsic dimensions and can create visibly uneven UI alignment. */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+svg {
+  max-width: 100%;
+  display: block;
 }
 
 /* Interaction is responsive, not decorative. Keep motion short and purposeful. */
@@ -283,7 +290,6 @@ input[type="button"] {
   transform: scale(0.99);
 }
 
-/* Loading state: quiet and stable rather than flashy. */
 .skeleton {
   background: #e9eef5;
   border-radius: 0.5rem;
@@ -293,16 +299,7 @@ input[type="button"] {
   background: #182235;
 }
 
-img,
-video,
-svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Existing animation utility names remain supported, but the product UI is intentionally still.
-   This removes the floating-card / pulsing-orb look that reads as generated template decoration. */
+/* Existing animation utility names remain supported, but the product UI is intentionally still. */
 .animate-float-slow,
 .animate-float-fast,
 .animate-pulse-glow {
@@ -320,7 +317,6 @@ svg {
   }
 }
 
-/* Native-feeling scrollbars on desktop without changing mobile behavior. */
 @media (min-width: 768px) {
   * {
     scrollbar-width: thin;
@@ -332,7 +328,6 @@ svg {
   }
 }
 
-/* Keep the marquee available for places that intentionally use it. */
 @keyframes verxor-marquee {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
