@@ -184,7 +184,7 @@
 
 @utility vx-card {
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow-card);
@@ -192,7 +192,7 @@
 
 @utility vx-list {
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow-card);
@@ -229,6 +229,12 @@
 
 .vx-list > * + * {
   border-top: 1px solid var(--border);
+}
+
+/* Normalize shared card primitives without affecting controls or page logic. */
+[class~="shadow-card-elev"] {
+  overflow: hidden;
+  border-radius: 1.25rem;
 }
 
 /* Interaction is responsive, not decorative. Keep motion short and purposeful. */
