@@ -10,14 +10,14 @@ export function AppShell({
   showThemeToggle?: boolean;
 }) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-x-hidden pb-28">
+    <div className="min-h-[100dvh] overflow-x-hidden bg-background text-foreground">
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col overflow-x-hidden pb-[calc(7rem+env(safe-area-inset-bottom))]">
         {showThemeToggle && (
           <div className="flex justify-end px-5 pt-3">
             <ThemeToggle />
           </div>
         )}
-        <div className="min-w-0 flex-1">{children}</div>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
       <BottomNav />
     </div>
