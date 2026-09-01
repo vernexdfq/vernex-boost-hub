@@ -24,7 +24,7 @@ export function RentalBottomNav() {
       aria-label="Rental"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="mx-auto flex h-14 max-w-lg items-stretch justify-around">
+      <div className="mx-auto flex h-14 max-w-md items-stretch justify-around">
         {tabs.map(({ to, label, icon: Icon }) => {
           const active =
             to === "/profile"
