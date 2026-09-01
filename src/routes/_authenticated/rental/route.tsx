@@ -8,9 +8,11 @@ export const Route = createFileRoute("/_authenticated/rental")({
 
 function RentalLayout() {
   return (
-    <div className="mx-auto min-h-[100dvh] max-w-lg bg-white text-slate-900 antialiased">
+    <div className="mx-auto min-h-[100dvh] w-full max-w-md overflow-x-hidden bg-white text-slate-900 antialiased">
       <InstallPrompt variant="dropdown" />
-      <Outlet />
+      <main className="min-h-[100dvh] pb-[calc(4rem+env(safe-area-inset-bottom))]">
+        <Outlet />
+      </main>
       <RentalBottomNav />
     </div>
   );
