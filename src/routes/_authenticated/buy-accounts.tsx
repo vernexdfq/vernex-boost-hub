@@ -378,7 +378,7 @@ function BuyAccounts() {
                   setSelected(p);
                   setQty(1);
                 }}
-                className="rounded-2xl border border-border bg-surface p-3.5 text-left shadow-card-elev transition active:scale-[0.99]"
+                className="overflow-hidden rounded-2xl border border-border bg-surface p-3.5 text-left shadow-card-elev"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span
@@ -419,7 +419,7 @@ function BuyAccounts() {
       {/* Product detail modal */}
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-foreground/40 sm:place-items-center">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col rounded-t-3xl border border-border bg-surface shadow-xl sm:rounded-3xl">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-xl sm:rounded-2xl">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h3 className="text-base font-black text-foreground">Product details</h3>
               <button

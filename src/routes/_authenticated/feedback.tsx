@@ -91,7 +91,7 @@ function Feedback() {
       </header>
 
       <div className="space-y-4 px-4 pb-10 pt-4">
-        <div className="relative overflow-hidden rounded-3xl wallet-gradient p-5 text-white shadow-wallet">
+        <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 text-white shadow-wallet">
           <div className="absolute inset-0 dotted-bg opacity-30" />
           <div className="relative">
             <h2 className="text-lg font-black tracking-tight">

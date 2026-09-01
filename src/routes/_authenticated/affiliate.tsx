@@ -197,7 +197,7 @@ function Affiliate() {
         </div>
 
         {/* Banner */}
-        <div className="relative mb-6 overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 p-6 shadow-2xl">
+        <div className="relative mb-6 overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 p-6 shadow-2xl">
           <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-[#16C784]/10 blur-3xl" />
           <div className="relative">
             <div className="mb-4 inline-flex items-center space-x-2 rounded-full border border-[#16C784]/20 bg-[#16C784]/10 px-3 py-1 text-xs font-semibold text-[#16C784]">
@@ -231,7 +231,7 @@ function Affiliate() {
 
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
           {/* Step 1 */}
-          <div className="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
             <div className="mb-4 flex items-center space-x-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#16C784]/10 text-xs font-bold text-[#16C784]">
                 1
@@ -265,7 +265,7 @@ function Affiliate() {
           </div>
 
           {/* Step 2 */}
-          <div className="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
             <div className="mb-4 flex items-center space-x-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#16C784]/10 text-xs font-bold text-[#16C784]">
                 2
@@ -296,7 +296,7 @@ function Affiliate() {
           </div>
 
           {/* Step 3 */}
-          <div className="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
             <div className="mb-4 flex items-center space-x-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#16C784]/10 text-xs font-bold text-[#16C784]">
                 3
@@ -319,7 +319,7 @@ function Affiliate() {
           </div>
 
           {/* Step 4 */}
-          <div className="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/80 p-5 backdrop-blur-md">
             <div className="mb-4 flex items-center space-x-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#16C784]/10 text-xs font-bold text-[#16C784]">
                 4
@@ -358,7 +358,7 @@ function Affiliate() {
             <Sparkles size={18} className="text-[#16C784]" />
             <span>What You Get</span>
           </h3>
-          <div className="space-y-1 rounded-3xl border border-slate-800/80 bg-slate-900/80 p-2 backdrop-blur-md">
+          <div className="space-y-1 rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/80 p-2 backdrop-blur-md">
             {WHAT_YOU_GET.map((item) => {
               const Icon = item.icon;
               return (

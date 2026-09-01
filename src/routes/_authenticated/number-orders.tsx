@@ -43,47 +43,49 @@ function NumberOrders() {
   return (
     <AppShell>
       <PageHeader title="Number Orders" subtitle="OTP delivery log" />
-      <ul className="space-y-2 px-5 pt-5">
+      <div className="px-5 pt-5">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : orders?.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
             No number orders yet.
           </div>
         ) : (
-          orders?.map((o) => {
-            const status: OrderStatus = (o.status as OrderStatus) ?? "pending";
-            const b = badge[status];
-            const B = IconFor[status];
-            const product = o.number_products as { service_name?: string; country_name?: string; server_id?: string; provider?: string } | null;
-            return (
-              <li key={o.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-bold">
-                      {product?.service_name ?? "Unknown"}{" "}
-                      <span className="font-normal text-muted-foreground">• {product?.country_name ?? "—"} {product?.server_id ?? ""}</span>
-                    </p>
-                    <p className="mt-0.5 text-[11px] font-mono tabular-nums text-muted-foreground">{o.phone_number ?? "Allocating…"}</p>
+          <ul className="vx-list">
+            {orders?.map((o) => {
+              const status: OrderStatus = (o.status as OrderStatus) ?? "pending";
+              const b = badge[status];
+              const B = IconFor[status];
+              const product = o.number_products as { service_name?: string; country_name?: string; server_id?: string; provider?: string } | null;
+              return (
+                <li key={o.id} className="px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold">
+                        {product?.service_name ?? "Unknown"}{" "}
+                        <span className="font-normal text-muted-foreground">• {product?.country_name ?? "—"} {product?.server_id ?? ""}</span>
+                      </p>
+                      <p className="mt-0.5 text-[11px] font-mono tabular-nums text-muted-foreground">{o.phone_number ?? "Allocating…"}</p>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 overflow-hidden rounded-full border px-2 py-1 text-[10px] font-bold uppercase ${b.c}`}>
+                      <B className="h-3 w-3" /> {b.label}
+                    </span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold uppercase ${b.c}`}>
-                    <B className="h-3 w-3" /> {b.label}
-                  </span>
-                </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>#{o.id.slice(0, 8).toUpperCase()}</span>
-                  <span>₦{Number(o.amount_paid).toLocaleString("en-NG")}</span>
-                </div>
-                {o.otp_code && status === "received" && (
-                  <p className="mt-2 rounded-lg bg-indigo-500/10 px-3 py-2 text-center text-sm font-black tracking-[0.3em] text-indigo-400 tabular-nums">{o.otp_code}</p>
-                )}
-              </li>
-            );
-          })
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>#{o.id.slice(0, 8).toUpperCase()}</span>
+                    <span>₦{Number(o.amount_paid).toLocaleString("en-NG")}</span>
+                  </div>
+                  {o.otp_code && status === "received" && (
+                    <p className="mt-2 overflow-hidden rounded-lg bg-indigo-500/10 px-3 py-2 text-center text-sm font-black tracking-[0.3em] text-indigo-400 tabular-nums">{o.otp_code}</p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </ul>
+      </div>
     </AppShell>
   );
 }

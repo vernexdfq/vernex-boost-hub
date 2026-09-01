@@ -75,10 +75,9 @@ function NumbersPage() {
             </Link>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
             {rows.map((n) => (
-              <li key={n.id}>
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-3.5 py-3.5">
+              <li key={n.id} className="flex items-center gap-3 border-t border-slate-100 px-4 py-3.5 first:border-t-0">
                   <span className="text-2xl leading-none">{n.flag}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[15px] font-semibold tabular-nums text-slate-900">
@@ -90,7 +89,6 @@ function NumbersPage() {
                     </p>
                   </div>
                   <ChevronRight size={18} className="shrink-0 text-slate-300" />
-                </div>
               </li>
             ))}
           </ul>

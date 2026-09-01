@@ -25,7 +25,7 @@ function CreditPage() {
       </header>
 
       <div className="mx-auto max-w-lg px-4 pt-6">
-        <div className="mb-6 rounded-2xl bg-gradient-to-br from-[#0F1332] to-[#2563EB] p-5 text-white shadow-lg shadow-blue-600/20">
+        <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0F1332] to-[#2563EB] p-5 text-white shadow-lg shadow-blue-600/20">
           <p className="text-[13px] font-medium text-blue-100">Available credit</p>
           <p className="mt-1 text-3xl font-bold tabular-nums">₦0.00</p>
           <Link
@@ -37,12 +37,12 @@ function CreditPage() {
         </div>
 
         <h2 className="mb-3 text-[15px] font-semibold text-slate-900">Top-up packages</h2>
-        <ul className="space-y-2">
+        <ul className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           {packages.map((p) => (
-            <li key={p.id}>
+            <li key={p.id} className="border-t border-slate-100 first:border-t-0">
               <Link
                 to="/fund"
-                className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3.5 active:bg-slate-100"
+                className="flex items-center justify-between px-4 py-3.5 active:bg-slate-50"
               >
                 <div>
                   <p className="text-[15px] font-semibold text-slate-900">{p.amount}</p>

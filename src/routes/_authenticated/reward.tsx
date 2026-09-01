@@ -110,7 +110,7 @@ function Reward() {
   return (
     <AppShell>
       {/* Header */}
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-5 py-3 backdrop-blur-md">
         <Link
           to="/dashboard"
           aria-label="Back"
@@ -127,9 +127,9 @@ function Reward() {
         </div>
       </header>
 
-      <div className="space-y-4 px-4 pb-8 pt-4">
+      <div className="space-y-4 px-5 pb-8 pt-4">
         {/* Prominent balance strip (requested ₦ display zone) */}
-        <div className="rounded-2xl border border-border bg-surface px-4 py-3 shadow-card-elev">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface px-4 py-3 shadow-card-elev">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Wallet balance
           </p>
@@ -139,7 +139,7 @@ function Reward() {
         </div>
 
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-3xl brand-gradient p-5 text-white shadow-wallet">
+        <div className="relative overflow-hidden rounded-2xl brand-gradient p-5 text-white shadow-wallet">
           <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10" />
           <div className="absolute -bottom-8 right-8 h-24 w-24 rounded-full bg-white/10" />
           <div className="relative flex items-start gap-3">
@@ -207,7 +207,7 @@ function Reward() {
             return (
               <div
                 key={s.label}
-                className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev"
+                className="overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev"
               >
                 <Icon className={`h-4 w-4 ${s.tone}`} />
                 <p className="mt-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -220,7 +220,7 @@ function Reward() {
         </div>
 
         {/* Available to withdraw */}
-        <section className="rounded-3xl border border-border bg-surface p-5 shadow-card-elev">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-card-elev">
           <div className="rounded-2xl bg-[oklch(0.22_0.08_265)] px-4 py-5 text-center text-white">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
               Available to withdraw
@@ -266,7 +266,7 @@ function Reward() {
         </section>
 
         {/* Referral ID / link */}
-        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev">>
           <div className="mb-2 flex items-center gap-2">
             <Info className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-bold">Your referral ID</h2>
@@ -330,7 +330,7 @@ function Reward() {
         </section>
 
         {/* How it works */}
-        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev">>
           <div className="mb-3 flex items-center gap-2">
             <Info className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-bold">How it works</h2>
@@ -370,7 +370,7 @@ function Reward() {
         </section>
 
         {/* Earnings history */}
-        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev">>
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />

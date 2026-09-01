@@ -62,32 +62,34 @@ function Alerts() {
   return (
     <AppShell>
       <PageHeader title="Alerts" subtitle="System & order updates" right={<Bell className="h-5 w-5 text-muted-foreground" />} />
-      <ul className="mt-5 space-y-2 px-5">
+      <div className="mt-5 px-5">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : notifications.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
             No alerts yet. We'll notify you when orders update.
           </div>
         ) : (
-          notifications.map((n) => {
-            const mapped = iconMap[n.type] ?? iconMap.general;
-            const Icon = mapped.icon;
-            return (
-              <li key={n.id} className={`flex gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card-elev ${n.read ? "opacity-70" : ""}`}>
-                <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${mapped.tint}`} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{n.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">{n.body}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">{relativeTime(n.created_at)}</p>
-                </div>
-              </li>
-            );
-          })
+          <ul className="vx-list">
+            {notifications.map((n) => {
+              const mapped = iconMap[n.type] ?? iconMap.general;
+              const Icon = mapped.icon;
+              return (
+                <li key={n.id} className={`flex gap-3 px-4 py-3.5 ${n.read ? "opacity-70" : ""}`}>
+                  <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${mapped.tint}`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{n.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{n.body}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">{relativeTime(n.created_at)}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </ul>
+      </div>
     </AppShell>
   );
 }

@@ -314,7 +314,7 @@ function BoostPage() {
         </div>
 
         {/* Banner */}
-        <div className="relative mb-5 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-[#0F1332] via-[#1e3a8a] to-[#2563EB] p-6 shadow-xl dark:border-slate-800/80">
+        <div className="relative mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#0F1332] via-[#1e3a8a] to-[#2563EB] p-6 shadow-xl dark:border-slate-800/80">
           <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-[#2563EB]/10 blur-2xl" />
           <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-sm">
             <Rocket size={24} />
@@ -328,7 +328,7 @@ function BoostPage() {
         </div>
 
         {/* Wallet */}
-        <div className="mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/90">
+        <div className="mb-5 flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/90">
           <div className="flex items-center space-x-2.5">
             <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-[#2563EB]" />
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -339,7 +339,7 @@ function BoostPage() {
         </div>
 
         {/* Tip */}
-        <div className="mb-6 flex items-start space-x-3 rounded-2xl border border-blue-100 bg-blue-50/80 p-4 text-slate-600 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-slate-300">
+        <div className="mb-6 flex items-start space-x-3 overflow-hidden rounded-2xl border border-blue-100 bg-blue-50/80 p-4 text-slate-600 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-slate-300">
           <Info size={18} className="mt-0.5 shrink-0 text-[#2563EB]" />
           <p className="text-xs leading-relaxed">
             <strong className="text-slate-900 dark:text-white">Quick Tip:</strong> Select a platform, pick a
@@ -356,7 +356,7 @@ function BoostPage() {
             <button
               type="button"
               onClick={() => setPlatformOpen(true)}
-              className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
+              className="flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
             >
               <span className="text-sm font-semibold text-slate-900 dark:text-white">
                 {platform || (productsLoading ? "Loading…" : "Select platform")}
@@ -379,7 +379,7 @@ function BoostPage() {
                 }
                 setCategoryOpen(true);
               }}
-              className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
+              className="flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
             >
               <div className="flex items-center space-x-3">
                 <Folder size={18} className="text-[#2563EB]" />
@@ -405,7 +405,7 @@ function BoostPage() {
                 }
                 setServiceOpen(true);
               }}
-              className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
+              className="flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:bg-slate-900"
             >
               <div className="flex min-w-0 items-center space-x-3">
                 <Star size={18} className="shrink-0 text-amber-400" />
@@ -461,7 +461,7 @@ function BoostPage() {
           </div>
 
           {/* Summary */}
-          <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/80">
+          <div className="space-y-2 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/80">
             <div className="mb-2 flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
               <Hash size={14} className="text-[#2563EB]" />
               <span>Order Summary</span>
@@ -512,7 +512,7 @@ function BoostPage() {
               No boost orders yet
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="vx-list">
               {(orders ?? []).map((o: any) => {
                 const st = String(o.status || "pending").toLowerCase();
                 const badge = statusBadge[st] ?? statusBadge.pending;
@@ -522,7 +522,7 @@ function BoostPage() {
                 return (
                   <li
                     key={o.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/80"
+                    className="px-4 py-3.5 dark:bg-slate-900/80"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -693,7 +693,7 @@ function BoostPage() {
 
       {showFund && selected && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-black/70 p-4 sm:place-items-center">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-red-500/10 text-red-400">
               <Wallet className="h-5 w-5" />
             </span>
@@ -739,7 +739,7 @@ function SelectModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:rounded-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:rounded-2xl">
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
           <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
           <button

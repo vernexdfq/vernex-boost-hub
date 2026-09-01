@@ -93,7 +93,7 @@ function PrivacyPolicy() {
       </header>
 
       <div className="space-y-4 px-4 pb-10 pt-4">
-        <div className="relative overflow-hidden rounded-3xl wallet-gradient p-5 text-white shadow-wallet">
+        <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 text-white shadow-wallet">
           <div className="absolute inset-0 dotted-bg opacity-30" />
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/30 bg-indigo-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">

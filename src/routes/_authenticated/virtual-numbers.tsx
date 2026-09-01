@@ -390,7 +390,7 @@ function VirtualNumbers() {
         </div>
 
         {/* Order card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-200/50 sm:p-5">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card-elev sm:p-5">
           <h2 className="mb-0.5 text-base font-black text-slate-900">Order a Number</h2>
           <p className="mb-4 text-[11px] font-medium text-slate-400">
             {activeSlot.label} · live provider catalog
@@ -655,11 +655,11 @@ function VirtualNumbers() {
               ))}
             </div>
           ) : !orders || orders.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
               No orders yet — pick a service above to get started.
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="vx-list">
               {orders.slice(0, 8).map((o) => {
                 const status = (o.status as OrderStatus) || "pending";
                 const b = badge[status] ?? badge.pending;
@@ -673,7 +673,7 @@ function VirtualNumbers() {
                 return (
                   <li
                     key={o.id}
-                    className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm"
+                    className="px-4 py-3.5"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">

@@ -143,7 +143,7 @@ function FundPage() {
 
   return (
     <AppShell showThemeToggle={false}>
-      <div className="mx-auto max-w-md space-y-6 px-4 pb-6 pt-2 sm:px-6">
+      <div className="space-y-6 px-5 pb-6 pt-2">
         {/* Top bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -167,7 +167,7 @@ function FundPage() {
         </div>
 
         {/* Wallet balance card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-tr from-slate-900 to-indigo-950 p-6 text-white shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-tr from-slate-900 to-indigo-950 p-5 text-white shadow-xl">
           <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-indigo-600/30 blur-2xl" />
           <div className="mb-2 flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-300">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +193,7 @@ function FundPage() {
             <Building2 className="h-5 w-5" />
             <span>Fund via Bank Transfer</span>
           </div>
-          <div className="flex items-start space-x-3 rounded-2xl border border-amber-200/80 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800 sm:text-sm">
+          <div className="flex items-start space-x-3 overflow-hidden rounded-2xl border border-amber-200/80 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800 sm:text-sm">
             <span className="text-lg">⚠️</span>
             <span>No fee will be deducted from your deposit (₦0).</span>
           </div>
@@ -236,7 +236,7 @@ function FundPage() {
         </div>
 
         {/* Account details card */}
-        <div className="space-y-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-lg">
+        <div className="space-y-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card-elev">
           {isLoading ? (
             <div className="flex justify-center py-10">
               <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
@@ -323,7 +323,7 @@ function FundPage() {
         </div>
 
         {/* How to fund */}
-        <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-lg">
+        <div className="space-y-4 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card-elev">
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
             How to fund your wallet
           </h3>
@@ -345,7 +345,7 @@ function FundPage() {
         </div>
 
         {/* Secure badge */}
-        <div className="flex items-start space-x-3 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900">
+        <div className="flex items-start space-x-3 overflow-hidden rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
           <div>
             <span className="font-bold text-slate-900">Instant & Secure:</span> Transfers are

@@ -40,17 +40,17 @@ function HistoryPage() {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : transactions.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
             No transactions yet. Fund your wallet to get started.
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="vx-list">
             {transactions.map((row) => {
               const pos = row.type === "credit";
               const Icon = pos ? ArrowDownLeft : ArrowUpRight;
               return (
-                <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${pos ? "bg-indigo-500/10 text-indigo-400" : "bg-slate-100 text-slate-600"}`}>
+                <li key={row.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl ${pos ? "bg-indigo-500/10 text-indigo-400" : "bg-slate-100 text-slate-600"}`}>
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>
                   <div className="min-w-0 flex-1">

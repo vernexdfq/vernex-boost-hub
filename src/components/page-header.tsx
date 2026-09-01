@@ -12,7 +12,7 @@ export function PageHeader({
   right?: ReactNode;
 }) {
   return (
-    <header className="flex items-center gap-3 px-5 pt-6">
+    <header className="flex items-center gap-3 px-5 pt-2">
       <Link
         to="/dashboard"
         aria-label="Back"

@@ -118,7 +118,7 @@ function LogHistory() {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : !orders || orders.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-8 text-center">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-8 text-center">
             <Package className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="mt-3 text-sm font-semibold">No purchases yet</p>
             <p className="mt-1 text-[13px] text-muted-foreground">
@@ -132,11 +132,11 @@ function LogHistory() {
             </Link>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="vx-list">
             {orders.map((o) => (
               <li
                 key={o.id}
-                className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev"
+                className="px-4 py-3.5"
               >
                 <div className="flex items-start gap-3">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">

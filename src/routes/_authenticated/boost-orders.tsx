@@ -30,46 +30,48 @@ function BoostOrders() {
   return (
     <AppShell>
       <PageHeader title="Boost Orders" subtitle="SMM delivery tracker" />
-      <ul className="space-y-2 px-5 pt-5">
+      <div className="px-5 pt-5">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : orders?.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
             No boost orders yet.
           </div>
         ) : (
-          orders?.map((o) => {
-            const product = o.boost_products as { platform?: string; service_type?: string } | null;
-            const svc = `${product?.platform ?? "Unknown"} ${product?.service_type ?? ""}`;
-            const meta = o.metadata as { done?: number } | null;
-            const done = meta?.done ?? (o.status === "received" ? o.quantity : 0);
-            const pct = Math.min(100, Math.round((done / o.quantity) * 100));
-            const completed = o.status === "received";
-            return (
-              <li key={o.id} className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
-                <div className="flex items-start justify-between">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{svc}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">{o.target_url}</p>
+          <ul className="vx-list">
+            {orders?.map((o) => {
+              const product = o.boost_products as { platform?: string; service_type?: string } | null;
+              const svc = `${product?.platform ?? "Unknown"} ${product?.service_type ?? ""}`;
+              const meta = o.metadata as { done?: number } | null;
+              const done = meta?.done ?? (o.status === "received" ? o.quantity : 0);
+              const pct = Math.min(100, Math.round((done / o.quantity) * 100));
+              const completed = o.status === "received";
+              return (
+                <li key={o.id} className="px-4 py-3.5">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold">{svc}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">{o.target_url}</p>
+                    </div>
+                    <span className={`overflow-hidden rounded-full px-2 py-1 text-[10px] font-bold uppercase ${completed ? "bg-indigo-500/10 text-indigo-400" : "bg-amber-500/10 text-amber-600"}`}>
+                      {completed ? "Completed" : "In progress"}
+                    </span>
                   </div>
-                  <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${completed ? "bg-indigo-500/10 text-indigo-400" : "bg-amber-500/10 text-amber-600"}`}>
-                    {completed ? "Completed" : "In progress"}
-                  </span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-accent">
-                  <div className="h-full brand-gradient" style={{ width: `${pct}%` }} />
-                </div>
-                <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground tabular-nums">
-                  <span>{done.toLocaleString()} / {o.quantity.toLocaleString()}</span>
-                  <span>{pct}%</span>
-                </div>
-              </li>
-            );
-          })
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-accent">
+                    <div className="h-full brand-gradient" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground tabular-nums">
+                    <span>{done.toLocaleString()} / {o.quantity.toLocaleString()}</span>
+                    <span>{pct}%</span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </ul>
+      </div>
     </AppShell>
   );
 }

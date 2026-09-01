@@ -29,7 +29,7 @@ export function TelegramModal() {
       aria-modal="true"
       aria-labelledby="community-modal-title"
     >
-      <div className="relative w-full max-w-sm scale-100 transform rounded-3xl bg-white p-6 text-center shadow-2xl shadow-slate-900/20 transition-all dark:bg-surface dark:text-foreground">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white p-6 text-center shadow-2xl shadow-slate-900/20 dark:bg-surface dark:text-foreground">
         <button
           type="button"
           onClick={close}

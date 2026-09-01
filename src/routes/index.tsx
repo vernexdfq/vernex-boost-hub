@@ -232,7 +232,7 @@ function Landing() {
               type="button"
               onClick={enter}
               disabled={going}
-              className="tap-fast inline-flex w-full transform items-center justify-center rounded-2xl bg-blue-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto"
+              className="tap-fast inline-flex w-full items-center justify-center overflow-hidden rounded-2xl bg-blue-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-blue-600/25 transition-colors hover:bg-blue-700 sm:w-auto"
             >
               Get a Number Now
               <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
@@ -241,7 +241,7 @@ function Landing() {
 
           {/* Floating preview cards */}
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 text-left sm:grid-cols-2">
-            <div className="animate-float-slow flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-xl shadow-blue-500/5 backdrop-blur-md">
+            <div className="flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card-elev">
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-lg">
                   🇨🇦
@@ -256,10 +256,7 @@ function Landing() {
               </span>
             </div>
 
-            <div
-              className="animate-float-fast flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-xl shadow-blue-500/5 backdrop-blur-md"
-              style={{ animationDelay: "1s" }}
-            >
+            <div className="flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card-elev">
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-lg">
                   🇫🇷
@@ -308,9 +305,7 @@ function Landing() {
                 key={s.id}
                 type="button"
                 onClick={enter}
-                className={`tap-fast group relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white text-left shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 ${
-                  i % 2 === 0 ? "animate-float-slow" : "animate-float-fast"
-                }`}
+                className="tap-fast group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white text-left shadow-card-elev transition-colors hover:border-blue-300"
               >
                 {/* Full banner — no crop, no overlay */}
                 <div className="w-full overflow-hidden bg-[#0B1220]">
@@ -362,9 +357,7 @@ function Landing() {
                 key={name}
                 type="button"
                 onClick={enter}
-                className={`tap-fast group flex cursor-pointer items-center space-x-3 rounded-2xl border border-slate-200/80 bg-[#F8FAFF] p-3.5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md ${
-                  i % 2 === 0 ? "animate-float-slow" : "animate-float-fast"
-                }`}
+                className="tap-fast group flex cursor-pointer items-center space-x-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-[#F8FAFF] p-3.5 shadow-sm transition-colors hover:border-blue-300"
               >
                 <span className="text-xl">{flag}</span>
                 <span className="text-left text-xs font-bold text-slate-800 group-hover:text-blue-600 sm:text-sm">

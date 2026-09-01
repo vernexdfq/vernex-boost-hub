@@ -209,7 +209,7 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <header className="flex items-center gap-3 px-5 pt-6">
+      <header className="flex items-center gap-3 px-5 pt-2">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient text-base font-bold text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.3)]">
           {initial}
         </div>
@@ -258,10 +258,10 @@ function Dashboard() {
             </button>
           </div>
           <div className="relative mt-5 grid grid-cols-2 gap-3">
-            <Link to="/fund" className="flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-[#0F172A] hover:brightness-95 transition">
+            <Link to="/fund" className="flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-white py-3 text-sm font-semibold text-[#0F172A] hover:brightness-95 transition">
               <Plus className="h-4 w-4" strokeWidth={2.6} /> Fund Wallet
             </Link>
-            <Link to="/history" className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
+            <Link to="/history" className="flex items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/15 bg-white/5 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
               <History className="h-4 w-4" /> History
             </Link>
           </div>
@@ -272,18 +272,18 @@ function Dashboard() {
         <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Quick Actions
         </h2>
-        <div className="rounded-3xl border border-border bg-surface p-3 shadow-card-elev backdrop-blur-md">
-          <div className="grid grid-cols-4 gap-3">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface p-3 shadow-card-elev">
+          <div className="grid grid-cols-4 gap-2">
             {quickActions.map((a) => {
               const Icon = a.icon;
               return (
                 <Link
                   key={a.label}
                   to={a.to}
-                  className="group flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-background/40 p-3 text-center transition hover:bg-accent/60 active:scale-[0.97]"
+                  className="group flex flex-col items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-background/40 p-3 text-center transition hover:bg-accent/60"
                 >
                   <span
-                    className={`mb-2 flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition group-hover:scale-105 ${a.tint}`}
+                    className={`mb-2 flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border shadow-sm ${a.tint}`}
                   >
                     <Icon size={22} strokeWidth={2.1} />
                   </span>
@@ -311,17 +311,17 @@ function Dashboard() {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : activity.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
             No transactions yet. Fund your wallet to get started.
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="vx-list">
             {activity.map((row) => {
               const Icon = row.icon;
               const positive = row.amount >= 0;
               return (
-                <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev">
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${row.tint}`}>
+                <li key={row.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl ${row.tint}`}>
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -345,9 +345,9 @@ function Dashboard() {
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Notifications</h2>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <ul className="space-y-2">
+          <ul className="vx-list">
             {notifications.slice(0, 3).map((n) => (
-              <li key={n.id} className={`rounded-2xl border border-border bg-surface p-3.5 shadow-card-elev ${n.read ? "opacity-70" : ""}`}>
+              <li key={n.id} className={`px-4 py-3.5 ${n.read ? "opacity-70" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold">{n.title}</p>

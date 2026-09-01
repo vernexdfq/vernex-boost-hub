@@ -99,7 +99,7 @@ function Profile() {
 
   return (
     <AppShell>
-      <div className="px-4 pb-8 pt-6">
+      <div className="px-5 pb-8 pt-2">
         <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-card-elev">
           <div className="relative flex items-center space-x-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full brand-gradient text-xl font-bold text-white shadow-md">
