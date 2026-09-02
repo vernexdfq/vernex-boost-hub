@@ -10,7 +10,7 @@ export function AppShell({
   showThemeToggle?: boolean;
 }) {
   return (
-    <div className="min-h-[100dvh] overflow-x-hidden bg-background text-foreground">
+    <div className="verxor-app-shell min-h-[100dvh] overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col overflow-x-hidden pb-[calc(7rem+env(safe-area-inset-bottom))]">
         {showThemeToggle && (
           <div className="flex h-16 shrink-0 items-center justify-end px-5">
