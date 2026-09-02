@@ -45,41 +45,33 @@
 /* Verxor production palette: restrained surfaces, strong navy, electric blue. */
 :root {
   --radius: 0.75rem;
-
   --background: #f6f8fc;
   --foreground: #111827;
-
   --surface: #ffffff;
   --surface-2: #f8fafc;
-
   --card: #ffffff;
   --card-foreground: #111827;
   --popover: #ffffff;
   --popover-foreground: #111827;
-
   --brand: #2563eb;
   --brand-glow: #3b82f6;
   --primary: #2563eb;
   --primary-foreground: #ffffff;
-
   --secondary: #f1f5f9;
   --secondary-foreground: #111827;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #eff6ff;
   --accent-foreground: #1d4ed8;
-
   --success: #16a34a;
   --success-foreground: #ffffff;
   --warning: #d97706;
   --warning-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #2563eb;
-
   --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #101b36 58%, #0b1220 100%);
   --shadow-wallet: 0 18px 42px -22px rgba(4, 17, 62, 0.5);
@@ -95,30 +87,25 @@
   --card-foreground: #f8fafc;
   --popover: #0f1726;
   --popover-foreground: #f8fafc;
-
   --brand: #3b82f6;
   --brand-glow: #60a5fa;
   --primary: #3b82f6;
   --primary-foreground: #ffffff;
-
   --secondary: #172235;
   --secondary-foreground: #e5e7eb;
   --muted: #172235;
   --muted-foreground: #94a3b8;
   --accent: #142342;
   --accent-foreground: #bfdbfe;
-
   --success: #22c55e;
   --success-foreground: #052e16;
   --warning: #f59e0b;
   --warning-foreground: #451a03;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-
   --border: #1e293b;
   --input: #1e293b;
   --ring: #3b82f6;
-
   --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #111c35 58%, #080d18 100%);
   --shadow-wallet: 0 18px 44px -22px rgba(37, 99, 235, 0.38);
@@ -126,12 +113,8 @@
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  html,
-  body {
+  * { border-color: var(--color-border); }
+  html, body {
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -139,48 +122,22 @@
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
   }
-
-  body {
-    min-width: 320px;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
+  body { min-width: 320px; }
+  h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.025em;
   }
-
-  button,
-  a,
-  input,
-  select,
-  textarea {
-    font: inherit;
-  }
-
+  button, a, input, select, textarea { font: inherit; }
   :focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
 }
 
-@utility wallet-gradient {
-  background-image: var(--gradient-wallet);
-}
-
-@utility brand-gradient {
-  background-image: var(--gradient-brand);
-}
-
-@utility shadow-wallet {
-  box-shadow: var(--shadow-wallet);
-}
-
-@utility shadow-card-elev {
-  box-shadow: var(--shadow-card);
-}
+@utility wallet-gradient { background-image: var(--gradient-wallet); }
+@utility brand-gradient { background-image: var(--gradient-brand); }
+@utility shadow-wallet { box-shadow: var(--shadow-wallet); }
+@utility shadow-card-elev { box-shadow: var(--shadow-card); }
 
 @utility vx-card {
   overflow: hidden;
@@ -209,10 +166,7 @@
   background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px);
   background-size: 16px 16px;
 }
-
-.dark .dotted-bg {
-  background-image: radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-}
+.dark .dotted-bg { background-image: radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px); }
 
 @utility icon-well {
   display: grid;
@@ -221,94 +175,33 @@
   background: #eff6ff;
   color: #2563eb;
 }
+.dark .icon-well { background: rgba(37, 99, 235, 0.14); color: #60a5fa; }
+.vx-list > * + * { border-top: 1px solid var(--border); }
 
-.dark .icon-well {
-  background: rgba(37, 99, 235, 0.14);
-  color: #60a5fa;
-}
+/* Shared card primitives are normalized without adding padding behind their children. */
+[class~="shadow-card-elev"] { overflow: hidden; border-radius: 1.25rem; }
+[class~="rounded-[20px]"], [class~="rounded-[28px]"] { overflow: hidden; border-radius: 1.25rem; }
 
-.vx-list > * + * {
-  border-top: 1px solid var(--border);
-}
+img, video { max-width: 100%; height: auto; display: block; }
+svg { max-width: 100%; display: block; }
 
-/* Normalize shared card primitives without injecting padding into arbitrary layouts. */
-[class~="shadow-card-elev"] {
-  overflow: hidden;
-  border-radius: 1.25rem;
-}
-
-/* Keep legacy landing-page surfaces on the same outer radius system. */
-[class~="rounded-[20px]"],
-[class~="rounded-[28px]"] {
-  overflow: hidden;
-  border-radius: 1.25rem;
-}
-
-/* SVGs keep their explicit Tailwind dimensions; never force an intrinsic height. */
-img,
-video {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-svg {
-  max-width: 100%;
-  display: block;
-}
-
-/* Interaction is responsive, not decorative. Keep motion short and purposeful. */
-html {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-button,
-a,
-[role="button"],
-input[type="submit"],
-input[type="button"] {
+html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button, a, [role="button"], input[type="submit"], input[type="button"] {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-
 .tap-fast {
   transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
-
-.tap-fast:active {
-  transform: scale(0.985);
-  opacity: 0.96;
-}
-
-.press-card {
-  transition: transform 140ms ease, box-shadow 180ms ease, border-color 160ms ease;
-}
-
-.press-card:active {
-  transform: scale(0.99);
-}
-
-.skeleton {
-  background: #e9eef5;
-  border-radius: 0.5rem;
-}
-
-.dark .skeleton {
-  background: #182235;
-}
-
-/* Existing animation utility names remain supported, but the product UI is intentionally still. */
-.animate-float-slow,
-.animate-float-fast,
-.animate-pulse-glow {
-  animation: none !important;
-}
+.tap-fast:active { transform: scale(0.985); opacity: 0.96; }
+.press-card { transition: transform 140ms ease, box-shadow 180ms ease, border-color 160ms ease; }
+.press-card:active { transform: scale(0.99); }
+.skeleton { background: #e9eef5; border-radius: 0.5rem; }
+.dark .skeleton { background: #182235; }
+.animate-float-slow, .animate-float-fast, .animate-pulse-glow { animation: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
@@ -317,21 +210,14 @@ input[type="button"] {
 }
 
 @media (min-width: 768px) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-  }
-
-  .dark * {
-    scrollbar-color: #334155 transparent;
-  }
+  * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+  .dark * { scrollbar-color: #334155 transparent; }
 }
 
 @keyframes verxor-marquee {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 }
-
 .verxor-marquee-track {
   display: flex;
   width: max-content;
@@ -339,44 +225,22 @@ input[type="button"] {
   animation: verxor-marquee 30s linear infinite;
   will-change: transform;
 }
+.verxor-marquee-track:hover, .verxor-marquee-track.is-paused { animation-play-state: paused; }
+.verxor-marquee-track > .verxor-marquee-group { display: flex; flex-shrink: 0; gap: 1rem; }
 
-.verxor-marquee-track:hover,
-.verxor-marquee-track.is-paused {
-  animation-play-state: paused;
-}
+/* One alignment contract for every authenticated page. */
+.verxor-app-shell > .mx-auto > main > header { padding-inline: 1.25rem; }
+.verxor-app-shell > .mx-auto > main > [class~="px-4"] { padding-inline: 1.25rem; }
 
-.verxor-marquee-track > .verxor-marquee-group {
-  display: flex;
-  flex-shrink: 0;
-  gap: 1rem;
-}
-
-/* Mobile layout contract: rental screens inherit the same 28rem content rail as
-   the primary authenticated shell, instead of mixing max-w-lg with max-w-md. */
+/* Rental uses a separate screen tree, but must share the same mobile rail. */
 .verxor-rental-shell .mx-auto.max-w-lg {
   width: 100%;
   max-width: 28rem;
   box-sizing: border-box;
 }
-
 .verxor-rental-shell header > .mx-auto.max-w-lg,
-.verxor-rental-shell .mx-auto.max-w-lg.px-4 {
-  padding-inline: 1.25rem;
-}
+.verxor-rental-shell .mx-auto.max-w-lg.px-4 { padding-inline: 1.25rem; }
 
-/* Long service names, emails, IDs and URLs must wrap inside cards rather than
-   widening the viewport and creating a sideways-shifted mobile layout. */
-.vx-card,
-.vx-list,
-.verxor-rental-shell,
-main {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.vx-card p,
-.vx-list p,
-.verxor-rental-shell p,
-main p {
-  overflow-wrap: anywhere;
-}
+/* Never let long identifiers force the viewport wider than the application rail. */
+.vx-card, .vx-list, .verxor-rental-shell, main { min-width: 0; max-width: 100%; }
+.vx-card p, .vx-list p, .verxor-rental-shell p, main p { overflow-wrap: anywhere; }
