@@ -45,41 +45,33 @@
 /* Verxor production palette: restrained surfaces, strong navy, electric blue. */
 :root {
   --radius: 0.75rem;
-
   --background: #f6f8fc;
   --foreground: #111827;
-
   --surface: #ffffff;
   --surface-2: #f8fafc;
-
   --card: #ffffff;
   --card-foreground: #111827;
   --popover: #ffffff;
   --popover-foreground: #111827;
-
   --brand: #2563eb;
   --brand-glow: #3b82f6;
   --primary: #2563eb;
   --primary-foreground: #ffffff;
-
   --secondary: #f1f5f9;
   --secondary-foreground: #111827;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #eff6ff;
   --accent-foreground: #1d4ed8;
-
   --success: #16a34a;
   --success-foreground: #ffffff;
   --warning: #d97706;
   --warning-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #2563eb;
-
   --gradient-brand: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #101b36 58%, #0b1220 100%);
   --shadow-wallet: 0 18px 42px -22px rgba(4, 17, 62, 0.5);
@@ -95,30 +87,25 @@
   --card-foreground: #f8fafc;
   --popover: #0f1726;
   --popover-foreground: #f8fafc;
-
   --brand: #3b82f6;
   --brand-glow: #60a5fa;
   --primary: #3b82f6;
   --primary-foreground: #ffffff;
-
   --secondary: #172235;
   --secondary-foreground: #e5e7eb;
   --muted: #172235;
   --muted-foreground: #94a3b8;
   --accent: #142342;
   --accent-foreground: #bfdbfe;
-
   --success: #22c55e;
   --success-foreground: #052e16;
   --warning: #f59e0b;
   --warning-foreground: #451a03;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-
   --border: #1e293b;
   --input: #1e293b;
   --ring: #3b82f6;
-
   --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   --gradient-wallet: linear-gradient(145deg, #0b1b4a 0%, #111c35 58%, #080d18 100%);
   --shadow-wallet: 0 18px 44px -22px rgba(37, 99, 235, 0.38);
@@ -126,12 +113,18 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     border-color: var(--color-border);
   }
 
   html,
   body {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -140,7 +133,7 @@
   }
 
   body {
-    min-width: 320px;
+    margin: 0;
   }
 
   h1,
@@ -157,6 +150,12 @@
   select,
   textarea {
     font: inherit;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
   }
 
   :focus-visible {
@@ -203,7 +202,6 @@
   color: #60a5fa;
 }
 
-/* Interaction is responsive, not decorative. Keep motion short and purposeful. */
 html {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -235,7 +233,6 @@ input[type="button"] {
   transform: scale(0.99);
 }
 
-/* Loading state: quiet and stable rather than flashy. */
 .skeleton {
   background: #e9eef5;
   border-radius: 0.5rem;
@@ -245,16 +242,6 @@ input[type="button"] {
   background: #182235;
 }
 
-img,
-video,
-svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Existing animation utility names remain supported, but the product UI is intentionally still.
-   This removes the floating-card / pulsing-orb look that reads as generated template decoration. */
 .animate-float-slow,
 .animate-float-fast,
 .animate-pulse-glow {
@@ -272,7 +259,6 @@ svg {
   }
 }
 
-/* Native-feeling scrollbars on desktop without changing mobile behavior. */
 @media (min-width: 768px) {
   * {
     scrollbar-width: thin;
@@ -284,7 +270,6 @@ svg {
   }
 }
 
-/* Keep the marquee available for places that intentionally use it. */
 @keyframes verxor-marquee {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
