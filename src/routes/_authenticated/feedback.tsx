@@ -63,7 +63,6 @@ function Feedback() {
       setSubject("");
       setMessage("");
     } catch {
-      // Fallback: open Telegram support if insert fails (RLS / schema)
       const text = encodeURIComponent(
         `[Verxor Feedback]\nType: ${type}\nSubject: ${subject}\n\n${message}\n\nFrom: ${user.email ?? user.id}`,
       );
@@ -76,7 +75,7 @@ function Feedback() {
 
   return (
     <AppShell>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-5 py-3 backdrop-blur-md">
         <Link
           to="/profile"
           aria-label="Back"
@@ -90,7 +89,7 @@ function Feedback() {
         </div>
       </header>
 
-      <div className="space-y-4 px-4 pb-10 pt-4">
+      <div className="space-y-4 px-5 pb-10 pt-4">
         <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 text-white shadow-wallet">
           <div className="absolute inset-0 dotted-bg opacity-30" />
           <div className="relative">
@@ -105,7 +104,7 @@ function Feedback() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Share something
           </p>
