@@ -244,8 +244,7 @@
   border-radius: 1.25rem;
 }
 
-/* SVGs must keep their explicit Tailwind dimensions. A global height:auto rule makes
-   icon boxes inherit intrinsic dimensions and can create visibly uneven UI alignment. */
+/* SVGs keep their explicit Tailwind dimensions; never force an intrinsic height. */
 img,
 video {
   max-width: 100%;
@@ -350,4 +349,34 @@ input[type="button"] {
   display: flex;
   flex-shrink: 0;
   gap: 1rem;
+}
+
+/* Mobile layout contract: rental screens inherit the same 28rem content rail as
+   the primary authenticated shell, instead of mixing max-w-lg with max-w-md. */
+.verxor-rental-shell .mx-auto.max-w-lg {
+  width: 100%;
+  max-width: 28rem;
+  box-sizing: border-box;
+}
+
+.verxor-rental-shell header > .mx-auto.max-w-lg,
+.verxor-rental-shell .mx-auto.max-w-lg.px-4 {
+  padding-inline: 1.25rem;
+}
+
+/* Long service names, emails, IDs and URLs must wrap inside cards rather than
+   widening the viewport and creating a sideways-shifted mobile layout. */
+.vx-card,
+.vx-list,
+.verxor-rental-shell,
+main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vx-card p,
+.vx-list p,
+.verxor-rental-shell p,
+main p {
+  overflow-wrap: anywhere;
 }
