@@ -78,7 +78,7 @@ function PrivacyPolicy() {
 
   return (
     <AppShell>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-5 py-3 backdrop-blur-md">
         <Link
           to="/profile"
           aria-label="Back"
@@ -92,7 +92,7 @@ function PrivacyPolicy() {
         </div>
       </header>
 
-      <div className="space-y-4 px-4 pb-10 pt-4">
+      <div className="space-y-4 px-5 pb-10 pt-4">
         <div className="relative overflow-hidden rounded-2xl wallet-gradient p-5 text-white shadow-wallet">
           <div className="absolute inset-0 dotted-bg opacity-30" />
           <div className="relative">
@@ -116,7 +116,7 @@ function PrivacyPolicy() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card-elev">
           <div className="flex gap-3">
             <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <p className="text-[13px] leading-relaxed text-muted-foreground">
@@ -132,10 +132,7 @@ function PrivacyPolicy() {
             const Icon = s.icon;
             const open = openId === s.id;
             return (
-              <div
-                key={s.id}
-                className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card-elev"
-              >
+              <div key={s.id} className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card-elev">
                 <button
                   type="button"
                   onClick={() => setOpenId(open ? null : s.id)}
@@ -149,9 +146,7 @@ function PrivacyPolicy() {
                     {s.id}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${
-                      open ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
                   />
                 </button>
                 {open && (
@@ -164,7 +159,7 @@ function PrivacyPolicy() {
           })}
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5 text-center shadow-card-elev">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface p-5 text-center shadow-card-elev">
           <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
             <Mail className="h-5 w-5" />
           </div>
