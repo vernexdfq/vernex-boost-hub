@@ -96,7 +96,7 @@ function LogHistory() {
 
   return (
     <AppShell>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-5 py-3 backdrop-blur-md">
         <Link to="/buy-accounts" aria-label="Back" className="text-primary">
           <ChevronLeft className="h-5 w-5" />
         </Link>
@@ -134,10 +134,7 @@ function LogHistory() {
         ) : (
           <ul className="vx-list">
             {orders.map((o) => (
-              <li
-                key={o.id}
-                className="px-4 py-3.5"
-              >
+              <li key={o.id} className="px-4 py-3.5">
                 <div className="flex items-start gap-3">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
                     <FileText className="h-5 w-5" />
@@ -146,40 +143,16 @@ function LogHistory() {
                     <p className="truncate text-sm font-bold">{o.product_name}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {o.platform} · {timeAgo(o.created_at)} ·{" "}
-                      <span className="font-semibold capitalize text-indigo-400">
-                        {o.status}
-                      </span>
+                      <span className="font-semibold capitalize text-indigo-400">{o.status}</span>
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-black tabular-nums">
-                    {naira(o.amount_paid)}
-                  </span>
+                  <span className="shrink-0 text-sm font-black tabular-nums">{naira(o.amount_paid)}</span>
                 </div>
                 <div className="mt-3 space-y-2">
-                  <CredRow
-                    label="Username"
-                    value={o.credentials.username}
-                    orderId={o.id}
-                    field="user"
-                  />
-                  <CredRow
-                    label="Password"
-                    value={o.credentials.password}
-                    orderId={o.id}
-                    field="pass"
-                  />
-                  <CredRow
-                    label="Email"
-                    value={o.credentials.email}
-                    orderId={o.id}
-                    field="email"
-                  />
-                  <CredRow
-                    label="Extra"
-                    value={o.credentials.extra}
-                    orderId={o.id}
-                    field="extra"
-                  />
+                  <CredRow label="Username" value={o.credentials.username} orderId={o.id} field="user" />
+                  <CredRow label="Password" value={o.credentials.password} orderId={o.id} field="pass" />
+                  <CredRow label="Email" value={o.credentials.email} orderId={o.id} field="email" />
+                  <CredRow label="Extra" value={o.credentials.extra} orderId={o.id} field="extra" />
                 </div>
               </li>
             ))}
