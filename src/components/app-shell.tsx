@@ -19,7 +19,10 @@ export function AppShell({
         </div>
       )}
 
-      <main className="mx-auto min-h-[100dvh] w-full max-w-md overflow-x-clip pb-[calc(7rem+env(safe-area-inset-bottom))]">
+      <main
+        data-app-shell="true"
+        className="mx-auto min-h-[100dvh] w-full max-w-md overflow-x-clip pb-[calc(7rem+env(safe-area-inset-bottom))]"
+      >
         {children}
       </main>
 
