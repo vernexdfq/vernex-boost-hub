@@ -257,6 +257,15 @@ input[type="button"] {
     padding-inline: 1.25rem;
   }
 
+  /* Any bordered 2xl/3xl surface inside the app is clipped to its geometry,
+     preventing inner badges, controls and content from visually escaping. */
+  main[data-app-shell] .rounded-2xl.border,
+  main[data-app-shell] .rounded-3xl.border,
+  .verxor-rental-shell .rounded-2xl.border,
+  .verxor-rental-shell .rounded-3xl.border {
+    overflow: hidden;
+  }
+
   /* Rental screens are rendered by their own layout instead of AppShell. */
   .verxor-rental-shell > header > .max-w-lg,
   .verxor-rental-shell > .max-w-lg {
