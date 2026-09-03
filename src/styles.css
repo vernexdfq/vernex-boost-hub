@@ -248,19 +248,18 @@ input[type="button"] {
 }
 
 @media (max-width: 640px) {
-  /* Normalize legacy authenticated screens that still use 16px outer gutters. */
-  main > .px-4,
-  main > .space-y-4.px-4,
-  main > .min-h-screen.px-4,
-  main > .mx-auto.max-w-md.px-4,
-  main > header.px-4 {
+  /* Authenticated app pages: one 20px mobile gutter, regardless of legacy utility. */
+  main[data-app-shell] > .px-4,
+  main[data-app-shell] > .space-y-4.px-4,
+  main[data-app-shell] > .min-h-screen.px-4,
+  main[data-app-shell] > .mx-auto.max-w-md.px-4,
+  main[data-app-shell] > header.px-4 {
     padding-inline: 1.25rem;
   }
 
-  /* Rental screens used a wider rail and 16px gutters; keep them on the same
-     448px application geometry as the rest of the authenticated product. */
-  main > header > .max-w-lg,
-  main > .max-w-lg {
+  /* Rental screens are rendered by their own layout instead of AppShell. */
+  .verxor-rental-shell > header > .max-w-lg,
+  .verxor-rental-shell > .max-w-lg {
     width: 100%;
     max-width: 28rem;
     margin-inline: auto;
