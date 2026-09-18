@@ -46,7 +46,7 @@ export type SmsSlotMeta = {
 export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   {
     id: "US-S1",
-    label: "USA (S1)",
+    label: "USA · Option 1",
     flag: "🇺🇸",
     group: "usa",
     provider: "fivesim",
@@ -54,7 +54,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "US-S2",
-    label: "USA (S2)",
+    label: "USA · Option 2",
     flag: "🇺🇸",
     group: "usa",
     provider: "dogesms",
@@ -62,7 +62,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "US-S3",
-    label: "USA (S3)",
+    label: "USA · Option 3",
     flag: "🇺🇸",
     group: "usa",
     provider: "grizzly",
@@ -70,7 +70,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "US-S4",
-    label: "USA (S4)",
+    label: "USA · Option 4",
     flag: "🇺🇸",
     group: "usa",
     provider: "textverified",
@@ -78,7 +78,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "ALL-S1",
-    label: "All Countries (S1)",
+    label: "All Countries · Option 1",
     flag: "🌐",
     group: "all",
     provider: "grizzly",
@@ -86,7 +86,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "ALL-S2",
-    label: "All Countries (S2)",
+    label: "All Countries · Option 2",
     flag: "🌐",
     group: "all",
     provider: "dogesms",
@@ -94,7 +94,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "ALL-S3",
-    label: "All Countries (S3)",
+    label: "All Countries · Option 3",
     flag: "🌐",
     group: "all",
     provider: "textverified",
@@ -102,7 +102,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "ALL-S4",
-    label: "All Countries (S4)",
+    label: "All Countries · Option 4",
     flag: "🌐",
     group: "all",
     provider: "fivesim",
@@ -110,7 +110,7 @@ export const SMS_SERVER_SLOTS: readonly SmsSlotMeta[] = [
   },
   {
     id: "ALL-S5",
-    label: "All Countries (S5)",
+    label: "All Countries · Option 5",
     flag: "🌐",
     group: "all",
     provider: "smsbuyz",
