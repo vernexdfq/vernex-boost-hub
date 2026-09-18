@@ -538,11 +538,11 @@ function VirtualNumbers() {
               {/* Operators / price board */}
               <div className="mb-4">
                 <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Select operator
+                  Select option
                 </p>
                 <div className="mb-2.5 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
                   <span className="font-semibold text-indigo-700">Info: </span>
-                  Each operator has different pricing and delivery success rates. Higher % = more
+                  Each option has different pricing and delivery success rates. Higher % = more
                   likely to receive OTP.
                 </div>
 
@@ -554,8 +554,7 @@ function VirtualNumbers() {
                   <div className="max-h-72 space-y-2 overflow-y-auto pr-0.5">
                     {operators.map((op) => {
                       const active = op.id === productId;
-                      const label =
-                        op.operator || (op.provider ? `${op.provider}` : "default");
+                      const label = op.operator || "Available option";
                       return (
                         <button
                           key={op.id}
