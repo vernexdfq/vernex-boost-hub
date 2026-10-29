@@ -2,16 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  ChevronLeft,
   Search,
   ShoppingCart,
   Wallet,
   Loader2,
   Zap,
   Package,
-  ChevronDown,
+  Menu,
   X,
   AlertCircle,
+  ChevronRight,
+  LayoutGrid,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/buy-accounts")({
       { title: "Buy Logs & Aged Accounts — Verxor" },
       {
         name: "description",
-        content: "Verified aged social media accounts and SMS logs — ready to use.",
+        content: "Verified aged social media accounts and logs — instant delivery, live stock.",
       },
       { property: "og:title", content: "Verxor — Buy Aged Accounts" },
       {
@@ -43,11 +44,11 @@ export const Route = createFileRoute("/_authenticated/buy-accounts")({
   component: BuyAccounts,
 });
 
-/** Theme-safe tag tints (work in light + dark) */
 const tagTint: Record<string, string> = {
   IG: "bg-violet-500/15 text-violet-500",
   FB: "bg-blue-500/15 text-blue-500",
   GM: "bg-amber-500/15 text-amber-500",
+  OL: "bg-amber-500/15 text-amber-500",
   TT: "bg-teal-500/15 text-teal-500",
   X: "bg-muted text-foreground",
   LI: "bg-blue-500/15 text-blue-500",
@@ -68,7 +69,13 @@ const tagTint: Record<string, string> = {
 };
 
 function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`skeleton ${className}`} />;
+  return <div className={"skeleton " + className} />;
+}
+
+function fmtCount(n?: number) {
+  if (!n || n <= 0) return null;
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+  return String(n);
 }
 
 function BuyAccounts() {
@@ -81,7 +88,7 @@ function BuyAccounts() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [subcategory, setSubcategory] = useState<string | null>(null);
-  const [openCat, setOpenCat] = useState<string | null>(null);
+  const [drawer, setDrawer] = useState(false);
   const [selected, setSelected] = useState<AccountProduct | null>(null);
   const [qty, setQty] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -105,6 +112,17 @@ function BuyAccounts() {
   const balance = account?.wallet?.balance ?? 0;
   const categories = catData?.categories ?? ["All"];
   const subcategories = catData?.subcategories ?? {};
+
+  const countsByCategory = useMemo(() => {
+    const map: Record<string, number> = {};
+    let all = 0;
+    for (const p of products ?? []) {
+      all++;
+      map[p.category] = (map[p.category] ?? 0) + 1;
+    }
+    map["All"] = all;
+    return map;
+  }, [products]);
 
   const filtered = useMemo(() => {
     if (!products) return [];
@@ -132,8 +150,16 @@ function BuyAccounts() {
 
   useEffect(() => {
     setSubcategory(null);
-    setOpenCat(null);
   }, [category]);
+
+  useEffect(() => {
+    if (!drawer) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawer(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawer]);
 
   const total = selected ? selected.price_ngn * qty : 0;
 
@@ -172,18 +198,25 @@ function BuyAccounts() {
     }
   }
 
+  function selectCategory(c: string, sub: string | null) {
+    setCategory(c);
+    setSubcategory(sub);
+    setDrawer(false);
+  }
+
   return (
     <AppShell>
       {/* Header */}
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur-md">
-        <Link
-          to="/dashboard"
-          aria-label="Back"
-          className="inline-flex shrink-0 items-center text-primary"
+        <button
+          type="button"
+          onClick={() => setDrawer(true)}
+          aria-label="Browse all services"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border bg-surface text-foreground"
         >
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold text-foreground">
+          <Menu className="h-4 w-4" />
+        </button>
+        <h1 className="min-w-0 flex-1 truncate text-[15px] font-bold text-foreground">
           Buy Logs
         </h1>
         <span className="shrink-0 rounded-full bg-primary/12 px-2.5 py-1 text-xs font-black tabular-nums text-primary">
@@ -207,7 +240,7 @@ function BuyAccounts() {
           </p>
           <h2 className="mt-1 text-lg font-black leading-tight">Buy Accounts</h2>
           <p className="mt-1 text-[13px] text-white/90">
-            Aged & verified social media accounts — delivered instantly.
+            Live stock from verified suppliers — delivered instantly.
           </p>
         </div>
 
@@ -238,7 +271,7 @@ function BuyAccounts() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search accounts..."
+            placeholder="Search platform, country, or account type..."
             className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           {query && (
@@ -248,80 +281,26 @@ function BuyAccounts() {
           )}
         </div>
 
-        {/* Categories */}
+        {/* Sliding category tabs */}
         <div className="relative -mx-5 px-5">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {categories.map((c) => {
-              const active = category === c;
-              const subs = c !== "All" ? subcategories[c] ?? [] : [];
+              const active = category === c && !subcategory;
               return (
-                <div key={c} className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (c === "All") {
-                        setCategory("All");
-                        setOpenCat(null);
-                        setSubcategory(null);
-                        return;
-                      }
-                      if (category === c && openCat === c) {
-                        setOpenCat(null);
-                        return;
-                      }
-                      setCategory(c);
-                      setOpenCat(subs.length ? c : null);
-                    }}
-                    className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12px] font-bold transition ${
-                      active
-                        ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(37,99,235,0.55)]"
-                        : "border-border bg-surface text-muted-foreground"
-                    }`}
-                  >
-                    {c}
-                    {subs.length > 0 && (
-                      <ChevronDown
-                        className={`h-3.5 w-3.5 transition ${openCat === c ? "rotate-180" : ""}`}
-                      />
-                    )}
-                  </button>
-                </div>
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => selectCategory(c, null)}
+                  className={"inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-[12px] font-bold transition " +
+                    (active
+                      ? "border-transparent brand-gradient text-white shadow-[0_8px_18px_-10px_rgba(37,99,235,0.55)]"
+                      : "border-border bg-surface text-muted-foreground")}
+                >
+                  {c}
+                </button>
               );
             })}
           </div>
-          {openCat && (subcategories[openCat] ?? []).length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-border bg-surface p-2 shadow-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  setSubcategory(null);
-                  setOpenCat(null);
-                }}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                  !subcategory ? "bg-primary/15 text-primary" : "text-muted-foreground"
-                }`}
-              >
-                All {openCat}
-              </button>
-              {(subcategories[openCat] ?? []).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => {
-                    setSubcategory(s);
-                    setOpenCat(null);
-                  }}
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                    subcategory === s
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Active filter chips */}
@@ -330,14 +309,14 @@ function BuyAccounts() {
             <span className="text-muted-foreground">Showing:</span>
             <span className="rounded-full bg-primary/12 px-2.5 py-0.5 font-bold text-primary">
               {category}
-              {subcategory ? ` · ${subcategory}` : ""}
+              {subcategory ? " · " + subcategory : ""}
+            </span>
+            <span className="text-muted-foreground">
+              {filtered.length} of {(products ?? []).length}
             </span>
             <button
               type="button"
-              onClick={() => {
-                setCategory("All");
-                setSubcategory(null);
-              }}
+              onClick={() => selectCategory("All", null)}
               className="font-bold text-primary"
             >
               Clear
@@ -370,51 +349,141 @@ function BuyAccounts() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filtered.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  setSelected(p);
-                  setQty(1);
-                }}
-                className="rounded-2xl border border-border bg-surface p-3.5 text-left shadow-card-elev transition active:scale-[0.99]"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-black ${
-                      tagTint[p.tag] ?? "bg-primary/15 text-primary"
-                    }`}
-                  >
-                    {p.tag}
+            {filtered.map((p) => {
+              const soldLabel = fmtCount(p.sold);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    setSelected(p);
+                    setQty(1);
+                  }}
+                  className="flex flex-col rounded-2xl border border-border bg-surface p-3.5 text-left shadow-card-elev transition active:scale-[0.99]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={"grid h-10 w-10 place-items-center rounded-xl text-xs font-black " +
+                        (tagTint[p.tag] ?? "bg-primary/15 text-primary")}
+                    >
+                      {p.tag}
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground">
+                      {p.stock} in stock
+                    </span>
+                  </div>
+                  <p className="mt-3 line-clamp-2 text-sm font-bold leading-tight text-foreground">
+                    {p.name}
+                  </p>
+                  <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">
+                    {p.subcategory}
+                    {p.country ? " · " + p.country : ""}
+                    {soldLabel ? " · " + soldLabel + " sold" : ""}
+                  </p>
+                  {p.instant && (
+                    <span className="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-primary/12 px-2 py-0.5 text-[10px] font-bold text-primary">
+                      <Zap className="h-3 w-3" /> Instant
+                    </span>
+                  )}
+                  <p className="mt-2 text-lg font-black tabular-nums text-foreground">
+                    {naira(p.price_ngn)}
+                  </p>
+                  <span className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg brand-gradient py-2 text-[11px] font-bold text-white">
+                    <ShoppingCart className="h-3 w-3" /> Buy Now
                   </span>
-                  <span className="text-[10px] font-bold text-muted-foreground">
-                    {p.stock} in stock
-                  </span>
-                </div>
-                <p className="mt-3 line-clamp-2 text-sm font-bold leading-tight text-foreground">
-                  {p.name}
-                </p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {p.age_label}
-                  {p.country ? ` · ${p.country}` : ""}
-                </p>
-                {p.instant && (
-                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/12 px-2 py-0.5 text-[10px] font-bold text-primary">
-                    <Zap className="h-3 w-3" /> Instant
-                  </span>
-                )}
-                <p className="mt-2 text-lg font-black tabular-nums text-foreground">
-                  {naira(p.price_ngn)}
-                </p>
-                <span className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg brand-gradient py-2 text-[11px] font-bold text-white">
-                  <ShoppingCart className="h-3 w-3" /> Buy Now
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Services sidebar drawer */}
+      {drawer && (
+        <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setDrawer(false)}
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-[2px]"
+          />
+          <div className="absolute inset-y-0 left-0 flex w-[300px] max-w-[85vw] flex-col border-r border-border bg-surface shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
+              <div>
+                <p className="text-[14px] font-black text-foreground">All services</p>
+                <p className="text-[11px] font-semibold text-muted-foreground">
+                  {countsByCategory["All"] ?? 0} live accounts
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDrawer(false)}
+                aria-label="Close menu"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+              <button
+                type="button"
+                onClick={() => selectCategory("All", null)}
+                className={"mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition " +
+                  (category === "All"
+                    ? "bg-primary/12 text-primary"
+                    : "text-foreground hover:bg-muted/50")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+                All
+                <span className="ml-auto rounded-full bg-primary/12 px-2 py-0.5 text-[10px] font-bold tabular-nums text-primary">
+                  {countsByCategory["All"] ?? 0}
+                </span>
+              </button>
+
+              {categories.filter((c) => c !== "All").map((c) => (
+                <div key={c} className="mb-1">
+                  <button
+                    type="button"
+                    onClick={() => selectCategory(c, null)}
+                    className={"flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-bold transition " +
+                      (category === c
+                        ? "bg-primary/12 text-primary"
+                        : "text-foreground hover:bg-muted/50")}
+                  >
+                    <span className="truncate">{c}</span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="ml-auto shrink-0 text-[10px] font-bold tabular-nums text-muted-foreground">
+                      {countsByCategory[c] ?? 0}
+                    </span>
+                  </button>
+                  {(subcategories[c] ?? []).length > 0 && (
+                    <div className="mb-1 mt-0.5 space-y-0.5 ml-3 border-l border-border pl-2">
+                      {(subcategories[c] ?? []).slice(0, 12).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => selectCategory(c, s)}
+                          className={"block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-[12px] font-semibold transition " +
+                            (subcategory === s && category === c
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground hover:bg-muted/50")}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                      {(subcategories[c] ?? []).length > 12 && (
+                        <p className="px-2.5 py-1 text-[11px] text-muted-foreground">
+                          + {(subcategories[c] ?? []).length - 12} more
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Product detail modal */}
       {selected && (
@@ -433,9 +502,8 @@ function BuyAccounts() {
             <div className="overflow-y-auto px-4 py-4">
               <div className="flex items-start gap-3">
                 <span
-                  className={`grid h-12 w-12 place-items-center rounded-2xl text-sm font-black ${
-                    tagTint[selected.tag] ?? "bg-primary/15 text-primary"
-                  }`}
+                  className={"grid h-12 w-12 place-items-center rounded-2xl text-sm font-black " +
+                    (tagTint[selected.tag] ?? "bg-primary/15 text-primary")}
                 >
                   {selected.tag}
                 </span>
@@ -443,11 +511,15 @@ function BuyAccounts() {
                   <p className="font-black leading-tight text-foreground">{selected.name}</p>
                   <p className="mt-0.5 text-[12px] text-muted-foreground">
                     {selected.platform} · {selected.subcategory}
-                    {selected.country ? ` · ${selected.country}` : ""}
+                    {selected.country ? " · " + selected.country : ""}
                   </p>
                 </div>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">{selected.description}</p>
+              {selected.description && (
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {selected.description}
+                </p>
+              )}
               {selected.features.length > 0 && (
                 <ul className="mt-3 flex flex-wrap gap-1.5">
                   {selected.features.map((f) => (
@@ -460,18 +532,25 @@ function BuyAccounts() {
                   ))}
                 </ul>
               )}
+              {selected.provider === "accszone" && (
+                <p className="mt-3 rounded-xl border border-border bg-background px-3 py-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
+                  Credentials are delivered exactly as the supplier provides them
+                  (e.g. login:password or login:password:email:email_pass). Open Log
+                  History right after purchase to copy them.
+                </p>
+              )}
               <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-xl border border-border bg-background p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Age
-                  </p>
-                  <p className="font-bold text-foreground">{selected.age_label}</p>
-                </div>
                 <div className="rounded-xl border border-border bg-background p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                     Stock
                   </p>
                   <p className="font-bold text-foreground">{selected.stock}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-background p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Sold
+                  </p>
+                  <p className="font-bold text-foreground">{selected.sold ?? "—"}</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">

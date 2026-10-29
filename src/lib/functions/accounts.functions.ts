@@ -5,6 +5,14 @@ import {
   accsMarketFetchInventory,
   isAccsMarketConfigured,
 } from "@/lib/providers/accsmarket.server";
+import {
+  accsZonePurchase,
+  getAccsZoneCatalog,
+  isAccsZoneConfigured,
+  logsRetailPriceNgn,
+  stripHtml,
+  type AccsZoneListing,
+} from "@/lib/providers/accszone.server";
 
 export type AccountProduct = {
   id: string;
@@ -20,6 +28,11 @@ export type AccountProduct = {
   country?: string;
   features: string[];
   tag: string;
+  /** Provider metadata (live integrations only) */
+  provider?: "accszone" | "accsmarket" | "builtin";
+  ad_id?: number;
+  price_usd?: number;
+  sold?: number;
 };
 
 export type AccountOrder = {
@@ -65,7 +78,92 @@ const CATEGORY_ORDER = [
   "Social Networks",
 ] as const;
 
-/** Built-in catalog used when ACCS_MARKET API is not configured */
+const TAG_RULES: [string, string][] = [
+  ["facebook", "FB"],
+  ["instagram", "IG"],
+  ["tiktok", "TT"],
+  ["twitter", "X"],
+  [" x ", "X"],
+  ["gmail", "GM"],
+  ["google", "GM"],
+  ["outlook", "OL"],
+  ["hotmail", "OL"],
+  ["gmx", "GM"],
+  ["yahoo", "GM"],
+  ["telegram", "TG"],
+  ["discord", "DC"],
+  ["snapchat", "SC"],
+  ["youtube", "YT"],
+  ["reddit", "RD"],
+  ["linkedin", "LI"],
+  ["threads", "TH"],
+  ["spotify", "SP"],
+  ["netflix", "NF"],
+  ["chatgpt", "AI"],
+  ["openai", "AI"],
+  ["whatsapp", "WA"],
+  ["proxy", "PX"],
+  ["apple", "AP"],
+  ["boomplay", "BP"],
+  ["audiomack", "AM"],
+];
+
+function tagFor(title: string, fallback: string): string {
+  const low = " " + title.toLowerCase() + " ";
+  for (const [needle, tag] of TAG_RULES) {
+    if (low.includes(needle)) return tag;
+  }
+  return fallback.slice(0, 2).toUpperCase() || "AC";
+}
+
+function normalizeCategoryTitle(title: string): string {
+  const cleaned = title
+    .replace(/^buy\s+/i, "")
+    .replace(/\s+accounts$/i, "")
+    .trim();
+  return cleaned || title;
+}
+
+function accsZoneToListing(l: AccsZoneListing): AccountProduct {
+  const category = normalizeCategoryTitle(l.category?.title || "Other");
+  const subcategory = l.subcategory?.title || "General";
+  const description = stripHtml(l.description || "");
+  const priceUsd = Number(l.price) || 0;
+  return {
+    id: "acz-" + l.id,
+    provider: "accszone",
+    ad_id: l.id,
+    price_usd: priceUsd,
+    platform: category,
+    category,
+    subcategory,
+    name: l.title,
+    description: description || l.title,
+    age_label: subcategory,
+    price_ngn: logsRetailPriceNgn(priceUsd),
+    stock: Number(l.available_stock) || 0,
+    sold: Number(l.sold) || 0,
+    instant: true,
+    features: [subcategory, "Instant delivery", "Verified supplier"],
+    tag: tagFor(l.category?.title || l.title, l.title || "AC"),
+  };
+}
+
+async function fetchFromAccsZone(): Promise<AccountProduct[] | null> {
+  if (!isAccsZoneConfigured()) return null;
+  try {
+    const listings = await getAccsZoneCatalog();
+    if (!listings.length) return null;
+    return listings
+      .filter((l) => (Number(l.available_stock) || 0) > 0)
+      .map(accsZoneToListing);
+  } catch (err) {
+    console.error("[accszone] catalogue fetch failed", err);
+    return null;
+  }
+}
+
+/** Built-in catalog used when no provider is configured */
 function builtInCatalog(): AccountProduct[] {
   const items: Omit<AccountProduct, "id">[] = [
     { platform: "Instagram", category: "Instagram", subcategory: "Aged", name: "Instagram Aged 2019", description: "Aged IG account, email access included. Softreg style.", age_label: "5 yrs", price_ngn: 4500, stock: 42, instant: true, country: "Mixed", features: ["Email access", "Aged", "Instant delivery"], tag: "IG" },
@@ -100,12 +198,12 @@ function builtInCatalog(): AccountProduct[] {
 
   return items.map((item, i) => ({
     ...item,
-    id: `acc-${item.platform.toLowerCase().replace(/\s+/g, "-")}-${i + 1}`,
+    provider: "builtin" as const,
+    id: "acc-" + item.platform.toLowerCase().replace(/\s+/g, "-") + "-" + (i + 1),
   }));
 }
 
 async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
-  // AccsMarket session sync is opt-in (ACCSMARKET_LIVE=1) — login scraping is too heavy for every page view
   if (isAccsMarketConfigured() && process.env.ACCSMARKET_LIVE === "1") {
     try {
       const inv = await accsMarketFetchInventory();
@@ -114,7 +212,8 @@ async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
         const markup = Number(process.env.MARKUP_PERCENTAGE || 1.5);
         const fixed = Number(process.env.FIXED_NGN_MARKUP || 200);
         return inv.products.map((p, i) => ({
-          id: `am-${String(p.externalId || i)}`,
+          id: "am-" + String(p.externalId || i),
+          provider: "accsmarket" as const,
           platform: p.category,
           category: p.category,
           subcategory: p.subcategory,
@@ -134,7 +233,6 @@ async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
     }
   }
 
-
   const apiUrl = process.env.ACCS_MARKET_API_URL?.trim();
   const apiKey = process.env.ACCS_MARKET_API_KEY?.trim();
   if (!apiUrl || !apiKey) return null;
@@ -142,7 +240,7 @@ async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
   try {
     const res = await fetch(apiUrl, {
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: "Bearer " + apiKey,
         Accept: "application/json",
       },
     });
@@ -169,11 +267,11 @@ async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
         Math.ceil(usd * rate * markup + fixed);
       const platform = String(r.platform ?? r.category ?? r.type ?? "Other");
       return {
-        id: String(r.id ?? r.sku ?? `accs-${i}`),
+        id: String(r.id ?? r.sku ?? "accs-" + i),
         platform,
         category: String(r.category ?? platform),
         subcategory: String(r.subcategory ?? r.type ?? r.format ?? "Other"),
-        name: String(r.name ?? r.title ?? `${platform} Account`),
+        name: String(r.name ?? r.title ?? platform + " Account"),
         description: String(r.description ?? r.desc ?? ""),
         age_label: String(r.age ?? r.age_label ?? r.registered ?? "—"),
         price_ngn: priceNgn,
@@ -191,10 +289,15 @@ async function fetchFromAccsMarket(): Promise<AccountProduct[] | null> {
   }
 }
 
+/** Provider priority: AccsZone (real API) → AccsMarket → built-in seed. */
+async function getCatalog(): Promise<AccountProduct[]> {
+  return (await fetchFromAccsZone()) ?? (await fetchFromAccsMarket()) ?? builtInCatalog();
+}
+
 export const listAccountCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    const products = (await fetchFromAccsMarket()) ?? builtInCatalog();
+    const products = await getCatalog();
     const fromProducts = Array.from(new Set(products.map((p) => p.category)));
     const ordered = [
       "All",
@@ -213,7 +316,7 @@ export const listAccountCategories = createServerFn({ method: "GET" })
 export const listAccountProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async (): Promise<AccountProduct[]> => {
-    return (await fetchFromAccsMarket()) ?? builtInCatalog();
+    return getCatalog();
   });
 
 const purchaseSchema = z.object({
@@ -224,13 +327,30 @@ const purchaseSchema = z.object({
 
 function demoCredentials(product: AccountProduct, index: number) {
   const slug = product.platform.toLowerCase().replace(/\s+/g, "");
+  const stamp = Date.now().toString(36);
   return {
-    username: `${slug}_user_${Date.now().toString(36)}_${index}`,
-    password: `Vx$${Math.random().toString(36).slice(2, 10)}!`,
-    email: `${slug}.${Date.now().toString(36)}@delivered.verxor`,
+    username: slug + "_user_" + stamp + "_" + index,
+    password: "Vx$" + Math.random().toString(36).slice(2, 10) + "!",
+    email: slug + "." + stamp + "@delivered.verxor",
     extra: product.instant
       ? "Delivered instantly. Change password after login."
       : "Manual delivery — credentials may arrive within a few minutes.",
+  };
+}
+
+/**
+ * Provider credential strings arrive exactly as the supplier provides them
+ * (e.g. "email:password" or "email:password:token:client_id"). Keep the raw
+ * string in `extra` so nothing is lost, and best-effort split login parts.
+ */
+function mapProviderAccount(raw: string) {
+  const parts = String(raw).split(":");
+  const login = parts[0] || raw;
+  return {
+    username: login,
+    password: parts[1] ?? "",
+    email: login.includes("@") ? login : undefined,
+    extra: raw,
   };
 }
 
@@ -241,7 +361,7 @@ export const purchaseAccount = createServerFn({ method: "POST" })
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const catalog = (await fetchFromAccsMarket()) ?? builtInCatalog();
+    const catalog = await getCatalog();
     const product = catalog.find((p) => p.id === data.productId);
     if (!product) throw new Error("Product not available");
     if (product.stock < data.quantity) throw new Error("Not enough stock");
@@ -260,17 +380,41 @@ export const purchaseAccount = createServerFn({ method: "POST" })
     if (walletError || !wallet) throw new Error("Wallet not found");
     if (Number(wallet.balance) < expected) throw new Error("Insufficient wallet balance");
 
-    const reference = `VXR-LOG-${Date.now().toString(36).toUpperCase()}`;
-    const creds = Array.from({ length: data.quantity }, (_, i) =>
-      demoCredentials(product, i + 1),
-    );
+    const isAccsZone = product.provider === "accszone" && product.ad_id != null;
+    const reference = isAccsZone
+      ? crypto.randomUUID()
+      : "VXR-LOG-" + Date.now().toString(36).toUpperCase();
+
+    let creds: ReturnType<typeof demoCredentials>[];
+    let status: string;
+    let providerOrderId: number | undefined;
+    let rawAccounts: string[] | undefined;
+
+    if (isAccsZone) {
+      // Provider first — AccsZone guarantees no charge on any 4xx failure,
+      // and client_reference makes retries idempotent (never buys twice).
+      const purchase = await accsZonePurchase(
+        product.ad_id as number,
+        data.quantity,
+        reference,
+      );
+      rawAccounts = purchase.accounts ?? [];
+      providerOrderId = purchase.order_id;
+      creds = rawAccounts.map(mapProviderAccount);
+      status = "delivered";
+    } else {
+      creds = Array.from({ length: data.quantity }, (_, i) =>
+        demoCredentials(product, i + 1),
+      );
+      status = product.instant ? "delivered" : "processing";
+    }
 
     await supabaseAdmin.rpc("record_wallet_transaction", {
       _user_id: userId,
       _type: "debit",
       _amount: expected,
       _fee: 0,
-      _description: `Account log — ${product.name} ×${data.quantity}`,
+      _description: "Account log — " + product.name + " ×" + data.quantity,
       _reference: reference,
       _payment_method: "wallet",
       _metadata: {
@@ -280,20 +424,22 @@ export const purchaseAccount = createServerFn({ method: "POST" })
         platform: product.platform,
         quantity: data.quantity,
         credentials: creds,
-        status: product.instant ? "delivered" : "processing",
+        accounts: rawAccounts,
+        provider_order_id: providerOrderId,
+        status,
       },
     });
 
     await supabaseAdmin.from("notifications").insert({
       user_id: userId,
       title: "Account delivered",
-      body: `${product.name} ×${data.quantity} — open Log History for credentials.`,
+      body: product.name + " ×" + data.quantity + " — open Log History for credentials.",
       type: "order",
     });
 
     return {
       reference,
-      status: product.instant ? "delivered" : "processing",
+      status,
       credentials: creds,
       product_name: product.name,
       amount_paid: expected,
@@ -311,7 +457,7 @@ export const listAccountOrders = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
 
-    if (error) throw new Error(`Failed to load orders: ${error.message}`);
+    if (error) throw new Error("Failed to load orders: " + error.message);
 
     return (data ?? [])
       .filter((t) => {
@@ -341,7 +487,7 @@ export const listAccountOrders = createServerFn({ method: "GET" })
             extra:
               first.extra ||
               (credsList.length > 1
-                ? `${credsList.length} accounts in this order — contact support for bulk export.`
+                ? String(credsList.length) + " accounts in this order — contact support for bulk export."
                 : undefined),
           },
         };
