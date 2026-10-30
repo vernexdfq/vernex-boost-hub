@@ -9,6 +9,8 @@ import {
   Zap,
   Package,
   Menu,
+  Check,
+  FolderOpen,
   X,
   AlertCircle,
   ChevronRight,
@@ -89,6 +91,7 @@ function BuyAccounts() {
   const [category, setCategory] = useState("All");
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
+  const [subSheet, setSubSheet] = useState(false);
   const [selected, setSelected] = useState<AccountProduct | null>(null);
   const [qty, setQty] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -121,6 +124,17 @@ function BuyAccounts() {
       map[p.category] = (map[p.category] ?? 0) + 1;
     }
     map["All"] = all;
+    return map;
+  }, [products]);
+
+  // Live item counts per sub-category (for the trigger bar and bottom sheet)
+  const subCounts = useMemo(() => {
+    const map: Record<string, Record<string, number>> = {};
+    for (const prod of products ?? []) {
+      const m = map[prod.category] ?? {};
+      m[prod.subcategory] = (m[prod.subcategory] ?? 0) + 1;
+      map[prod.category] = m;
+    }
     return map;
   }, [products]);
 
@@ -202,6 +216,7 @@ function BuyAccounts() {
     setCategory(c);
     setSubcategory(sub);
     setDrawer(false);
+    setSubSheet(false);
   }
 
   return (
@@ -302,6 +317,45 @@ function BuyAccounts() {
             })}
           </div>
         </div>
+
+        {/* Sub-category trigger bar (platforms with 2+ sub-categories) */}
+        {category !== "All" && (subcategories[category] ?? []).length >= 2 && (
+          <button
+            type="button"
+            onClick={() => setSubSheet(true)}
+            className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 text-left shadow-card-elev transition active:scale-[0.99]"
+            aria-label="Filter by sub-category"
+          >
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/12 text-primary">
+              {subcategory ? <Check className="h-5 w-5" /> : <FolderOpen className="h-5 w-5" />}
+            </span>
+            <span className="min-w-0 flex-1">
+              {subcategory ? (
+                <>
+                  <p className="truncate text-[13.5px] font-bold text-foreground">
+                    {category} · {subcategory}
+                    <span className="ml-1 font-black text-primary">
+                      ({subCounts[category]?.[subcategory] ?? 0})
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Showing this type only</p>
+                </>
+              ) : (
+                <>
+                  <p className="truncate text-[13.5px] font-bold text-foreground">
+                    All {category} Accounts
+                    <span className="ml-1 font-black text-primary">({countsByCategory[category] ?? 0})</span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Tap to filter by type</p>
+                </>
+              )}
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold text-primary">
+              {subcategory ? "Change" : "Filter"}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </span>
+          </button>
+        )}
 
         {/* Active filter chips */}
         {(subcategory || category !== "All") && (
@@ -481,6 +535,88 @@ function BuyAccounts() {
                 </div>
               ))}
             </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-category bottom sheet */}
+      {subSheet && category !== "All" && (
+        <div className="fixed inset-0 z-[65] flex items-end bg-foreground/40" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            aria-label="Close categories"
+            onClick={() => setSubSheet(false)}
+            className="absolute inset-0"
+          />
+          <div className="relative flex max-h-[80vh] w-full flex-col rounded-t-3xl border border-border bg-surface shadow-xl">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
+              <div>
+                <h3 className="text-[15px] font-black text-foreground">
+                  {category} Categories
+                  <span className="ml-1 text-primary">({(subcategories[category] ?? []).length})</span>
+                </h3>
+                <p className="text-[11px] text-muted-foreground">Pick a type to narrow the list</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSubSheet(false)}
+                aria-label="Close categories"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 py-2.5">
+              <button
+                type="button"
+                onClick={() => selectCategory(category, null)}
+                className={"mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition " +
+                  (!subcategory ? "bg-primary/12" : "hover:bg-muted/50")}
+              >
+                <span
+                  className={"grid h-9 w-9 shrink-0 place-items-center rounded-xl " +
+                    (!subcategory ? "bg-primary/15 text-primary" : "bg-primary/8 text-primary")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={"block text-[13.5px] font-bold " + (!subcategory ? "text-primary" : "text-foreground")}>
+                    All {category}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">{countsByCategory[category] ?? 0} accounts</span>
+                </span>
+                {!subcategory && <Check className="h-4 w-4 shrink-0 text-primary" />}
+              </button>
+
+              {(subcategories[category] ?? []).map((s) => {
+                const active = subcategory === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => selectCategory(category, s)}
+                    className={"mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition " +
+                      (active ? "bg-primary/12" : "hover:bg-muted/50")}
+                  >
+                    <span
+                      className={"grid h-9 w-9 shrink-0 place-items-center rounded-xl " +
+                        (active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}
+                    >
+                      <Package className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={"block truncate text-[13.5px] font-bold " + (active ? "text-primary" : "text-foreground")}>
+                        {s}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {subCounts[category]?.[s] ?? 0} accounts
+                      </span>
+                    </span>
+                    {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
