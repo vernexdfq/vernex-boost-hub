@@ -61,7 +61,7 @@ const quickActions = [
     label: "Rent Number",
     icon: PhoneForwarded,
     tint: "bg-sky-500/10 text-sky-500 border-sky-500/20",
-    to: "/rental/calls",
+    to: "/rent-number",
   },
   {
     label: "Get Affiliate Website",
