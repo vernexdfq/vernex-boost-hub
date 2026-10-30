@@ -133,7 +133,10 @@ async function azRequestPaged<T>(path: string): Promise<{ data: T; meta: PagedMe
     const failed = (json ?? {}) as { message?: string; error_code?: string };
     throw new Error(failed.message || failed.error_code || "AccsZone request failed");
   }
-  return { data: json.data, meta: json.meta };
+  return {
+    data: json.data,
+    meta: json.meta ?? { current_page: 1, per_page: 20, last_page: 1, total: 0 },
+  };
 }
 
 export async function accsZoneBalance(): Promise<number> {

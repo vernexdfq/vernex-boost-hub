@@ -343,7 +343,9 @@ function demoCredentials(product: AccountProduct, index: number) {
  * (e.g. "email:password" or "email:password:token:client_id"). Keep the raw
  * string in `extra` so nothing is lost, and best-effort split login parts.
  */
-function mapProviderAccount(raw: string) {
+type ProviderCred = { username: string; password: string; email?: string; extra: string };
+
+function mapProviderAccount(raw: string): ProviderCred {
   const parts = String(raw).split(":");
   const login = parts[0] || raw;
   return {
@@ -385,7 +387,7 @@ export const purchaseAccount = createServerFn({ method: "POST" })
       ? crypto.randomUUID()
       : "VXR-LOG-" + Date.now().toString(36).toUpperCase();
 
-    let creds: ReturnType<typeof demoCredentials>[];
+    let creds: ProviderCred[];
     let status: string;
     let providerOrderId: number | undefined;
     let rawAccounts: string[] | undefined;
