@@ -26,8 +26,10 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
 import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
 import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -118,18 +120,26 @@ const AuthenticatedVirtualNumbersRoute =
     path: '/virtual-numbers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminIndexRoute =
-  AuthenticatedAdminIndexRouteImport.update({
-    id: '/admin/',
-    path: '/admin/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminPricingRoute =
-  AuthenticatedAdminPricingRouteImport.update({
-    id: '/admin/pricing',
-    path: '/admin/pricing',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelsRoute = AdminPanelsRouteImport.update({
+  id: '/admin/panels',
+  path: '/admin/panels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/admin/pricing',
+  path: '/admin/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFlutterwaveWebhookRoute = ApiFlutterwaveWebhookRouteImport.update({
   id: '/api/flutterwave/webhook',
   path: '/api/flutterwave/webhook',
@@ -153,8 +163,10 @@ export interface FileRoutesByFullPath {
   '/rent-number': typeof AuthenticatedRentNumberRoute
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
-  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -174,8 +186,10 @@ export interface FileRoutesByTo {
   '/rent-number': typeof AuthenticatedRentNumberRoute
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
-  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesById {
@@ -197,8 +211,10 @@ export interface FileRoutesById {
   '/_authenticated/rent-number': typeof AuthenticatedRentNumberRoute
   '/_authenticated/reward': typeof AuthenticatedRewardRoute
   '/_authenticated/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
-  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRouteTypes {
@@ -221,6 +237,8 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin'
+    | '/admin/login'
+    | '/admin/panels'
     | '/admin/pricing'
     | '/api/flutterwave/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -242,6 +260,8 @@ export interface FileRouteTypes {
     | '/reward'
     | '/virtual-numbers'
     | '/admin'
+    | '/admin/login'
+    | '/admin/panels'
     | '/admin/pricing'
     | '/api/flutterwave/webhook'
   id:
@@ -263,8 +283,10 @@ export interface FileRouteTypes {
     | '/_authenticated/rent-number'
     | '/_authenticated/reward'
     | '/_authenticated/virtual-numbers'
-    | '/_authenticated/admin/'
-    | '/_authenticated/admin/pricing'
+    | '/admin/'
+    | '/admin/login'
+    | '/admin/panels'
+    | '/admin/pricing'
     | '/api/flutterwave/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -272,6 +294,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminPanelsRoute: typeof AdminPanelsRoute
+  AdminPricingRoute: typeof AdminPricingRoute
   ApiFlutterwaveWebhookRoute: typeof ApiFlutterwaveWebhookRoute
 }
 
@@ -396,19 +422,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/': {
-      id: '/_authenticated/admin/'
+    '/admin/': {
+      id: '/admin/'
       path: '/admin/'
       fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin/pricing': {
-      id: '/_authenticated/admin/pricing'
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/panels': {
+      id: '/admin/panels'
+      path: '/admin/panels'
+      fullPath: '/admin/panels'
+      preLoaderRoute: typeof AdminPanelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
       path: '/admin/pricing'
       fullPath: '/admin/pricing'
-      preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/flutterwave/webhook': {
       id: '/api/flutterwave/webhook'
@@ -435,8 +475,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRentNumberRoute: typeof AuthenticatedRentNumberRoute
   AuthenticatedRewardRoute: typeof AuthenticatedRewardRoute
   AuthenticatedVirtualNumbersRoute: typeof AuthenticatedVirtualNumbersRoute
-  AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -454,8 +492,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRentNumberRoute: AuthenticatedRentNumberRoute,
   AuthenticatedRewardRoute: AuthenticatedRewardRoute,
   AuthenticatedVirtualNumbersRoute: AuthenticatedVirtualNumbersRoute,
-  AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -465,6 +501,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminPanelsRoute: AdminPanelsRoute,
+  AdminPricingRoute: AdminPricingRoute,
   ApiFlutterwaveWebhookRoute: ApiFlutterwaveWebhookRoute,
 }
 export const routeTree = rootRouteImport
