@@ -26,6 +26,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
 import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
 import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
 import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
 
@@ -117,6 +118,12 @@ const AuthenticatedVirtualNumbersRoute =
     path: '/virtual-numbers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIndexRoute =
+  AuthenticatedAdminIndexRouteImport.update({
+    id: '/admin/',
+    path: '/admin/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPricingRoute =
   AuthenticatedAdminPricingRouteImport.update({
     id: '/admin/pricing',
@@ -146,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/rent-number': typeof AuthenticatedRentNumberRoute
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
@@ -166,6 +174,7 @@ export interface FileRoutesByTo {
   '/rent-number': typeof AuthenticatedRentNumberRoute
   '/reward': typeof AuthenticatedRewardRoute
   '/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
@@ -188,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/rent-number': typeof AuthenticatedRentNumberRoute
   '/_authenticated/reward': typeof AuthenticatedRewardRoute
   '/_authenticated/virtual-numbers': typeof AuthenticatedVirtualNumbersRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/rent-number'
     | '/reward'
     | '/virtual-numbers'
+    | '/admin'
     | '/admin/pricing'
     | '/api/flutterwave/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/rent-number'
     | '/reward'
     | '/virtual-numbers'
+    | '/admin'
     | '/admin/pricing'
     | '/api/flutterwave/webhook'
   id:
@@ -251,6 +263,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rent-number'
     | '/_authenticated/reward'
     | '/_authenticated/virtual-numbers'
+    | '/_authenticated/admin/'
     | '/_authenticated/admin/pricing'
     | '/api/flutterwave/webhook'
   fileRoutesById: FileRoutesById
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin/'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/pricing': {
       id: '/_authenticated/admin/pricing'
       path: '/admin/pricing'
@@ -416,6 +436,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRewardRoute: typeof AuthenticatedRewardRoute
   AuthenticatedVirtualNumbersRoute: typeof AuthenticatedVirtualNumbersRoute
   AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -434,6 +455,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRewardRoute: AuthenticatedRewardRoute,
   AuthenticatedVirtualNumbersRoute: AuthenticatedVirtualNumbersRoute,
   AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
