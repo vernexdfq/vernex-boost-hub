@@ -444,7 +444,13 @@ function Landing() {
             <span className="font-bold text-white">Verxor.com</span>
           </div>
           <div className="text-center text-sm sm:text-left">
-            © {new Date().getFullYear()} Verxor.com — Connect · Verify · Grow
+            <div>© {new Date().getFullYear()} Verxor.com — Connect · Verify · Grow</div>
+            <Link
+              to="/admin"
+              className="mt-1 inline-block text-xs font-medium text-slate-500 transition-colors hover:text-blue-400"
+            >
+              Admin
+            </Link>
           </div>
         </div>
       </footer>

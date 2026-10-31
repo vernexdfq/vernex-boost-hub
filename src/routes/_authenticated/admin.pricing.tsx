@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings2 } from "lucide-react";
+import { Lock, Settings2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { checkAdminAccess } from "@/lib/functions/admin.functions";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -29,10 +31,52 @@ export const Route = createFileRoute("/_authenticated/admin/pricing")({
 function AdminPricing() {
   const [cfg, setCfg] = useState<PricingConfig>(DEFAULT_PRICING);
   const [sample, setSample] = useState(0.35);
+  const checkAdmin = useServerFn(checkAdminAccess);
+  const [adminState, setAdminState] = useState<"loading" | "ok" | "denied">("loading");
 
   useEffect(() => {
     setCfg(loadPricing());
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await checkAdmin();
+        if (!cancelled) setAdminState(res.isAdmin ? "ok" : "denied");
+      } catch {
+        if (!cancelled) setAdminState("denied");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [checkAdmin]);
+
+  if (adminState !== "ok") {
+    return (
+      <AppShell>
+        <PageHeader title="Pricing Settings" subtitle="Admin: exchange rate & markups" />
+        <div className="px-5 pb-24 pt-5">
+          <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-card-elev">
+            {adminState === "loading" ? (
+              <p className="text-sm text-muted-foreground">Checking access…</p>
+            ) : (
+              <>
+                <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-500/10 text-red-500">
+                  <Lock className="h-7 w-7" />
+                </span>
+                <h2 className="mt-4 text-base font-bold">Access restricted</h2>
+                <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
+                  This area is for Verxor administrators only.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   const save = () => {
     savePricing(cfg);
