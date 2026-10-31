@@ -101,21 +101,50 @@ export const listNumberProducts = createServerFn({ method: "GET" })
 export const listNumberOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data, error } = await supabase
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Admin client + no embedded join: an order can never be dropped from the
+    // list because of RLS policies or a missing product row. Every order for
+    // this user — pending, received, expired, cancelled, refunded — is returned.
+    const { data: orders, error } = await supabaseAdmin
       .from("number_orders")
       .select(
-        "id, product_id, phone_number, otp_code, status, amount_paid, provider_order_id, expires_at, created_at, updated_at, number_products(service_name, country_name, server_id, provider)",
+        "id, product_id, phone_number, otp_code, status, amount_paid, provider_order_id, expires_at, created_at, updated_at",
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (error) {
       console.error("[numbers] list orders", error.message);
       return [];
     }
-    return data ?? [];
+    if (!orders || orders.length === 0) return [];
+
+    // Merge product info separately so missing product rows never hide an order.
+    const productIds = Array.from(
+      new Set(orders.map((o: { product_id: string | null }) => o.product_id).filter(Boolean)),
+    ) as string[];
+    const productsById = new Map<string, Record<string, unknown>>();
+    if (productIds.length) {
+      const { data: productRows, error: productErr } = await supabaseAdmin
+        .from("number_products")
+        .select("id, service_name, country_name, server_id, provider")
+        .in("id", productIds);
+      if (productErr) {
+        console.error("[numbers] list order products", productErr.message);
+      } else {
+        for (const p of productRows ?? []) {
+          productsById.set(String(p.id), p as Record<string, unknown>);
+        }
+      }
+    }
+
+    return orders.map((o: Record<string, unknown>) => ({
+      ...o,
+      number_products: o.product_id ? (productsById.get(String(o.product_id)) ?? null) : null,
+    }));
   });
 
 const createNumberOrderSchema = z.object({
