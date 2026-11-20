@@ -9,47 +9,46 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
-import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
-import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
-import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedPrivacyPolicyRouteImport } from './routes/_authenticated/privacy-policy'
-import { Route as AuthenticatedNumberOrdersRouteImport } from './routes/_authenticated/number-orders'
-import { Route as AuthenticatedLogHistoryRouteImport } from './routes/_authenticated/log-history'
-import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
-import { Route as AuthenticatedFundRouteImport } from './routes/_authenticated/fund'
-import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedBuyAccountsRouteImport } from './routes/_authenticated/buy-accounts'
-import { Route as AuthenticatedBoostOrdersRouteImport } from './routes/_authenticated/boost-orders'
-import { Route as AuthenticatedBoostRouteImport } from './routes/_authenticated/boost'
-import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedAffiliateRouteImport } from './routes/_authenticated/affiliate'
+import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedBoostRouteImport } from './routes/_authenticated/boost'
+import { Route as AuthenticatedBoostOrdersRouteImport } from './routes/_authenticated/boost-orders'
+import { Route as AuthenticatedBuyAccountsRouteImport } from './routes/_authenticated/buy-accounts'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
+import { Route as AuthenticatedFundRouteImport } from './routes/_authenticated/fund'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedLogHistoryRouteImport } from './routes/_authenticated/log-history'
+import { Route as AuthenticatedNumberOrdersRouteImport } from './routes/_authenticated/number-orders'
+import { Route as AuthenticatedPrivacyPolicyRouteImport } from './routes/_authenticated/privacy-policy'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedRentNumberRouteImport } from './routes/_authenticated/rent-number'
 import { Route as AuthenticatedRentalRouteRouteImport } from './routes/_authenticated/rental/route'
+import { Route as AuthenticatedRewardRouteImport } from './routes/_authenticated/reward'
+import { Route as AuthenticatedVirtualNumbersRouteImport } from './routes/_authenticated/virtual-numbers'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AuthenticatedRentalIndexRouteImport } from './routes/_authenticated/rental/index'
-import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
-import { Route as AuthenticatedRentalNumbersRouteImport } from './routes/_authenticated/rental/numbers'
-import { Route as AuthenticatedRentalMessagesRouteImport } from './routes/_authenticated/rental/messages'
-import { Route as AuthenticatedRentalCreditRouteImport } from './routes/_authenticated/rental/credit'
 import { Route as AuthenticatedRentalCallsRouteImport } from './routes/_authenticated/rental/calls'
+import { Route as AuthenticatedRentalCreditRouteImport } from './routes/_authenticated/rental/credit'
+import { Route as AuthenticatedRentalMessagesRouteImport } from './routes/_authenticated/rental/messages'
+import { Route as AuthenticatedRentalNumbersRouteImport } from './routes/_authenticated/rental/numbers'
+import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -57,108 +56,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPricingRoute = AdminPricingRouteImport.update({
-  id: '/admin/pricing',
-  path: '/admin/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPanelsRoute = AdminPanelsRouteImport.update({
-  id: '/admin/panels',
-  path: '/admin/panels',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedVirtualNumbersRoute =
-  AuthenticatedVirtualNumbersRouteImport.update({
-    id: '/virtual-numbers',
-    path: '/virtual-numbers',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedRewardRoute = AuthenticatedRewardRouteImport.update({
-  id: '/reward',
-  path: '/reward',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRentNumberRoute = AuthenticatedRentNumberRouteImport.update({
-  id: '/rent-number',
-  path: '/rent-number',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPrivacyPolicyRoute =
-  AuthenticatedPrivacyPolicyRouteImport.update({
-    id: '/privacy-policy',
-    path: '/privacy-policy',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedNumberOrdersRoute =
-  AuthenticatedNumberOrdersRouteImport.update({
-    id: '/number-orders',
-    path: '/number-orders',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedLogHistoryRoute = AuthenticatedLogHistoryRouteImport.update({
-  id: '/log-history',
-  path: '/log-history',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFundRoute = AuthenticatedFundRouteImport.update({
-  id: '/fund',
-  path: '/fund',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFeedbackRoute = AuthenticatedFeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBuyAccountsRoute =
-  AuthenticatedBuyAccountsRouteImport.update({
-    id: '/buy-accounts',
-    path: '/buy-accounts',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoostOrdersRoute =
-  AuthenticatedBoostOrdersRouteImport.update({
-    id: '/boost-orders',
-    path: '/boost-orders',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoostRoute = AuthenticatedBoostRouteImport.update({
-  id: '/boost',
-  path: '/boost',
+const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
@@ -166,9 +76,68 @@ const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
-  id: '/affiliate',
-  path: '/affiliate',
+const AuthenticatedBoostRoute = AuthenticatedBoostRouteImport.update({
+  id: '/boost',
+  path: '/boost',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBoostOrdersRoute =
+  AuthenticatedBoostOrdersRouteImport.update({
+    id: '/boost-orders',
+    path: '/boost-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyAccountsRoute =
+  AuthenticatedBuyAccountsRouteImport.update({
+    id: '/buy-accounts',
+    path: '/buy-accounts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFeedbackRoute = AuthenticatedFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFundRoute = AuthenticatedFundRouteImport.update({
+  id: '/fund',
+  path: '/fund',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLogHistoryRoute = AuthenticatedLogHistoryRouteImport.update({
+  id: '/log-history',
+  path: '/log-history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNumberOrdersRoute =
+  AuthenticatedNumberOrdersRouteImport.update({
+    id: '/number-orders',
+    path: '/number-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPrivacyPolicyRoute =
+  AuthenticatedPrivacyPolicyRouteImport.update({
+    id: '/privacy-policy',
+    path: '/privacy-policy',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRentNumberRoute = AuthenticatedRentNumberRouteImport.update({
+  id: '/rent-number',
+  path: '/rent-number',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRentalRouteRoute =
@@ -177,33 +146,41 @@ const AuthenticatedRentalRouteRoute =
     path: '/rental',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedRewardRoute = AuthenticatedRewardRouteImport.update({
+  id: '/reward',
+  path: '/reward',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVirtualNumbersRoute =
+  AuthenticatedVirtualNumbersRouteImport.update({
+    id: '/virtual-numbers',
+    path: '/virtual-numbers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelsRoute = AdminPanelsRouteImport.update({
+  id: '/admin/panels',
+  path: '/admin/panels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/admin/pricing',
+  path: '/admin/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRentalIndexRoute =
   AuthenticatedRentalIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedRentalRouteRoute,
-  } as any)
-const ApiFlutterwaveWebhookRoute = ApiFlutterwaveWebhookRouteImport.update({
-  id: '/api/flutterwave/webhook',
-  path: '/api/flutterwave/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRentalNumbersRoute =
-  AuthenticatedRentalNumbersRouteImport.update({
-    id: '/numbers',
-    path: '/numbers',
-    getParentRoute: () => AuthenticatedRentalRouteRoute,
-  } as any)
-const AuthenticatedRentalMessagesRoute =
-  AuthenticatedRentalMessagesRouteImport.update({
-    id: '/messages',
-    path: '/messages',
-    getParentRoute: () => AuthenticatedRentalRouteRoute,
-  } as any)
-const AuthenticatedRentalCreditRoute =
-  AuthenticatedRentalCreditRouteImport.update({
-    id: '/credit',
-    path: '/credit',
     getParentRoute: () => AuthenticatedRentalRouteRoute,
   } as any)
 const AuthenticatedRentalCallsRoute =
@@ -212,6 +189,29 @@ const AuthenticatedRentalCallsRoute =
     path: '/calls',
     getParentRoute: () => AuthenticatedRentalRouteRoute,
   } as any)
+const AuthenticatedRentalCreditRoute =
+  AuthenticatedRentalCreditRouteImport.update({
+    id: '/credit',
+    path: '/credit',
+    getParentRoute: () => AuthenticatedRentalRouteRoute,
+  } as any)
+const AuthenticatedRentalMessagesRoute =
+  AuthenticatedRentalMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedRentalRouteRoute,
+  } as any)
+const AuthenticatedRentalNumbersRoute =
+  AuthenticatedRentalNumbersRouteImport.update({
+    id: '/numbers',
+    path: '/numbers',
+    getParentRoute: () => AuthenticatedRentalRouteRoute,
+  } as any)
+const ApiFlutterwaveWebhookRoute = ApiFlutterwaveWebhookRouteImport.update({
+  id: '/api/flutterwave/webhook',
+  path: '/api/flutterwave/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -430,25 +430,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -458,137 +444,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/pricing': {
-      id: '/admin/pricing'
-      path: '/admin/pricing'
-      fullPath: '/admin/pricing'
-      preLoaderRoute: typeof AdminPricingRouteImport
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/panels': {
-      id: '/admin/panels'
-      path: '/admin/panels'
-      fullPath: '/admin/panels'
-      preLoaderRoute: typeof AdminPanelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/virtual-numbers': {
-      id: '/_authenticated/virtual-numbers'
-      path: '/virtual-numbers'
-      fullPath: '/virtual-numbers'
-      preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reward': {
-      id: '/_authenticated/reward'
-      path: '/reward'
-      fullPath: '/reward'
-      preLoaderRoute: typeof AuthenticatedRewardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/rent-number': {
-      id: '/_authenticated/rent-number'
-      path: '/rent-number'
-      fullPath: '/rent-number'
-      preLoaderRoute: typeof AuthenticatedRentNumberRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/privacy-policy': {
-      id: '/_authenticated/privacy-policy'
-      path: '/privacy-policy'
-      fullPath: '/privacy-policy'
-      preLoaderRoute: typeof AuthenticatedPrivacyPolicyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/number-orders': {
-      id: '/_authenticated/number-orders'
-      path: '/number-orders'
-      fullPath: '/number-orders'
-      preLoaderRoute: typeof AuthenticatedNumberOrdersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/log-history': {
-      id: '/_authenticated/log-history'
-      path: '/log-history'
-      fullPath: '/log-history'
-      preLoaderRoute: typeof AuthenticatedLogHistoryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/history': {
-      id: '/_authenticated/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/fund': {
-      id: '/_authenticated/fund'
-      path: '/fund'
-      fullPath: '/fund'
-      preLoaderRoute: typeof AuthenticatedFundRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/feedback': {
-      id: '/_authenticated/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof AuthenticatedFeedbackRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/buy-accounts': {
-      id: '/_authenticated/buy-accounts'
-      path: '/buy-accounts'
-      fullPath: '/buy-accounts'
-      preLoaderRoute: typeof AuthenticatedBuyAccountsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boost-orders': {
-      id: '/_authenticated/boost-orders'
-      path: '/boost-orders'
-      fullPath: '/boost-orders'
-      preLoaderRoute: typeof AuthenticatedBoostOrdersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boost': {
-      id: '/_authenticated/boost'
-      path: '/boost'
-      fullPath: '/boost'
-      preLoaderRoute: typeof AuthenticatedBoostRouteImport
+    '/_authenticated/affiliate': {
+      id: '/_authenticated/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/alerts': {
@@ -598,11 +479,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/affiliate': {
-      id: '/_authenticated/affiliate'
-      path: '/affiliate'
-      fullPath: '/affiliate'
-      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
+    '/_authenticated/boost': {
+      id: '/_authenticated/boost'
+      path: '/boost'
+      fullPath: '/boost'
+      preLoaderRoute: typeof AuthenticatedBoostRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/boost-orders': {
+      id: '/_authenticated/boost-orders'
+      path: '/boost-orders'
+      fullPath: '/boost-orders'
+      preLoaderRoute: typeof AuthenticatedBoostOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buy-accounts': {
+      id: '/_authenticated/buy-accounts'
+      path: '/buy-accounts'
+      fullPath: '/buy-accounts'
+      preLoaderRoute: typeof AuthenticatedBuyAccountsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/feedback': {
+      id: '/_authenticated/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof AuthenticatedFeedbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fund': {
+      id: '/_authenticated/fund'
+      path: '/fund'
+      fullPath: '/fund'
+      preLoaderRoute: typeof AuthenticatedFundRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/log-history': {
+      id: '/_authenticated/log-history'
+      path: '/log-history'
+      fullPath: '/log-history'
+      preLoaderRoute: typeof AuthenticatedLogHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/number-orders': {
+      id: '/_authenticated/number-orders'
+      path: '/number-orders'
+      fullPath: '/number-orders'
+      preLoaderRoute: typeof AuthenticatedNumberOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/privacy-policy': {
+      id: '/_authenticated/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof AuthenticatedPrivacyPolicyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rent-number': {
+      id: '/_authenticated/rent-number'
+      path: '/rent-number'
+      fullPath: '/rent-number'
+      preLoaderRoute: typeof AuthenticatedRentNumberRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rental': {
@@ -612,6 +570,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRentalRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reward': {
+      id: '/_authenticated/reward'
+      path: '/reward'
+      fullPath: '/reward'
+      preLoaderRoute: typeof AuthenticatedRewardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/virtual-numbers': {
+      id: '/_authenticated/virtual-numbers'
+      path: '/virtual-numbers'
+      fullPath: '/virtual-numbers'
+      preLoaderRoute: typeof AuthenticatedVirtualNumbersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/panels': {
+      id: '/admin/panels'
+      path: '/admin/panels'
+      fullPath: '/admin/panels'
+      preLoaderRoute: typeof AdminPanelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/admin/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/rental/': {
       id: '/_authenticated/rental/'
       path: '/'
@@ -619,25 +619,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRentalIndexRouteImport
       parentRoute: typeof AuthenticatedRentalRouteRoute
     }
-    '/api/flutterwave/webhook': {
-      id: '/api/flutterwave/webhook'
-      path: '/api/flutterwave/webhook'
-      fullPath: '/api/flutterwave/webhook'
-      preLoaderRoute: typeof ApiFlutterwaveWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/rental/numbers': {
-      id: '/_authenticated/rental/numbers'
-      path: '/numbers'
-      fullPath: '/rental/numbers'
-      preLoaderRoute: typeof AuthenticatedRentalNumbersRouteImport
-      parentRoute: typeof AuthenticatedRentalRouteRoute
-    }
-    '/_authenticated/rental/messages': {
-      id: '/_authenticated/rental/messages'
-      path: '/messages'
-      fullPath: '/rental/messages'
-      preLoaderRoute: typeof AuthenticatedRentalMessagesRouteImport
+    '/_authenticated/rental/calls': {
+      id: '/_authenticated/rental/calls'
+      path: '/calls'
+      fullPath: '/rental/calls'
+      preLoaderRoute: typeof AuthenticatedRentalCallsRouteImport
       parentRoute: typeof AuthenticatedRentalRouteRoute
     }
     '/_authenticated/rental/credit': {
@@ -647,12 +633,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRentalCreditRouteImport
       parentRoute: typeof AuthenticatedRentalRouteRoute
     }
-    '/_authenticated/rental/calls': {
-      id: '/_authenticated/rental/calls'
-      path: '/calls'
-      fullPath: '/rental/calls'
-      preLoaderRoute: typeof AuthenticatedRentalCallsRouteImport
+    '/_authenticated/rental/messages': {
+      id: '/_authenticated/rental/messages'
+      path: '/messages'
+      fullPath: '/rental/messages'
+      preLoaderRoute: typeof AuthenticatedRentalMessagesRouteImport
       parentRoute: typeof AuthenticatedRentalRouteRoute
+    }
+    '/_authenticated/rental/numbers': {
+      id: '/_authenticated/rental/numbers'
+      path: '/numbers'
+      fullPath: '/rental/numbers'
+      preLoaderRoute: typeof AuthenticatedRentalNumbersRouteImport
+      parentRoute: typeof AuthenticatedRentalRouteRoute
+    }
+    '/api/flutterwave/webhook': {
+      id: '/api/flutterwave/webhook'
+      path: '/api/flutterwave/webhook'
+      fullPath: '/api/flutterwave/webhook'
+      preLoaderRoute: typeof ApiFlutterwaveWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

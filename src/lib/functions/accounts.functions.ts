@@ -242,7 +242,6 @@ function builtInCatalog(): AccountProduct[] {
     { platform: "Apple Music", category: "Apple Music", subcategory: "Individual", name: "Apple Music Individual", description: "Apple Music individual plan access.", age_label: "Active", price_ngn: 4500, stock: 12, sold: 38, instant: true, country: "US", features: ["Music"], tag: "AP" },
     { platform: "Apple Music", category: "Apple Music", subcategory: "Family", name: "Apple Music Family Slot", description: "Family plan slot on shared Apple Music.", age_label: "Active", price_ngn: 2500, stock: 18, sold: 66, instant: true, country: "NG", features: ["Family slot"], tag: "AP" },
   ];
-  ];
 
   return items.map((item, i) => ({
     ...item,
