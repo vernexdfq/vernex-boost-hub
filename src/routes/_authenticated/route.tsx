@@ -9,6 +9,26 @@ import {
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
+    // View-only preview mode (entered from the hidden sign on /auth):
+    // no Supabase session is required; data pages show empty states.
+    let previewActive = false;
+    if (typeof window !== "undefined") {
+      try {
+        previewActive = localStorage.getItem("verxor_preview_mode") === "1";
+      } catch {
+        previewActive = false;
+      }
+    }
+    if (previewActive) {
+      touchSessionActivity();
+      return {
+        user: {
+          id: "preview-user",
+          email: "preview@verxor.local",
+        },
+      };
+    }
+
     const { data, error } = await supabase.auth.getUser();
 
     if (error || !data.user) {

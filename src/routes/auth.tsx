@@ -22,12 +22,10 @@ const LAST_ID_KEY = "verxor_last_identifier";
 const LAST_TAB_KEY = "verxor_last_tab";
 
 /**
- * Preview-only access: a dedicated zero-balance account used to browse
- * the app and take screenshots. It is signed in through the normal
- * identifier+PIN ticket flow, so its PIN acts as the access code.
- * Never fund this account; wallet-funded purchases will always fail.
+ * View-only preview mode: browses the app without any account or backend.
+ * Cleared by signing out or clearing site data.
  */
-const PREVIEW_ACCOUNT_EMAIL = "verxorpreview@gmail.com";
+const PREVIEW_MODE_KEY = "verxor_preview_mode";
 
 function AuthError({ error, reset }: { error: Error; reset: () => void }) {
   console.error("[auth]", error);
@@ -220,28 +218,16 @@ function AuthPage() {
     }
   }
 
-  async function previewSignIn() {
-    // Discreet prompt: no label, nothing revealing on screen.
-    const code = window.prompt("", "");
-    if (!code || !/^\d{4}$/.test(code.trim())) return;
-    setBusy(true);
+  function previewSignIn() {
+    // Blank confirm dialog: discreet, but prevents accidental taps.
+    const ok = window.confirm("");
+    if (!ok) return;
     try {
-      const ticket = await signInWithPin({
-        data: { identifier: PREVIEW_ACCOUNT_EMAIL, pin: code.trim() },
-      });
-      const { error } = await supabase.auth.verifyOtp({
-        email: ticket.email,
-        token: ticket.token,
-        type: "email",
-      });
-      if (error) throw error;
-      toast.success("Preview mode");
-      // onAuthStateChange listener navigates to /dashboard.
+      localStorage.setItem(PREVIEW_MODE_KEY, "1");
     } catch {
-      toast.error("Could not start preview.");
-    } finally {
-      setBusy(false);
+      /* ignore */
     }
+    navigate({ to: "/dashboard", replace: true });
   }
 
   function pressKey(key: string) {
