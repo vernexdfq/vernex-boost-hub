@@ -304,7 +304,16 @@ function AuthPage() {
           ) : (
             <div className={screen === "signup" ? "mb-5" : ""}>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-                {screen === "signup" ? "Create your account 🚀" : "Welcome back 👋"}
+                {screen === "signup" ? (
+                  "Create your account 🚀"
+                ) : (
+                  <>
+                    Welcome back{" "}
+                    <span onClick={() => previewSignIn()} className="cursor-default select-none">
+                      👋
+                    </span>
+                  </>
+                )}
               </h1>
               <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 {screen === "signup"
@@ -389,15 +398,6 @@ function AuthPage() {
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
             <span className="font-semibold">Bank-grade encryption - NDPR compliant</span>
           </div>
-          <button
-            type="button"
-            aria-hidden="true"
-            tabIndex={-1}
-            onClick={() => void previewSignIn()}
-            className="mx-auto mt-1 block select-none px-3 py-1.5 text-[6px] leading-none text-slate-200/70 transition-colors hover:text-slate-300"
-          >
-            *
-          </button>
         </footer>
       </div>
     </div>
